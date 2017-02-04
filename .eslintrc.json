@@ -1,0 +1,33 @@
+{
+    "env": {
+        "browser": true
+    },
+    "parser": "babel-eslint",
+    "extends": "airbnb",
+    "plugins": [
+        "class-property"
+    ],
+    "rules": {
+        "no-tabs": "off",
+        "import/extensions": [
+            "error",
+            "never"
+        ],
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": ["error", "unix"],
+        "comma-dangle": [
+            "error",
+            {
+                "arrays": "always-multiline",
+                "objects": "always-multiline",
+                "imports": "always-multiline",
+                "exports": "always-multiline",
+                "functions": "ignore"
+            }
+        ],
+        "class-methods-use-this": "off"
+    }
+}

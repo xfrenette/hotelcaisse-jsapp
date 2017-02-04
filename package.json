@@ -1,0 +1,40 @@
+{
+  "name": "hotelcaisse-app",
+  "version": "0.0.1",
+  "description": "Application of the HotelCaisse",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "node node_modules/eslint/bin/eslint.js ."
+  },
+  "author": "Xavier Frenette",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-jest": "^18.0.0",
+    "babel-plugin-transform-class-properties": "^6.22.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-object-rest-spread": "^6.22.0",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "eslint": "^3.14.1",
+    "eslint-config-airbnb": "^14.0.0",
+    "eslint-plugin-class-property": "^1.0.3",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^3.0.2",
+    "eslint-plugin-react": "^6.9.0",
+    "jest": "^18.1.0"
+  },
+  "jest": {
+    "testPathDirs": [
+      "<rootDir>/tests/"
+    ],
+    "modulePaths": [
+      "<rootDir>/src/"
+    ],
+    "testRegex": "(\\.(test|spec))\\.jsx?$"
+  },
+  "dependencies": {
+    "mobx": "^3.0.2"
+  }
+}
