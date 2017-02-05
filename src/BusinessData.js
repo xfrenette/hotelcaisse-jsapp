@@ -1,3 +1,4 @@
+// TODO
 /**
  * This Class contains all the business specific data required
  * for this device : the device's register, products, categories,

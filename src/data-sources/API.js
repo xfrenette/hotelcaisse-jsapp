@@ -1,3 +1,4 @@
+// TODO
 // Notes: c'est la même instance qui sera utilisée par tous
 // les plugins qui utilisent l'API. Quand la première requête
 // est reçu, fait la requête sur le serveur. Si d'autres

@@ -1,3 +1,4 @@
+// TODO
 /**
  * Represents a method used for a Transaction. Examples :
  * cash, credit card, ...

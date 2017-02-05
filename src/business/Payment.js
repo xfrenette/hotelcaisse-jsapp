@@ -1,3 +1,4 @@
+// TODO
 /**
  * Represents a money transaction with a customer. If amount
  * is positive, it is a payment by the customer, if it is
