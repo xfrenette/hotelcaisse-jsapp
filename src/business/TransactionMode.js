@@ -1,10 +1,13 @@
-// TODO
 /**
  * Represents a method used for a Transaction. Examples :
  * cash, credit card, ...
  */
 class TransactionMode {
-	id = null;
+	/**
+	 * Name of the transaction mode.
+	 *
+	 * @type {String}
+	 */
 	name = '';
 }
 
