@@ -9,6 +9,13 @@ class TransactionMode {
 	 * @type {String}
 	 */
 	name = '';
+
+	/**
+	 * @param {String} name
+	 */
+	constructor(name) {
+		this.name = name;
+	}
 }
 
 export default TransactionMode;

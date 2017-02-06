@@ -6,6 +6,10 @@ beforeEach(() => {
 	transactionMode = new TransactionMode();
 });
 
-test('it works!', () => {
-	expect(transactionMode).toBeInstanceOf(TransactionMode);
+describe('constructor()', () => {
+	test('it sets name if supplied', () => {
+		const name = 'test-name';
+		transactionMode = new TransactionMode(name);
+		expect(transactionMode.name).toBe(name);
+	});
 });
