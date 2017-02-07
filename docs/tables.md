@@ -64,8 +64,9 @@ items (pour ajout ou remboursement)
 	id
 	order_id
 	created_at (des items pourraient être rajoutés plus tard)
-	product_id (pour pouvoir regrouper ensemble les items qui représentent le même produit, mais pas pour accéder à ses infos)
-	product_name
+	original_product_id (pour pouvoir regrouper ensemble les items qui représentent le même produit, mais pas pour accéder à ses infos, sera à null si c'est un item
+	custom)
+	name (nom original du produit, ou nom donné à l'item custom)
 	quantity (négatif si remboursement)
 	totalPrice (avant taxe)
 	totalTax
@@ -74,7 +75,7 @@ items (pour ajout ou remboursement)
 item_taxes
 	id
 	item_id
-	tax_id (pour regrouper ensemble, pas pour accéder aux infos)
+	original_tax_id (pour regrouper ensemble, pas pour accéder aux infos)
 	tax_name
 	total
 
