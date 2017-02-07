@@ -1,8 +1,13 @@
-// TODO
+import Decimal from 'decimal.js';
+
 /**
  * Class that represents a Product. A Product can have variants
  * (which are also variants). Those variants have a parent
- * Product.
+ * Product. Note that, in this system, an old Order may reference
+ * products (instances of this class) that do not exist anymore
+ * or that are modified. It must not be considered that if an Product
+ * instance exists, that it exists as a still valid product for new
+ * orders.
  */
 class Product {
 	/**
@@ -68,6 +73,21 @@ class Product {
 	}
 
 	/**
+	 * If this product is a variant, returns a name built
+	 * from the parent's name and this variant's name. If
+	 * not a variant, returns the name.
+	 *
+	 * @return {String}
+	 */
+	get extendedName() {
+		if (this.isVariant) {
+			return `${this.parent.extendedName} (${this.name})`;
+		}
+
+		return this.name;
+	}
+
+	/**
 	 * Adds a product variant and sets its parent to the
 	 * current product.
 	 *
@@ -89,6 +109,26 @@ class Product {
 			name,
 			amount,
 		});
+	}
+
+	/**
+	 * Creates a "shallow" clone of this product. The cloning
+	 * is "shallow" because the variants (and parent)
+	 * are not cloned and not set in the returned Product.
+	 *
+	 * @return {Product}
+	 */
+	clone() {
+		const clone = new Product();
+		clone.name = this.name;
+		clone.description = this.description;
+		clone.taxes = [...this.taxes];
+
+		if (this.price) {
+			clone.price = new Decimal(this.price);
+		}
+
+		return clone;
 	}
 }
 
