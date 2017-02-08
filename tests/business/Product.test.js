@@ -82,6 +82,7 @@ describe('clone()', () => {
 
 	test('clones properties', () => {
 		product.name = 'test name';
+		product.isCustom = true;
 		product.description = 'test description';
 		product.price = new Decimal(22);
 		product.addTax('tax1', new Decimal(1.22));
@@ -89,6 +90,7 @@ describe('clone()', () => {
 
 		const clone = product.clone();
 		expect(clone.name).toBe(product.name);
+		expect(clone.isCustom).toBe(product.isCustom);
 		expect(clone.description).toBe(product.description);
 		expect(clone.price.eq(product.price)).toBeTruthy();
 		expect(clone.taxes).toEqual(product.taxes);

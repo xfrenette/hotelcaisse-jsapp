@@ -1,13 +1,18 @@
 import Decimal from 'decimal.js';
 
 /**
- * Class that represents a Product. A Product can have variants
- * (which are also variants). Those variants have a parent
- * Product. Note that, in this system, an old Order may reference
- * products (instances of this class) that do not exist anymore
- * or that are modified. It must not be considered that if an Product
- * instance exists, that it exists as a still valid product for new
- * orders.
+ * Represents a product sold by the business. Can represent
+ * an actual product (past or current) or can represent a
+ * custom product for a specific order. A product can have
+ * variants, which are also Products. If the Product is a
+ * variant, it has a parent Product.
+ *
+ * It must be clear that an instance of a Product does not
+ * necessarily represent a product currently sold by the
+ * business. It can represent a product that was once sold,
+ * a custom product or a product that was once a variant.
+ * It is only a class that represents a Product, no matter
+ * in what context.
  */
 class Product {
 	/**
@@ -17,7 +22,7 @@ class Product {
 	 */
 	name = '';
 	/**
-	 * Optionnal description of the product.
+	 * Optional description of the product.
 	 *
 	 * @type {String}
 	 */
@@ -29,6 +34,12 @@ class Product {
 	 * @type {Decimal}
 	 */
 	price = null;
+	/**
+	 * True if it represents a custom product.
+	 *
+	 * @type {Boolean}
+	 */
+	isCustom = false;
 	/**
 	 * List of taxes. Each element is an object:
 	 * {
@@ -112,9 +123,9 @@ class Product {
 	}
 
 	/**
-	 * Creates a "shallow" clone of this product. The cloning
-	 * is "shallow" because the variants (and parent)
-	 * are not cloned and not set in the returned Product.
+	 * Creates a new Product based on this one. It is not
+	 * a complete copy: it does not duplicate variants and
+	 * the parent.
 	 *
 	 * @return {Product}
 	 */
@@ -123,6 +134,7 @@ class Product {
 		clone.name = this.name;
 		clone.description = this.description;
 		clone.taxes = [...this.taxes];
+		clone.isCustom = this.isCustom;
 
 		if (this.price) {
 			clone.price = new Decimal(this.price);
