@@ -1,15 +1,40 @@
-// TODO
 /**
- * An Item represents an entry in an order. It generaly is
- * a specific product with a quantity. It can also be a
- * refunded item or a custom entry.
+ * An Item, made to be used in Order, represents the combination of a Product with a quantity. If
+ * the quantity is positive, it represents a Product being bought by a customer. If it is negative,
+ * it represents a refunded Product.
+ *
+ * When an Item is used in an Order, it is important to keep the Product as it was at the time of
+ * creation. For example, if the Product changes price after the Order was created, the Item must
+ * have the Product as it was at the time. That is why Item has a freezeProduct() method that keeps
+ * the Product "frozen" (it keeps a clone of it).
  */
 class Item {
-	product = null; // Can be a variant
+	/**
+	 * The product of the Item.
+	 *
+	 * @type {Product}
+	 */
+	product = null;
+	/**
+	 * Quantity of the Item. Can be negative (when a refunded Item).
+	 *
+	 * @type {Number}
+	 */
 	quantity = 1;
-	customPrice = false;
-	customName = null; // In case of custom item
+	/**
+	 * Creation date time. Note that it will probably be set again when the Order is saved.
+	 *
+	 * @type {Date}
+	 */
 	createdAt = null;
+
+	constructor() {
+		this.createdAt = new Date();
+	}
+
+	get name() {
+		return this.product.extendedName;
+	}
 
 	/**
 	 * Returns the unit price of this item, before taxes.
@@ -17,7 +42,19 @@ class Item {
 	 * @return {Decimal}
 	 */
 	get unitPrice() {
+		return this.product.price;
+	}
 
+	/**
+	 * Returns an array of taxes applied to the unit price.
+	 * Each entry is an object :
+	 *
+	 * {name:<String>, amount:<Decimal>}
+	 *
+	 * @return {array}
+	 */
+	get unitTaxes() {
+		return this.product.taxes;
 	}
 
 	/**
@@ -25,43 +62,52 @@ class Item {
 	 *
 	 * @return {Decimal}
 	 */
-	get unitPriceFull() {
-
-	}
-
-	/**
-	 * Returns an array of tax totals where each entry is an
-	 * object with 'name' and 'amount' keys. The returned taxes
-	 * are for the total (all quantities).
-	 *
-	 * [
-	 * 	{name:<String>,amount:<Decimal>}
-	 * ]
-	 *
-	 * @return {array}
-	 */
-	get taxTotals() {
-
+	get unitFullPrice() {
+		return this.unitTaxes.reduce(
+			(prev, { amount }) => prev.add(amount),
+			this.unitPrice
+		);
 	}
 
 	/**
 	 * Returns total before taxes
 	 * quantity() * unitPrice()
 	 *
-	 * @return {[type]}
+	 * @return {Decimal}
 	 */
-	get subTotal() {
+	get subtotal() {
+		return this.unitPrice.mul(this.quantity);
+	}
 
+	/**
+	 * Same as unitTaxes, but multiplied by the quantity.
+	 *
+	 * @return {array}
+	 */
+	get taxesTotals() {
+		return this.unitTaxes.map(
+			({ name, amount }) => ({ name, amount: amount.mul(this.quantity) })
+		);
 	}
 
 	/**
 	 * Returns total including taxes
-	 * quantity() * unitPriceFull()
+	 * quantity() * unitFullPrice()
 	 *
 	 * @return {Decimal}
 	 */
 	get total() {
+		return this.unitFullPrice.mul(this.quantity);
+	}
 
+	/**
+	 * Freezes the Product (creates and saves a copy of it). Sets the name of the new Product to the
+	 * extendedName of the original one.
+	 */
+	freezeProduct() {
+		const extendedName = this.product.extendedName;
+		this.product = this.product.clone();
+		this.product.name = extendedName;
 	}
 }
 
