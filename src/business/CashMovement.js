@@ -24,6 +24,12 @@ class CashMovement {
 	 * @type {Date}
 	 */
 	createdAt = null;
+	/**
+	 * Register where this cash movement is saved. It is set when calling Register#addCashMovement(CashMovement).
+	 *
+	 * @type {Register}
+	 */
+	register = null;
 
 	constructor(amount) {
 		this.createdAt = new Date();

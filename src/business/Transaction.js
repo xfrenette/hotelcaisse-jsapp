@@ -32,6 +32,12 @@ class Transaction {
 	 * @type {Date}
 	 */
 	createdAt = null;
+	/**
+	 * Register where this transaction is saved. It is set when calling Register#addTransaction(Transaction).
+	 *
+	 * @type {Register}
+	 */
+	register = null;
 
 	/**
 	 * @param {Decimal} amount
