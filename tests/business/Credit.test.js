@@ -1,3 +1,4 @@
+import { serialize, deserialize } from 'serializr';
 import Credit from 'business/Credit';
 import Decimal from 'decimal.js';
 
@@ -16,5 +17,52 @@ describe('constructor()', () => {
 	test('doesn\'t set amount if not present', () => {
 		const credit = new Credit();
 		expect(credit.amount).toBeNull();
+	});
+});
+
+describe('serializing', () => {
+	let data;
+	let credit;
+
+	beforeEach(() => {
+		credit = new Credit(new Decimal(12.56));
+		credit.note = 'test-note';
+		data = serialize(credit);
+	});
+
+	test('saves primitives', () => {
+		expect(data).toEqual(expect.objectContaining({
+			note: credit.note,
+			createdAt: expect.any(Number),
+		}));
+	});
+
+	test('saves amount', () => {
+		expect(typeof data.amount).toBe('string');
+	});
+});
+
+describe('deserializing', () => {
+	let credit;
+	const jsonObject = {
+		amount: '-1.23',
+		note: 'test-note',
+		createdAt: (new Date()).getTime(),
+	};
+
+	beforeEach(() => {
+		credit = deserialize(Credit, jsonObject);
+	});
+
+	test('restores createdAt', () => {
+		expect(credit.createdAt).toBeInstanceOf(Date);
+	});
+
+	test('restores primitives', () => {
+		expect(credit.note).toBe(jsonObject.note);
+	});
+
+	test('restores amount', () => {
+		expect(credit.amount).toBeInstanceOf(Decimal);
 	});
 });
