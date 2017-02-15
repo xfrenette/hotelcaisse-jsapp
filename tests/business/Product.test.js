@@ -1,5 +1,6 @@
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
+import { serialize, deserialize } from 'serializr';
 
 let product;
 
@@ -100,5 +101,91 @@ describe('clone()', () => {
 	test('works with null price', () => {
 		const clone = product.clone();
 		expect(clone.price).toBeNull();
+	});
+});
+
+describe('serializing', () => {
+	let data;
+
+	beforeEach(() => {
+		product.name = 'test-name';
+		product.description = 'test-description';
+		product.price = new Decimal(12.34);
+		product.isCustom = true;
+		product.addTax('tax1', new Decimal(5.25));
+		product.addTax('tax2', new Decimal(8.14));
+		data = serialize(product);
+	});
+
+	test('saves primitives', () => {
+		expect(data.name).toBe(product.name);
+		expect(data.description).toBe(product.description);
+		expect(data.isCustom).toBe(product.isCustom);
+	});
+
+	test('saves price', () => {
+		expect(typeof data.price).toBe('string');
+	});
+
+	test('saves taxes', () => {
+		expect(data.taxes.length).toBe(product.taxes.length);
+		expect(data.taxes[0]).toEqual({
+			name: product.taxes[0].name,
+			amount: product.taxes[0].amount.toString(),
+		});
+	});
+
+	test('saves variants', () => {
+		const variant = new Product();
+		variant.name = 'test-variant-name';
+		product.addVariant(variant);
+		data = serialize(product);
+		expect(data.variants.length).toBe(1);
+		expect(data.variants[0].name).toBe(variant.name);
+	});
+});
+
+describe('deserializing', () => {
+	const data = {
+		name: 'test-name',
+		description: 'test-description',
+		price: '12.34',
+		isCustom: true,
+		taxes: [
+			{ name: 'tax1', amount: '1.23' },
+			{ name: 'tax2', amount: '4.56' },
+		],
+		variants: [
+			{ name: 'variant1' },
+			{ name: 'variant2' },
+		],
+	};
+
+	beforeEach(() => {
+		product = deserialize(Product, data);
+	});
+
+	test('restores primitives', () => {
+		expect(product.name).toBe(data.name);
+		expect(product.description).toBe(data.description);
+		expect(product.isCustom).toBe(data.isCustom);
+	});
+
+	test('restores price', () => {
+		expect(product.price).toBeInstanceOf(Decimal);
+		expect(product.price.toString()).toBe(data.price);
+	});
+
+	test('restores taxes', () => {
+		expect(product.taxes.length).toBe(data.taxes.length);
+		expect(product.taxes[0].name).toBe(data.taxes[0].name);
+		expect(product.taxes[0].amount.toString()).toBe(data.taxes[0].amount);
+	});
+
+	test('restores variants', () => {
+		expect(product.variants.length).toBe(data.variants.length);
+		const variant = product.variants[0];
+		expect(variant).toBeInstanceOf(Product);
+		expect(variant.name).toBe(data.variants[0].name);
 	});
 });
