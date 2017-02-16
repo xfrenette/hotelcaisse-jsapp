@@ -1,3 +1,6 @@
+import { serializable, date, object } from 'serializr';
+import Product from './Product';
+
 /**
  * An Item, made to be used in Order, represents the combination of a Product with a quantity. If
  * the quantity is positive, it represents a Product being bought by a customer. If it is negative,
@@ -14,18 +17,21 @@ class Item {
 	 *
 	 * @type {Product}
 	 */
+	@serializable(object(Product))
 	product = null;
 	/**
 	 * Quantity of the Item. Can be negative (when a refunded Item).
 	 *
 	 * @type {Number}
 	 */
+	@serializable
 	quantity = 1;
 	/**
 	 * Creation date time. Note that it will probably be set again when the Order is saved.
 	 *
 	 * @type {Date}
 	 */
+	@serializable(date())
 	createdAt = null;
 
 	constructor() {

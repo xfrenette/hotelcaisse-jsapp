@@ -1,6 +1,7 @@
 import Item from 'business/Item';
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
+import { serialize, deserialize } from 'serializr';
 
 let item;
 let parentProduct;
@@ -140,5 +141,50 @@ describe('freezeProduct()', () => {
 		item.product = product;
 		item.freezeProduct();
 		expect(item.product.name).toBe(expected);
+	});
+});
+
+describe('serializing', () => {
+	let data;
+
+	beforeEach(() => {
+		product.name = 'test-name';
+		item.product = product;
+		item.quantity = 2;
+		data = serialize(item);
+	});
+
+	test('saves primitives', () => {
+		expect(data.quantity).toBe(item.quantity);
+		expect(data.createdAt).toEqual(expect.any(Number));
+	});
+
+	test('saves product', () => {
+		expect(data.product.name).toBe(product.name);
+	});
+});
+
+describe('deserializing', () => {
+	let restoredItem;
+	const data = {
+		product: {
+			name: 'test-name',
+		},
+		quantity: 2,
+		createdAt: (new Date()).getTime(),
+	};
+
+	beforeEach(() => {
+		restoredItem = deserialize(Item, data);
+	});
+
+	test('restores primitives', () => {
+		expect(restoredItem.quantity).toBe(data.quantity);
+		expect(restoredItem.createdAt).toBeInstanceOf(Date);
+	});
+
+	test('restores product', () => {
+		expect(restoredItem.product).toBeInstanceOf(Product);
+		expect(restoredItem.product.name).toBe(data.product.name);
 	});
 });
