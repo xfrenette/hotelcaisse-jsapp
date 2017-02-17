@@ -4,6 +4,7 @@ import Product from 'business/Product';
 import Transaction from 'business/Transaction';
 import Credit from 'business/Credit';
 import Decimal from 'decimal.js';
+import { serialize, deserialize } from 'serializr';
 
 let order;
 let item1;
@@ -56,6 +57,12 @@ beforeEach(() => {
 	order.transactions.push(transaction2);
 	order.credits.push(credit1);
 	order.credits.push(credit2);
+});
+
+describe('constructor()', () => {
+	test('sets createdAt', () => {
+		expect(order.createdAt).toBeInstanceOf(Date);
+	});
 });
 
 describe('itemsSubtotal', () => {
@@ -146,5 +153,81 @@ describe('balance', () => {
 	test('returns expected sum', () => {
 		const balance = order.total.sub(order.transactionsTotal);
 		expect(order.balance).toEqual(balance);
+	});
+});
+
+describe('serializing', () => {
+	let data;
+
+	beforeEach(() => {
+		order.note = 'test-note';
+		data = serialize(order);
+	});
+
+	test('serializes primitives', () => {
+		expect(data.note).toBe(order.note);
+		expect(data.createdAt).toEqual(expect.any(Number));
+	});
+
+	test('serializes items', () => {
+		expect(data.items.length).toBe(order.items.length);
+		expect(data.items[0].quantity).toBe(order.items[0].quantity);
+	});
+
+	test('serializes credits', () => {
+		expect(data.credits.length).toBe(order.credits.length);
+		expect(data.credits[0].amount).toBe(order.credits[0].amount.toString());
+	});
+
+	test('serializes transactions', () => {
+		expect(data.transactions.length).toBe(order.transactions.length);
+		expect(data.transactions[0].amount).toBe(order.transactions[0].amount.toString());
+	});
+});
+
+describe('deserializing', () => {
+	let newOrder;
+	const data = {
+		createdAt: (new Date()).getTime(),
+		note: 'order-note',
+		items: [
+			{ quantity: 2 },
+			{ quantity: 1 },
+		],
+		credits: [
+			{ note: 'credit-1-note' },
+			{ note: 'credit-2-note' },
+		],
+		transactions: [
+			{ note: 'transaction-1-note' },
+			{ note: 'transaction-2-note' },
+		],
+	};
+
+	beforeEach(() => {
+		newOrder = deserialize(Order, data);
+	});
+
+	test('restores primitives', () => {
+		expect(newOrder.createdAt).toBeInstanceOf(Date);
+		expect(newOrder.note).toBe(data.note);
+	});
+
+	test('restores items', () => {
+		expect(newOrder.items.length).toBe(data.items.length);
+		expect(newOrder.items[1]).toBeInstanceOf(Item);
+		expect(newOrder.items[1].quantity).toBe(data.items[1].quantity);
+	});
+
+	test('restores credits', () => {
+		expect(newOrder.credits.length).toBe(data.credits.length);
+		expect(newOrder.credits[1]).toBeInstanceOf(Credit);
+		expect(newOrder.credits[1].note).toBe(data.credits[1].note);
+	});
+
+	test('restores transactions', () => {
+		expect(newOrder.transactions.length).toBe(data.transactions.length);
+		expect(newOrder.transactions[1]).toBeInstanceOf(Transaction);
+		expect(newOrder.transactions[1].note).toBe(data.transactions[1].note);
 	});
 });

@@ -1,4 +1,8 @@
+import { serializable, list, date, object } from 'serializr';
 import Decimal from 'decimal.js';
+import Item from './Item';
+import Credit from './Credit';
+import Transaction from './Transaction';
 
 /**
  * An Order, associated with a Customer, contains a list of Items sold (or reimbursed), a list of
@@ -10,37 +14,46 @@ class Order {
 	 *
 	 * @type {Date}
 	 */
+	@serializable(date())
 	createdAt = null;
 	/**
 	 * List of Items.
 	 *
 	 * @type {Array<Item>}
 	 */
+	@serializable(list(object(Item)))
 	items = [];
 	/**
 	 * List of Credits.
 	 *
 	 * @type {Array<Credit>}
 	 */
+	@serializable(list(object(Credit)))
 	credits = [];
 	/**
 	 * List of Transactions.
 	 *
 	 * @type {Array<Transaction>}
 	 */
+	@serializable(list(object(Transaction)))
 	transactions = [];
 	/**
-	 * Optional notes.
+	 * Optional note.
 	 *
 	 * @type {String}
 	 */
-	notes = '';
+	@serializable
+	note = '';
 	/**
 	 * Customer of the Order.
 	 *
 	 * @type {Customer}
 	 */
 	customer = null;
+
+	constructor() {
+		this.createdAt = new Date();
+	}
 
 	/**
 	 * Returns the total of the items' subtotal (which is before taxes).
