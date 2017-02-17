@@ -1,3 +1,7 @@
+import { serializable, list, object, date } from 'serializr';
+import CashMovement from './CashMovement';
+import { decimal } from '../vendor/serializr/propSchemas';
+
 /**
  * The Register records all Transactions and CashMovements of a business day.
  *
@@ -12,44 +16,63 @@ class Register {
 	 *
 	 * @type {Number}
 	 */
+	@serializable
 	state = STATES.NEW;
 	/**
 	 * Employee in charge of this Register.
 	 *
 	 * @type {String}
 	 */
+	@serializable
 	employee = '';
 	/**
-	 * Data of the opening:
-	 * - openedAt (Date): when it was opened
-	 * - declaredCash (Decimal): amount of cash in the register
+	 * Date time the register was opened.
 	 *
-	 * @type {Object}
+	 * @type {Date}
 	 */
-	openingData = {
-		openedAt: null,
-		declaredCash: null,
-	};
+	@serializable(date())
+	openedAt = null;
 	/**
-	 * Data of the closing:
-	 * - closedAt (Date): when it was closed
-	 * - declaredCash (Decimal): amount of cash in the register
-	 * - POSTRef (String): reference number of the POST batch
-	 * - POSTAmount (Decimal): total amount of the POST batch
+	 * Amount of cash when the register was opened.
 	 *
-	 * @type {Object}
+	 * @type {Decimal}
 	 */
-	closingData = {
-		closedAt: null,
-		declaredCash: null,
-		POSTRef: null,
-		POSTAmount: null,
-	};
+	@serializable(decimal())
+	openingCash = null;
+	/**
+	 * Date time the register was closed.
+	 *
+	 * @type {Date}
+	 */
+	@serializable(date())
+	closedAt = null;
+	/**
+	 * Amount of cash when the register was closed.
+	 *
+	 * @type {Decimal}
+	 */
+	@serializable(decimal())
+	closingCash = null;
+	/**
+	 * POST batch number (when closing batch).
+	 *
+	 * @type {String}
+	 */
+	@serializable
+	POSTRef = null;
+	/**
+	 * POST batch total (when closing batch).
+	 *
+	 * @type {Decimal}
+	 */
+	@serializable(decimal())
+	POSTAmount = null;
 	/**
 	 * List of cash movements
 	 *
 	 * @type {Array<CashMovement>}
 	 */
+	@serializable(list(object(CashMovement)))
 	cashMovements = [];
 
 	/**
@@ -59,10 +82,8 @@ class Register {
 	 * @param {Decimal} cashAmount
 	 */
 	open(employee, cashAmount) {
-		this.openingData = {
-			declaredCash: cashAmount,
-			openedAt: new Date(),
-		};
+		this.openingCash = cashAmount;
+		this.openedAt = new Date();
 		this.employee = employee;
 		this.state = STATES.OPENED;
 	}
@@ -75,12 +96,10 @@ class Register {
 	 * @param {Decimal} POSTAmount POST batch total
 	 */
 	close(cashAmount, POSTRef, POSTAmount) {
-		this.closingData = {
-			POSTRef,
-			POSTAmount,
-			declaredCash: cashAmount,
-			closedAt: new Date(),
-		};
+		this.POSTRef = POSTRef;
+		this.POSTAmount = POSTAmount;
+		this.closingCash = cashAmount;
+		this.closedAt = new Date();
 		this.state = STATES.CLOSED;
 	}
 
