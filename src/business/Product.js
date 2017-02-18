@@ -1,4 +1,4 @@
-import { serializable, list, object, getDefaultModelSchema } from 'serializr';
+import { serializable, identifier, list, object, getDefaultModelSchema } from 'serializr';
 import Decimal from 'decimal.js';
 import { decimal, productTax } from '../vendor/serializr/propSchemas';
 
@@ -13,6 +13,14 @@ import { decimal, productTax } from '../vendor/serializr/propSchemas';
  * what context.
  */
 class Product {
+	/**
+	 * Unique id of the Product (the same as on the server). It is possible it stays null (ex: for a
+	 * custom product).
+	 *
+	 * @type {String|null}
+	 */
+	@serializable(identifier())
+	id = null;
 	/**
 	 * Name of the product. If a variant, name of the variant.
 	 *
