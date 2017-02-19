@@ -1,4 +1,6 @@
 import { serialize, deserialize } from 'serializr';
+import postal from 'postal';
+import { CHANNELS, TOPICS } from 'const/message-bus';
 import Business from 'business/Business';
 import Register from 'business/Register';
 import Product from 'business/Product';
@@ -7,6 +9,7 @@ import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
 
 let business;
+const channel = postal.channel(CHANNELS.business);
 
 beforeAll(() => {
 	business = new Business();
@@ -38,6 +41,28 @@ beforeAll(() => {
 
 	business.orders.push(new Order());
 	business.orders.push(new Order());
+});
+
+describe('addOrder()', () => {
+	test('adds to orders array', () => {
+		business = new Business();
+		const order = new Order();
+		business.addOrder(order);
+		expect(business.orders).toEqual([order]);
+	});
+
+	test.only('publishes message', (done) => {
+		const order = new Order();
+		channel.subscribe(
+			TOPICS.business.order.added,
+			(data) => {
+				expect(data.business).toBe(business);
+				expect(data.order).toBe(order);
+				done();
+			}
+		);
+		business.addOrder(order);
+	});
 });
 
 describe('serializing', () => {

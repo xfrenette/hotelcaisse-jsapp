@@ -1,9 +1,18 @@
 import { serializable, object, list } from 'serializr';
+import postal from 'postal';
+import { CHANNELS, TOPICS } from '../const/message-bus';
 import Register from './Register';
 import Product from './Product';
 import ProductCategory from './ProductCategory';
 import TransactionMode from './TransactionMode';
 import Order from './Order';
+
+/**
+ * All messages by this class are published on the same channel.
+ *
+ * @type {ChannelDefinition}
+ */
+const channel = postal.channel(CHANNELS.business);
 
 /**
  * Class that represents the business currently on this device and all its business related data.
@@ -75,6 +84,15 @@ class Business {
 			})
 		).then(this.initialize())
 		 */
+	}
+
+	addOrder(order) {
+		this.orders.push(order);
+
+		channel.publish(TOPICS.business.order.added, {
+			order,
+			business: this,
+		});
 	}
 }
 
