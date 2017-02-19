@@ -6,6 +6,7 @@ businesses
 	name
 	locale
 	active_register_id (donc tous les devices ont le même registre; si un jour besoin de plusieurs registres, on pourra faire une table active_registers)
+	data_version (à chaque modification des données de la business -- nouveau produit, nouveau prix, register qui se ferme, ... -- ce chiffre est incrémenté. Quand un device fait une requête, il passe le dernier data_version reçu et s'ils sont différents, le serveur renvoie toutes les données, sinon il ne retourne rien)
 
 products
 	id
