@@ -1,6 +1,15 @@
 import { serializable, list, object, date } from 'serializr';
+import postal from 'postal';
+import { CHANNELS, TOPICS } from 'const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal } from '../vendor/serializr/propSchemas';
+
+/**
+ * All messages by this class are published on the same channel.
+ *
+ * @type {ChannelDefinition}
+ */
+const channel = postal.channel(CHANNELS.register);
 
 /**
  * The Register records all Transactions and CashMovements of a business day.
@@ -86,6 +95,10 @@ class Register {
 		this.openedAt = new Date();
 		this.employee = employee;
 		this.state = STATES.OPENED;
+
+		channel.publish(TOPICS.register.opened, {
+			register: this,
+		});
 	}
 
 	/**
@@ -101,11 +114,16 @@ class Register {
 		this.closingCash = cashAmount;
 		this.closedAt = new Date();
 		this.state = STATES.CLOSED;
+
+		channel.publish(TOPICS.register.closed, {
+			register: this,
+		});
 	}
 
 	/**
 	 * For now, there is no need to store the transactions in the register since the app doesn't need
-	 * to show them. We thus only set the Register on the Transaction.
+	 * to show them. We thus only set the Register on the Transaction. For the same reason, we do not
+	 * publish a message on postal.
 	 *
 	 * @param {Transaction} transaction
 	 */
@@ -121,6 +139,11 @@ class Register {
 	addCashMovement(cashMovement) {
 		this.cashMovements.push(cashMovement);
 		cashMovement.register = this;
+
+		channel.publish(TOPICS.register.cashMovement.added, {
+			cashMovement,
+			register: this,
+		});
 	}
 }
 

@@ -1,10 +1,13 @@
 import Register, { STATES } from 'business/Register';
+import { CHANNELS, TOPICS } from 'const/message-bus';
 import Transaction from 'business/Transaction';
 import CashMovement from 'business/CashMovement';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
+import postal from 'postal';
 
 let register;
+const channel = postal.channel(CHANNELS.register);
 
 beforeEach(() => {
 	register = new Register();
@@ -45,6 +48,18 @@ describe('addCashMovement()', () => {
 		register.addCashMovement(cashMovement);
 		expect(register.cashMovements).toEqual([cashMovement]);
 	});
+
+	test('publishes message', (done) => {
+		channel.subscribe(
+			TOPICS.register.cashMovement.added,
+			(data) => {
+				expect(data.cashMovement).toBe(cashMovement);
+				expect(data.register).toBe(register);
+				done();
+			},
+		);
+		register.addCashMovement(cashMovement);
+	});
 });
 
 describe('open()', () => {
@@ -68,6 +83,17 @@ describe('open()', () => {
 	test('sets opening datetime', () => {
 		register.open('test', new Decimal(1));
 		expect(register.openedAt).toBeInstanceOf(Date);
+	});
+
+	test('publishes message', (done) => {
+		channel.subscribe(
+			TOPICS.register.opened,
+			(data) => {
+				expect(data.register).toBe(register);
+				done();
+			},
+		);
+		register.open();
 	});
 });
 
@@ -101,15 +127,26 @@ describe('close()', () => {
 		register.close(new Decimal(1), 'test', new Decimal(1));
 		expect(register.closedAt).toBeInstanceOf(Date);
 	});
+
+	test('publishes message', (done) => {
+		channel.subscribe(
+			TOPICS.register.closed,
+			(data) => {
+				expect(data.register).toBe(register);
+				done();
+			},
+		);
+		register.close();
+	});
 });
 
 describe('serializing', () => {
 	let data;
 	let cm1;
 	let cm2;
-	let openingCash = new Decimal(100.12);
-	let closingCash = new Decimal(308.69);
-	let POSTAmount = new Decimal(876.04);
+	const openingCash = new Decimal(100.12);
+	const closingCash = new Decimal(308.69);
+	const POSTAmount = new Decimal(876.04);
 
 	beforeEach(() => {
 		cm1 = new CashMovement();

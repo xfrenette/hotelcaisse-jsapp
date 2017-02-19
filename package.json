@@ -38,6 +38,7 @@
     "decimal.js": "^7.1.1",
     "lodash.get": "^4.4.2",
     "mobx": "^3.0.2",
+    "postal": "^2.0.5",
     "serializr": "^1.1.9"
   }
 }
