@@ -1,8 +1,17 @@
 import { serializable, list, date, object } from 'serializr';
+import postal from 'postal';
 import Decimal from 'decimal.js';
+import { CHANNELS, TOPICS } from '../const/message-bus';
 import Item from './Item';
 import Credit from './Credit';
 import Transaction from './Transaction';
+
+/**
+ * All messages by this class are published on the same channel.
+ *
+ * @type {ChannelDefinition}
+ */
+const channel = postal.channel(CHANNELS.order);
 
 /**
  * An Order, associated with a Customer, contains a list of Items sold (or reimbursed), a list of
@@ -164,6 +173,57 @@ class Order {
 	 */
 	get balance() {
 		return this.total.sub(this.transactionsTotal);
+	}
+
+	/**
+	 * Adds an Item to the array and publishes a message.
+	 *
+	 * @param {Item} item
+	 */
+	addItem(item) {
+		this.items.push(item);
+
+		channel.publish(TOPICS.order.item.added, {
+			item,
+			order: this,
+		});
+	}
+
+	/**
+	 * Adds a Credit to the array and publishes a message.
+	 *
+	 * @param {Credit} credit
+	 */
+	addCredit(credit) {
+		this.credits.push(credit);
+
+		channel.publish(TOPICS.order.credit.added, {
+			credit,
+			order: this,
+		});
+	}
+
+	/**
+	 * Adds a Transaction to the array and publishes a message.
+	 *
+	 * @param {Transaction} transaction
+	 */
+	addTransaction(transaction) {
+		this.transactions.push(transaction);
+
+		channel.publish(TOPICS.order.transaction.added, {
+			transaction,
+			order: this,
+		});
+	}
+
+	/**
+	 * Calling this method publishes a message that the Order has been modified and saved.
+	 */
+	save() {
+		channel.publish(TOPICS.order.saved, {
+			order: this,
+		});
 	}
 }
 

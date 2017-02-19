@@ -1,3 +1,4 @@
+import { CHANNELS, TOPICS } from 'const/message-bus';
 import Order from 'business/Order';
 import Item from 'business/Item';
 import Product from 'business/Product';
@@ -5,10 +6,12 @@ import Transaction from 'business/Transaction';
 import Credit from 'business/Credit';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
+import postal from 'postal';
 
 let order;
 let item1;
 let item2;
+const channel = postal.channel(CHANNELS.order);
 
 const taxes = {
 	tax1: new Decimal(0.38),
@@ -153,6 +156,94 @@ describe('balance', () => {
 	test('returns expected sum', () => {
 		const balance = order.total.sub(order.transactionsTotal);
 		expect(order.balance).toEqual(balance);
+	});
+});
+
+describe('addItem()', () => {
+	test('adds to items array', () => {
+		order = new Order();
+		order.addItem(item1);
+		expect(order.items).toEqual([item1]);
+		order.addItem(item2);
+		expect(order.items).toEqual([item1, item2]);
+	});
+
+	test('publishes message', (done) => {
+		order = new Order();
+		channel.subscribe(
+			TOPICS.order.item.added,
+			(data) => {
+				expect(data.item).toBe(item1);
+				expect(data.order).toBe(order);
+				done();
+			},
+		);
+		order.addItem(item1);
+	});
+});
+
+describe('addCredit()', () => {
+	const credit1 = new Credit();
+	const credit2 = new Credit();
+
+	test('adds to credits array', () => {
+		order = new Order();
+		order.addCredit(credit1);
+		expect(order.credits).toEqual([credit1]);
+		order.addCredit(credit2);
+		expect(order.credits).toEqual([credit1, credit2]);
+	});
+
+	test('publishes message', (done) => {
+		order = new Order();
+		channel.subscribe(
+			TOPICS.order.credit.added,
+			(data) => {
+				expect(data.credit).toBe(credit1);
+				expect(data.order).toBe(order);
+				done();
+			},
+		);
+		order.addCredit(credit1);
+	});
+});
+
+describe('addTransaction()', () => {
+	const transaction1 = new Transaction();
+	const transaction2 = new Transaction();
+
+	test('adds to transactions array', () => {
+		order = new Order();
+		order.addTransaction(transaction1);
+		expect(order.transactions).toEqual([transaction1]);
+		order.addTransaction(transaction2);
+		expect(order.transactions).toEqual([transaction1, transaction2]);
+	});
+
+	test('publishes message', (done) => {
+		order = new Order();
+		channel.subscribe(
+			TOPICS.order.transaction.added,
+			(data) => {
+				expect(data.transaction).toBe(transaction1);
+				expect(data.order).toBe(order);
+				done();
+			},
+		);
+		order.addTransaction(transaction1);
+	});
+});
+
+describe('save()', () => {
+	test('publishes message', (done) => {
+		channel.subscribe(
+			TOPICS.order.saved,
+			(data) => {
+				expect(data.order).toBe(order);
+				done();
+			},
+		);
+		order.save();
 	});
 });
 
