@@ -1,6 +1,6 @@
 import { serializable, list, object, date } from 'serializr';
 import postal from 'postal';
-import { CHANNELS, TOPICS } from 'const/message-bus';
+import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal } from '../vendor/serializr/propSchemas';
 
