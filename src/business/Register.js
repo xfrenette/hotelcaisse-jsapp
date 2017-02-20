@@ -1,4 +1,4 @@
-import { serializable, list, object, date } from 'serializr';
+import { serializable, list, object, date, identifier } from 'serializr';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
@@ -20,6 +20,13 @@ const channel = postal.channel(CHANNELS.register);
  * - POST = Point Of Sale Terminal (credit/debit cards terminal)
  */
 class Register {
+	/**
+	 * UUID of the register
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = 'TODO';
 	/**
 	 * The Register can be OPENED or CLOSED. It is NEW when created, before being opened or closed.
 	 *

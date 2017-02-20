@@ -205,6 +205,7 @@ describe('serializing', () => {
 		cm2 = new CashMovement();
 		cm2.note = 'test-note2';
 
+		register.uuid = 'test-uuid';
 		register.open('employee-name', openingCash);
 
 		register.cashMovements.push(cm1);
@@ -216,6 +217,7 @@ describe('serializing', () => {
 	});
 
 	test('serializes primitives', () => {
+		expect(data.uuid).toBe(register.uuid);
 		expect(data.employee).toBe(register.employee);
 		expect(data.state).toBe(register.state);
 		expect(data.POSTRef).toBe(register.POSTRef);
@@ -250,6 +252,7 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	let newRegister;
 	const data = {
+		uuid: 'test-uuid1',
 		state: STATES.CLOSED,
 		employee: 'test-employee',
 		openedAt: (new Date()).getTime(),
@@ -269,6 +272,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores primitives', () => {
+		expect(newRegister.uuid).toBe(data.uuid);
 		expect(newRegister.state).toBe(data.state);
 		expect(newRegister.employee).toBe(data.employee);
 		expect(newRegister.POSTRef).toBe(data.POSTRef);
