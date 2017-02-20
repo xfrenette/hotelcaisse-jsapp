@@ -10,6 +10,7 @@ export const TOPICS = {
 		closed: 'closed',
 		cashMovement: {
 			added: 'cashMovement.added',
+			removed: 'cashMovement.removed',
 		},
 	},
 	business: {
