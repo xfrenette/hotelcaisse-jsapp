@@ -145,6 +145,19 @@ class Register {
 			register: this,
 		});
 	}
+
+	removeCashMovement(cashMovement) {
+		this.cashMovements = this.cashMovements.filter(
+			element => element !== cashMovement
+		);
+
+		cashMovement.register = null;
+
+		channel.publish(TOPICS.register.cashMovement.removed, {
+			cashMovement,
+			register: this,
+		});
+	}
 }
 
 export default Register;

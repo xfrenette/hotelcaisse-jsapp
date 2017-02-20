@@ -8,9 +8,17 @@ import postal from 'postal';
 
 let register;
 const channel = postal.channel(CHANNELS.register);
+let subscription;
 
 beforeEach(() => {
 	register = new Register();
+});
+
+afterEach(() => {
+	if (subscription) {
+		subscription.unsubscribe();
+		subscription = null;
+	}
 });
 
 describe('state', () => {
@@ -50,7 +58,7 @@ describe('addCashMovement()', () => {
 	});
 
 	test('publishes message', (done) => {
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.register.cashMovement.added,
 			(data) => {
 				expect(data.cashMovement).toBe(cashMovement);
@@ -59,6 +67,49 @@ describe('addCashMovement()', () => {
 			},
 		);
 		register.addCashMovement(cashMovement);
+	});
+});
+
+describe('removeCashMovement()', () => {
+	let cashMovement1;
+	let cashMovement2;
+
+	beforeEach(() => {
+		cashMovement1 = new CashMovement();
+		cashMovement2 = new CashMovement();
+		register.cashMovements.push(cashMovement1);
+		register.cashMovements.push(cashMovement2);
+	});
+
+	test('removes cashMovement from array', () => {
+		register.removeCashMovement(cashMovement1);
+		expect(register.cashMovements).toEqual([cashMovement2]);
+		register.removeCashMovement(cashMovement2);
+		expect(register.cashMovements).toEqual([]);
+	});
+
+	test('works with non-existing cashMovement', () => {
+		register.removeCashMovement(new CashMovement());
+		expect(register.cashMovements).toEqual([cashMovement1, cashMovement2]);
+	});
+
+	test('removes register from cashMovement', () => {
+		cashMovement1.register = register;
+		register.removeCashMovement(cashMovement1);
+		expect(cashMovement1.register).toBeNull();
+	});
+
+	test('publishes message', (done) => {
+		register.addCashMovement(cashMovement1);
+		subscription = channel.subscribe(
+			TOPICS.register.cashMovement.removed,
+			(data) => {
+				expect(data.cashMovement).toBe(cashMovement1);
+				expect(data.register).toBe(register);
+				done();
+			},
+		);
+		register.removeCashMovement(cashMovement1);
 	});
 });
 
@@ -86,7 +137,7 @@ describe('open()', () => {
 	});
 
 	test('publishes message', (done) => {
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.register.opened,
 			(data) => {
 				expect(data.register).toBe(register);
@@ -129,7 +180,7 @@ describe('close()', () => {
 	});
 
 	test('publishes message', (done) => {
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.register.closed,
 			(data) => {
 				expect(data.register).toBe(register);
