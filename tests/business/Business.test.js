@@ -10,8 +10,9 @@ import Order from 'business/Order';
 
 let business;
 const channel = postal.channel(CHANNELS.business);
+let subscription;
 
-beforeAll(() => {
+beforeEach(() => {
 	business = new Business();
 	business.deviceRegister = new Register();
 
@@ -43,6 +44,13 @@ beforeAll(() => {
 	business.orders.push(new Order());
 });
 
+afterEach(() => {
+	if (subscription) {
+		subscription.unsubscribe();
+		subscription = null;
+	}
+});
+
 describe('addOrder()', () => {
 	test('adds to orders array', () => {
 		business = new Business();
@@ -51,9 +59,9 @@ describe('addOrder()', () => {
 		expect(business.orders).toEqual([order]);
 	});
 
-	test.only('publishes message', (done) => {
+	test('publishes message', (done) => {
 		const order = new Order();
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.business.order.added,
 			(data) => {
 				expect(data.business).toBe(business);

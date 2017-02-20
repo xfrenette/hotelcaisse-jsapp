@@ -12,6 +12,7 @@ let order;
 let item1;
 let item2;
 const channel = postal.channel(CHANNELS.order);
+let subscription;
 
 const taxes = {
 	tax1: new Decimal(0.38),
@@ -60,6 +61,13 @@ beforeEach(() => {
 	order.transactions.push(transaction2);
 	order.credits.push(credit1);
 	order.credits.push(credit2);
+});
+
+afterEach(() => {
+	if (subscription) {
+		subscription.unsubscribe();
+		subscription = null;
+	}
 });
 
 describe('constructor()', () => {
@@ -170,7 +178,7 @@ describe('addItem()', () => {
 
 	test('publishes message', (done) => {
 		order = new Order();
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.order.item.added,
 			(data) => {
 				expect(data.item).toBe(item1);
@@ -196,7 +204,7 @@ describe('addCredit()', () => {
 
 	test('publishes message', (done) => {
 		order = new Order();
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.order.credit.added,
 			(data) => {
 				expect(data.credit).toBe(credit1);
@@ -222,7 +230,7 @@ describe('addTransaction()', () => {
 
 	test('publishes message', (done) => {
 		order = new Order();
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.order.transaction.added,
 			(data) => {
 				expect(data.transaction).toBe(transaction1);
@@ -236,7 +244,7 @@ describe('addTransaction()', () => {
 
 describe('save()', () => {
 	test('publishes message', (done) => {
-		channel.subscribe(
+		subscription = channel.subscribe(
 			TOPICS.order.saved,
 			(data) => {
 				expect(data.order).toBe(order);
