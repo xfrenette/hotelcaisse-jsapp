@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { decimal, productTax } from 'vendor/serializr/propSchemas';
+import { decimal, productTax, rawObject } from 'vendor/serializr/propSchemas';
 
 describe('decimal', () => {
 	const schema = decimal();
@@ -140,6 +140,52 @@ describe('productTax', () => {
 			schema.deserializer(data, (err, val) => {
 				expect(val.amount).toBeInstanceOf(Decimal);
 				expect(val.amount.toString()).toEqual(data.amount);
+				done();
+			});
+		});
+
+		test('returns null if null', (done) => {
+			schema.deserializer(null, (err, val) => {
+				expect(val).toBeNull();
+				done();
+			});
+		});
+
+		test('returns undefined if undefined', (done) => {
+			schema.deserializer(undefined, (err, val) => {
+				expect(val).toBeUndefined();
+				done();
+			});
+		});
+	});
+});
+
+describe('rawObject', () => {
+	const schema = rawObject();
+
+	describe('serializer()', () => {
+		test('saves object as is', () => {
+			const expected = { a: 'b', c: true, d: 3, e: null, f: [1], g: {} };
+			const data = schema.serializer(expected);
+			expect(data).toEqual(expected);
+		});
+
+		test('returns null if null', () => {
+			const data = schema.serializer(null);
+			expect(data).toBeNull();
+		});
+
+		test('returns undefined if undefined', () => {
+			const data = schema.serializer();
+			expect(data).toBeUndefined();
+		});
+	});
+
+	describe('deserializer', () => {
+		test('returns object as is', (done) => {
+			const data = { a: 'b', c: true, d: 3, e: null, f: [1], g: {} };
+			schema.deserializer(data, (err, val) => {
+				expect(val).toEqual(data);
 				done();
 			});
 		});

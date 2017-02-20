@@ -4,6 +4,7 @@ import Decimal from 'decimal.js';
  * Custom PropSchemas that can be used with serializr to serializ:
  * - decimal: for decimal.js instances
  * - productTax: for tax objects in a Product
+ * - rawObject: for used with literal objects that can be validly saved to JSON as is
  *
  * @see https://github.com/mobxjs/serializr
  * @see https://mikemcl.github.io/decimal.js
@@ -100,5 +101,28 @@ const productTaxPropSchema = {
 	},
 };
 
+const rawObjectPropSchema = {
+	/**
+	 * Serializer function that returns the literal object as is.
+	 *
+	 * @param {object} value
+	 * @return {object|null|undefined}
+	 */
+	serializer(value) {
+		return value;
+	},
+
+	/**
+	 * Deserializer function that calls callback with the jsonValue object as is.
+	 *
+	 * @param {object|null|undefined} jsonValue
+	 * @param {Function} callback
+	 */
+	deserializer(jsonValue, callback) {
+		callback(null, jsonValue);
+	},
+};
+
 export const decimal = () => decimalPropSchema;
 export const productTax = () => productTaxPropSchema;
+export const rawObject = () => rawObjectPropSchema;
