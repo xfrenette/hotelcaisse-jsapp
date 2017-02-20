@@ -81,8 +81,8 @@ class RegisterUpdates extends Plugin {
 	 * Called when a CashMovement is added to a Register. Writes a DataChange to the Writer with the
 	 * CashMovement and the register's UUID
 	 *
-	 * @param {[type]} cashMovement
-	 * @param {[type]} register
+	 * @param {CashMovement} cashMovement
+	 * @param {Register} register
 	 */
 	cashMovementAdded(cashMovement, register) {
 		const dataChange = new DataChange(
@@ -99,8 +99,8 @@ class RegisterUpdates extends Plugin {
 	 * Called when a CashMovement is removed from a Register. Writes a DataChange to the Writer with
 	 * the CashMovement and the register's UUID
 	 *
-	 * @param {[type]} cashMovement
-	 * @param {[type]} register
+	 * @param {CashMovement} cashMovement
+	 * @param {Register} register
 	 */
 	cashMovementRemoved(cashMovement, register) {
 		const dataChange = new DataChange(
