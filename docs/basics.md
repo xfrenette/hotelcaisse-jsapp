@@ -7,3 +7,4 @@ On a besoin des ids pour les éléments suivants:
 	- Qu'en est-il de products et productCategories ?
 - The following instances are always deserialized together, it is not possible to deserialize an object containing instances of a type if this object doesn't contain all the other instances:
 - Product and ProductCategory
+- Les Writer et les Reader ne peuvent recevoir et retourner que des objets litéraux (donc sur lesquels JSON.stringify et JSON.parse pourront être appelés)
