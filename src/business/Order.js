@@ -1,4 +1,4 @@
-import { serializable, list, date, object } from 'serializr';
+import { serializable, list, date, object, identifier } from 'serializr';
 import postal from 'postal';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
@@ -28,6 +28,13 @@ const channel = postal.channel(CHANNELS.order);
  * system also allows for a revert() method that can cancel all the modifications
  */
 class Order {
+	/**
+	 * UUID of the register
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = 'Order-TODO';
 	/**
 	 * Creation date time.
 	 *

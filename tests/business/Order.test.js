@@ -481,6 +481,7 @@ describe('serializing', () => {
 	});
 
 	test('serializes primitives', () => {
+		expect(data.uuid).toBe(order.uuid);
 		expect(data.note).toBe(order.note);
 		expect(data.createdAt).toEqual(expect.any(Number));
 	});
@@ -504,6 +505,7 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	let newOrder;
 	const data = {
+		uuid: 'test-uuid',
 		createdAt: (new Date()).getTime(),
 		note: 'order-note',
 		items: [
@@ -526,6 +528,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(newOrder.createdAt).toBeInstanceOf(Date);
+		expect(newOrder.uuid).toBe(data.uuid);
 		expect(newOrder.note).toBe(data.note);
 	});
 
