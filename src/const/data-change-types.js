@@ -6,4 +6,12 @@ export default {
 			added: 'cashMovement.added',
 		}
 	},
+	business: {
+		order: {
+			added: 'order.added',
+		},
+	},
+	order: {
+		modified: 'order.modified',
+	},
 };
