@@ -6,10 +6,40 @@ import EventEmitter from 'events';
  */
 class TestWriter extends EventEmitter {
 	data = null;
+	timeout = null;
+	doFail = false;
 
 	write(data) {
 		this.data = data;
 		this.emit('write', data);
+		return this.getPromise();
+	}
+
+	setTimeout(time = null) {
+		this.timeout = time;
+	}
+
+	fail(doFail = true) {
+		this.doFail = doFail;
+	}
+
+	getPromise() {
+		if (this.timeout !== null) {
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					if (this.doFail) {
+						reject();
+					} else {
+						resolve();
+					}
+				}, this.timeout);
+			});
+		}
+
+		if (this.doFail) {
+			return Promise.reject();
+		}
+
 		return Promise.resolve();
 	}
 }
