@@ -3,6 +3,7 @@ import postal from 'postal';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
 import { CHANNELS, TOPICS } from '../const/message-bus';
+import OrderChanges from './OrderChanges';
 import Item from './Item';
 import Credit from './Credit';
 import Transaction from './Transaction';
@@ -329,11 +330,11 @@ class Order {
 	}
 
 	/**
-	 * Returns an object of changes between the current properties of the Order and the ones in the
-	 * restoration data that were set by recordChanges().
+	 * Returns a OrderChanges containing changes between the current properties of the Order and the
+	 * ones in the restoration data that were set by recordChanges().
 	 *
-	 * Note that for items, transactions and credits, only new elements are considered changes. We do
-	 * not track modification, reordering, suppression, ... since it is not allowed in an Order.
+	 * Note that for items, transactions and credits, only new elements are considered changes. We
+	 * do not track modification, reordering, suppression, ... since it is not allowed in an Order.
 	 */
 	getChanges() {
 		if (this.restorationData === null || typeof this.restorationData !== 'object') {
@@ -341,24 +342,28 @@ class Order {
 		}
 
 		const old = this.restorationData;
-		const changes = {};
+		const changes = new OrderChanges();
+		let foundChanges = false;
 
 		if (this.note !== old.note) {
 			changes.note = this.note;
+			foundChanges = true;
 		}
 
 		['items', 'transactions', 'credits'].forEach((field) => {
 			const diff = arrayDifference(this[field], old[field]);
 			if (diff.length) {
 				changes[field] = diff;
+				foundChanges = true;
 			}
 		});
 
 		if (!this.customer.isEqualTo(old.customer)) {
 			changes.customer = this.customer;
+			foundChanges = true;
 		}
 
-		return Object.keys(changes).length ? changes : null;
+		return foundChanges ? changes : null;
 	}
 }
 

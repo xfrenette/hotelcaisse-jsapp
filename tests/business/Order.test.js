@@ -1,5 +1,6 @@
 import { CHANNELS, TOPICS } from 'const/message-bus';
 import Order from 'business/Order';
+import OrderChanges from 'business/OrderChanges';
 import Item from 'business/Item';
 import Product from 'business/Product';
 import Transaction from 'business/Transaction';
@@ -345,6 +346,12 @@ describe('getChanges()', () => {
 		delete order.restorationData;
 		order.getChanges();
 		// Must not throw errors
+	});
+
+	test('returns OrderChanges if has changes', () => {
+		order.note = `${order.note} (modif)`;
+		const res = order.getChanges();
+		expect(res).toBeInstanceOf(OrderChanges);
 	});
 
 	describe('fields modified', () => {
