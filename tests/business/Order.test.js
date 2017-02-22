@@ -4,6 +4,7 @@ import Item from 'business/Item';
 import Product from 'business/Product';
 import Transaction from 'business/Transaction';
 import Credit from 'business/Credit';
+import Customer from 'business/Customer';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
 import postal from 'postal';
@@ -55,12 +56,15 @@ beforeEach(() => {
 	const credit2 = new Credit(new Decimal(0.24));
 
 	order = new Order();
+	order.note = 'test-note';
 	order.items.push(item1);
 	order.items.push(item2);
 	order.transactions.push(transaction1);
 	order.transactions.push(transaction2);
 	order.credits.push(credit1);
 	order.credits.push(credit2);
+
+	order.customer.name = 'test-customer-name';
 });
 
 afterEach(() => {
@@ -242,16 +246,229 @@ describe('addTransaction()', () => {
 	});
 });
 
-describe('save()', () => {
-	test('publishes message', (done) => {
-		subscription = channel.subscribe(
-			TOPICS.order.saved,
-			(data) => {
-				expect(data.order).toBe(order);
-				done();
-			},
-		);
-		order.save();
+describe('restoreFrom()', () => {
+	const newCustomer = new Customer();
+	newCustomer.name = 'new-customer-name';
+	const restorationData = {
+		note: 'test-note',
+		items: ['a', 'b'],
+		credits: ['c', 'd'],
+		transactions: ['e', 'f'],
+		customer: newCustomer,
+	};
+
+	test('does nothing with invalid data', () => {
+		order.restoreFrom();
+		order.restoreFrom(null);
+		order.restoreFrom(false);
+		order.restoreFrom('string');
+		// Should not throw any error
+	});
+
+	test('restores note', () => {
+		order.restoreFrom(restorationData);
+		expect(order.note).toBe(restorationData.note);
+	});
+
+	test('restores items', () => {
+		order.restoreFrom(restorationData);
+		expect(order.items).toBe(restorationData.items);
+	});
+
+	test('restores credits', () => {
+		order.restoreFrom(restorationData);
+		expect(order.credits).toBe(restorationData.credits);
+	});
+
+	test('restores transactions', () => {
+		order.restoreFrom(restorationData);
+		expect(order.transactions).toBe(restorationData.transactions);
+	});
+
+	test('restores customer', () => {
+		order.restoreFrom(restorationData);
+		expect(order.customer.isEqualTo(newCustomer)).toBe(true);
+	});
+});
+
+describe('revertChanges()', () => {
+	test('calls restoreFrom with saves restorationData', () => {
+		const data = { note: 'test-note' };
+		order.restorationData = data;
+		order.restoreFrom = jest.fn();
+		order.revertChanges();
+		expect(order.restoreFrom).toHaveBeenCalledWith(data);
+	});
+
+	test('calls stopRecordChanges()', () => {
+		order.stopRecordChanges = jest.fn();
+		order.revertChanges();
+		expect(order.stopRecordChanges).toHaveBeenCalled();
+	});
+});
+
+describe('recordChanges()', () => {
+	test('sets restorationData', () => {
+		const key = 'test';
+		order.createRestorationData = () => key;
+		order.recordChanges();
+		expect(order.restorationData).toBe(key);
+	});
+
+	test('set recordingChanges', () => {
+		order.recordChanges();
+		expect(order.recordingChanges).toBeTruthy();
+	});
+
+	test('does nothing if already recordingChanges', () => {
+		order.recordingChanges = true;
+		order.createRestorationData = jest.fn();
+		order.listenToChanges = jest.fn();
+		order.recordChanges();
+		expect(order.createRestorationData).not.toHaveBeenCalled();
+		expect(order.listenToChanges).not.toHaveBeenCalled();
+	});
+});
+
+describe('getChanges()', () => {
+	beforeEach(() => {
+		order.recordChanges();
+	});
+
+	test('works if no restorationData', () => {
+		order.restorationData = null;
+		order.getChanges();
+		order.restorationData = false;
+		order.getChanges();
+		order.restorationData = 'string';
+		order.getChanges();
+		delete order.restorationData;
+		order.getChanges();
+		// Must not throw errors
+	});
+
+	describe('fields modified', () => {
+		test('note', () => {
+			order.note = `${order.note} (modif)`;
+			const res = order.getChanges();
+			expect(res.note).toBe(order.note);
+		});
+
+		test('items', () => {
+			const newItem1 = new Item();
+			const newItem2 = new Item();
+			order.addItem(newItem1);
+			order.addItem(newItem2);
+			const res = order.getChanges();
+			expect(res.items).toEqual([newItem1, newItem2]);
+		});
+
+		test('transactions', () => {
+			const newTransaction1 = new Transaction();
+			const newTransaction2 = new Transaction();
+			order.addTransaction(newTransaction1);
+			order.addTransaction(newTransaction2);
+			const res = order.getChanges();
+			expect(res.transactions).toEqual([newTransaction1, newTransaction2]);
+		});
+
+		test('credits', () => {
+			const newCredit1 = new Credit();
+			const newCredit2 = new Credit();
+			order.addCredit(newCredit1);
+			order.addCredit(newCredit2);
+			const res = order.getChanges();
+			expect(res.credits).toEqual([newCredit1, newCredit2]);
+		});
+
+		test('customer', () => {
+			order.customer.name = `${order.customer.name} (modif)`;
+			const res = order.getChanges();
+			expect(res.customer.isEqualTo(order.customer)).toBe(true);
+		});
+	});
+
+	test('fields not modified', () => {
+		expect(order.getChanges()).toBe(null);
+	});
+});
+
+describe('stopRecordChanges()', () => {
+	beforeEach(() => {
+		order.recordChanges();
+		order.stopRecordChanges();
+	});
+
+	test('sets recordingChanges', () => {
+		expect(order.recordingChanges).toBe(false);
+	});
+
+	test('clears restorationData', () => {
+		expect(order.restorationData).toBeNull();
+	});
+});
+
+describe('commitChanges()', () => {
+	test('calls stopRecordChanges()', () => {
+		order.stopRecordChanges = jest.fn();
+		order.commitChanges();
+		expect(order.stopRecordChanges).toHaveBeenCalled();
+	});
+
+	test('publishes message with result from getChanges()', (done) => {
+		const changes = { a: 'b' };
+		order.getChanges = jest.fn().mockImplementation(() => changes);
+		channel.subscribe(TOPICS.order.modified, (data) => {
+			expect(data.order).toBe(order);
+			expect(data.changes).toBe(changes);
+			done();
+		});
+		order.commitChanges();
+	});
+
+	test('does not publish if no changes', () => {
+		channel.subscribe(TOPICS.order.modified, () => {
+			throw new Error('Should not publish message if no changes.');
+		});
+		order.commitChanges();
+	});
+});
+
+describe('createRestorationData()', () => {
+	test('saves note', () => {
+		const res = order.createRestorationData();
+		expect(res.note).toBe(order.note);
+	});
+
+	test('saves items', () => {
+		const res = order.createRestorationData();
+		expect(res.items).not.toBe(order.items);
+		expect(res.items).toEqual(order.items);
+		order.addItem(new Item());
+		expect(res.items.length).toBe(order.items.length - 1);
+	});
+
+	test('saves credits', () => {
+		const res = order.createRestorationData();
+		expect(res.credits).not.toBe(order.credits);
+		expect(res.credits).toEqual(order.credits);
+		order.addCredit(new Credit());
+		expect(res.credits.length).toBe(order.credits.length - 1);
+	});
+
+	test('saves transactions', () => {
+		const res = order.createRestorationData();
+		expect(res.transactions).not.toBe(order.transactions);
+		expect(res.transactions).toEqual(order.transactions);
+		order.addTransaction(new Transaction());
+		expect(res.transactions.length).toBe(order.transactions.length - 1);
+	});
+
+	test('saves clone of customer', () => {
+		const res = order.createRestorationData();
+		expect(res.customer).toBeInstanceOf(Customer);
+		expect(res.customer).not.toBe(order.customer);
+		expect(order.customer.isEqualTo(res.customer)).toBe(true);
 	});
 });
 

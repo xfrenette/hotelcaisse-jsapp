@@ -19,7 +19,7 @@ export const TOPICS = {
 		},
 	},
 	order: {
-		saved: 'saved',
+		modified: 'modified',
 		item: {
 			added: 'item.added',
 		},

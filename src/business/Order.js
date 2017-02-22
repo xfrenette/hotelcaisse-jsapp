@@ -1,10 +1,12 @@
 import { serializable, list, date, object } from 'serializr';
 import postal from 'postal';
 import Decimal from 'decimal.js';
+import arrayDifference from 'lodash.difference';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import Item from './Item';
 import Credit from './Credit';
 import Transaction from './Transaction';
+import Customer from './Customer';
 
 /**
  * All messages by this class are published on the same channel.
@@ -16,6 +18,14 @@ const channel = postal.channel(CHANNELS.order);
 /**
  * An Order, associated with a Customer, contains a list of Items sold (or reimbursed), a list of
  * Credits and a list of Transactions (payments or refunds).
+ *
+ * We wish the Order to send a message when it is modified. But since the desired new Order may
+ * require mult iple changes (ex: 2 new items, 1 new payment mode, 1 new credit, all done one at a
+ * time), it could clutter the system if a message had to be processed for each modifications. To
+ * fix this, the Order comes with a 'modifications transaction' feature: you start recording
+ * changes by calling recordChanges(), you modify the Order as you and then you call commit() when
+ * finished. This will publish a 'commit' message containing only the changes that were made. This
+ * system also allows for a revert() method that can cancel all the modifications
  */
 class Order {
 	/**
@@ -58,7 +68,20 @@ class Order {
 	 *
 	 * @type {Customer}
 	 */
-	customer = null;
+	customer = new Customer();
+	/**
+	 * Flag indicating if currently recording changes.
+	 *
+	 * @type {Boolean}
+	 */
+	recordingChanges = false;
+	/**
+	 * When recording changes, this object holds the state of the Order when recording started. If we
+	 * call revertChanges(), the Order will be reverted to those data.
+	 *
+	 * @type {Object}
+	 */
+	restorationData = null;
 
 	constructor() {
 		this.createdAt = new Date();
@@ -218,12 +241,117 @@ class Order {
 	}
 
 	/**
-	 * Calling this method publishes a message that the Order has been modified and saved.
+	 * Starts recording all changes to the Order.
 	 */
-	save() {
-		channel.publish(TOPICS.order.saved, {
-			order: this,
+	recordChanges() {
+		if (this.recordingChanges) {
+			return;
+		}
+
+		this.recordingChanges = true;
+		this.restorationData = this.createRestorationData();
+	}
+
+	/**
+	 * Stops recording changes and publishes a message containing the changes.
+	 */
+	commitChanges() {
+		const changes = this.getChanges();
+		this.stopRecordChanges();
+
+		if (changes !== null) {
+			channel.publish(TOPICS.order.modified, {
+				changes,
+				order: this,
+			});
+		}
+	}
+
+	/**
+	 * Stops recording changes and restores this Order to the data at the time of recordChanges().
+	 */
+	revertChanges() {
+		const restorationData = this.restorationData;
+		this.stopRecordChanges();
+		this.restoreFrom(restorationData);
+	}
+
+	/**
+	 * Stops recording changes and clears list of changes recorded.
+	 */
+	stopRecordChanges() {
+		this.recordingChanges = false;
+		this.restorationData = null;
+	}
+
+	/**
+	 * Restore the values of this Order with data in restorationData.
+	 *
+	 * @param {Object} restorationData
+	 */
+	restoreFrom(restorationData) {
+		if (restorationData === null || typeof restorationData !== 'object') {
+			return;
+		}
+
+		const fields = ['note', 'items', 'credits', 'transactions'];
+		fields.forEach((field) => {
+			if (restorationData[field]) {
+				this[field] = restorationData[field];
+			}
 		});
+
+		if (restorationData.customer) {
+			this.customer = restorationData.customer;
+		}
+	}
+
+	/**
+	 * Creates an object of restoration data of the current state of the Order.
+	 *
+	 * @return {Object}
+	 */
+	createRestorationData() {
+		return {
+			note: this.note,
+			items: [...this.items],
+			transactions: [...this.transactions],
+			credits: [...this.credits],
+			customer: this.customer.clone(),
+		};
+	}
+
+	/**
+	 * Returns an object of changes between the current properties of the Order and the ones in the
+	 * restoration data that were set by recordChanges().
+	 *
+	 * Note that for items, transactions and credits, only new elements are considered changes. We do
+	 * not track modification, reordering, suppression, ... since it is not allowed in an Order.
+	 */
+	getChanges() {
+		if (this.restorationData === null || typeof this.restorationData !== 'object') {
+			return null;
+		}
+
+		const old = this.restorationData;
+		const changes = {};
+
+		if (this.note !== old.note) {
+			changes.note = this.note;
+		}
+
+		['items', 'transactions', 'credits'].forEach((field) => {
+			const diff = arrayDifference(this[field], old[field]);
+			if (diff.length) {
+				changes[field] = diff;
+			}
+		});
+
+		if (!this.customer.isEqualTo(old.customer)) {
+			changes.customer = this.customer;
+		}
+
+		return Object.keys(changes).length ? changes : null;
 	}
 }
 
