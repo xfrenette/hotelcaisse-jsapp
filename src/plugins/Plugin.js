@@ -5,10 +5,20 @@
  */
 class Plugin {
 	/**
-	 * Bootstrapping where the plugin may initialize data, but should not modify anything until
-	 * start() is called.
+	 * Application that executes this Plugin.
+	 *
+	 * @type {Application}
 	 */
-	bootstrap() {
+	application = null;
+
+	/**
+	 * Bootstrapping where the plugin may initialize data, but should not modify anything until
+	 * start() is called. Receives the Application in parameter.
+	 *
+	 * @param {Application} app
+	 */
+	bootstrap(application) {
+		this.application = application;
 	}
 
 	/**
