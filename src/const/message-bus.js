@@ -2,6 +2,7 @@ export const CHANNELS = {
 	register: 'register',
 	business: 'business',
 	order: 'order',
+	api: 'api',
 };
 
 export const TOPICS = {
@@ -28,6 +29,12 @@ export const TOPICS = {
 		},
 		transaction: {
 			added: 'transaction.added',
+		},
+	},
+	api: {
+		dataReceived: {
+			success: 'dataReceived.success',
+			error: 'dataReceived.error',
 		},
 	},
 };
