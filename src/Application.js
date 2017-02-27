@@ -1,11 +1,24 @@
-// TODO
 import Config from './Config';
+import Business from './business/Business';
 
+/**
+ * Object representing the application. Once created, we call bootstrap() to bootstrap it and the
+ * we call start() that starts all the plugins. Note that the Application does nothing
+ * automatically after. All automatic actions are done by the plugins.
+ */
 class Application {
+	/**
+	 * Config object of the Application.
+	 *
+	 * @type {Config}
+	 */
 	config = new Config();
-	auth = null;
-	businessData = null;
-	plugins = [];
+	/**
+	 * Business instance.
+	 *
+	 * @type {Business}
+	 */
+	business = null;
 
 	/**
 	 * If a config object is supplied, sets the config.
@@ -13,40 +26,34 @@ class Application {
 	 * @param {Object} config
 	 */
 	constructor(config = null) {
-
+		this.setConfig(config);
 	}
 
 	/**
-	 * Creates all needed instances and bootstrap them. Also
-	 * boostraps all plugins.
+	 * Creates instance of Business and bootstraps all the plugins.
 	 */
 	bootstrap() {
-		/*
-		this.auth = this.config.get('auth');
-		this.businessData = new BusinessData();
-		this.plugins = this.config.get('plugins', []).map(plugin => {
-			plugin.bootstrap(this)
-			return plugin;
-		})
-		 */
+		this.business = new Business();
+		this.config.get('plugins', []).forEach((plugin) => {
+			plugin.bootstrap(this);
+		});
 	}
 
 	/**
-	 * Triggers all the actions needed at the start of the application.
-	 * Also starts all the plugins. Returns a Promise that resolves
-	 * when everything is started
+	 * Starts the plugins sequentially. Returns a Promise that resolves once all plugins' start() has
+	 * resolved.
 	 *
 	 * @return {Promise}
 	 */
 	start() {
-		/*
-		return Promise(
-			this.auth.initFromSource(this.config.initialSources.auth);
-			this.businessData.initFromSources(this.config.initialSources.businessData);
-			this.plugins.forEach(plugin => {
-					plugin.start()
-		)
-		 */
+		let promise = Promise.resolve();
+
+		this.config.get('plugins', []).forEach((plugin) => {
+			// The promise is redefined at each pass so plugins' start() are called sequentially.
+			promise = promise.then(() => plugin.start());
+		});
+
+		return promise;
 	}
 
 	/**
@@ -55,7 +62,9 @@ class Application {
 	 * @param {object} config
 	 */
 	setConfig(config) {
-		this.config.set(config);
+		if (config !== null && typeof config === 'object') {
+			this.config.set(config);
+		}
 	}
 }
 
