@@ -62,30 +62,10 @@ class Business {
 	orders = [];
 
 	/**
-	 * TODO
-	 * Tries to initialize from data in a list of sources. Will try to load the data from each
-	 * source in order. If a source returns valid data, it saves it and stops there, else it
-	 * continues to the next. At the end (even if no sources contained valid data), sets the state
-	 * to INITIALIZED. Returns a Promise that resolves when initializing finishes
+	 * Add an Order to the order list. Publishes a message.
 	 *
-	 * @param {Array<DataSource>} sources
-	 * @return {Promise}
+	 * @param {Order} order
 	 */
-	initFromSources(sources) {
-		/*
-		return new Promise(
-			sources.forEach(source => {
-				source.read().then(data => {
-					if (data) {
-						this.setData(data);
-						break;
-					}
-				}
-			})
-		).then(this.initialize())
-		 */
-	}
-
 	addOrder(order) {
 		this.orders.push(order);
 
