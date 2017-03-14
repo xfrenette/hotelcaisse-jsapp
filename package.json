@@ -2,7 +2,7 @@
   "name": "hotelcaisse-app",
   "version": "0.0.1",
   "description": "Application of the HotelCaisse",
-  "main": "src/app.js",
+  "main": "src/Application.js",
   "scripts": {
     "test": "jest",
     "lint": "node node_modules/eslint/bin/eslint.js ."
@@ -36,7 +36,9 @@
     "testRegex": "(\\.(test|spec))\\.jsx?$"
   },
   "dependencies": {
+    "cldr-data": "^30.0.4",
     "decimal.js": "^7.1.1",
+    "globalize": "^1.2.2",
     "lodash.difference": "^4.5.0",
     "lodash.get": "^4.4.2",
     "mobx": "^3.0.2",
