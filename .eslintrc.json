@@ -32,6 +32,11 @@
         "no-param-reassign": [
             "error",
             { "props": false }
+        ],
+        "import/extensions": [
+            "error",
+            "never",
+            { "json": "always" }
         ]
     }
 }
