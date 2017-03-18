@@ -2,14 +2,16 @@
   "name": "hotelcaisse-app",
   "version": "0.0.1",
   "description": "Application of the HotelCaisse",
-  "main": "src/Application.js",
+  "main": "dist/Application.js",
   "scripts": {
     "test": "jest",
-    "lint": "node node_modules/eslint/bin/eslint.js ."
+    "lint": "node node_modules/eslint/bin/eslint.js .",
+    "build": "node node_modules/babel-cli/bin/babel.js src --out-dir dist"
   },
   "author": "Xavier Frenette",
   "license": "SEE LICENSE IN LICENSE.txt",
   "devDependencies": {
+    "babel-cli": "^6.24.0",
     "babel-eslint": "^7.1.1",
     "babel-jest": "^18.0.0",
     "babel-plugin-transform-class-properties": "^6.22.0",
