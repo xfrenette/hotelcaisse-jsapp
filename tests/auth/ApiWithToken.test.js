@@ -128,7 +128,8 @@ describe('processResponseData()', () => {
 describe('doAuthenticateRequest()', () => {
 	test('calls API url with params', () => {
 		global.fetch = jest.fn().mockImplementation(() => Promise.resolve());
-		apiWithToken.doAuthenticateRequest('test', 'test');
+		apiWithToken.doAuthenticateRequest('test', 'test')
+			.catch(() => {});
 		expect(global.fetch).toHaveBeenCalledWith(
 			apiWithToken.apiURL,
 			{
@@ -200,10 +201,21 @@ describe('authenticate()', () => {
 		apiWithToken.authenticate(code, deviceUUID);
 		expect(apiWithToken.doAuthenticateRequest).toHaveBeenCalledWith(code, deviceUUID);
 	});
+
+	test('sets authenticate to true if successful', (done) => {
+		const code = 'test-code';
+		const deviceUUID = 'test-uuid';
+		apiWithToken.doAuthenticateRequest = jest.fn().mockImplementation(() => Promise.resolve());
+		apiWithToken.authenticate(code, deviceUUID)
+			.then(() => {
+				expect(apiWithToken.authenticated).toBe(true);
+				done();
+			});
+	});
 });
 
 describe('constructor()', () => {
-	test.only('sets apiURL', () => {
+	test('sets apiURL', () => {
 		const url = 'test-url';
 		apiWithToken = new ApiWithToken(url);
 		expect(apiWithToken.apiURL).toBe(url);

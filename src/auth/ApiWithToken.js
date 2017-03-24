@@ -48,9 +48,20 @@ class ApiWithToken extends Auth {
 		this.apiURL = apiURL;
 	}
 
+	/**
+	 * Does the authentication. Returns a Promise that resolves if successful, else rejects. If
+	 * successful, sets this.authenticated to true, else to false.
+	 *
+	 * @param {string} code
+	 * @param {string} deviceUUID
+	 * @return {Promise}
+	 */
 	authenticate(code, deviceUUID) {
 		this.invalidate();
-		return this.doAuthenticateRequest(code, deviceUUID);
+		return this.doAuthenticateRequest(code, deviceUUID)
+			.then(() => {
+				this.authenticated = true;
+			});
 	}
 
 	/**
@@ -64,7 +75,7 @@ class ApiWithToken extends Auth {
 	/**
 	 * Does the actual request to the API to authenticate with the code and device uuid and
 	 * processes the response. Returns a Promise that resolves if authentication is successful,
-	 * rejects if any problem (network error, authentication fail, ...)
+	 * rejects if any problem (network error, authentication fail, ...).
 	 *
 	 * @param {String} code
 	 * @param {String} deviceUUID
