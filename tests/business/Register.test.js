@@ -5,6 +5,7 @@ import CashMovement from 'business/CashMovement';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
 import postal from 'postal';
+import { isObservable } from 'mobx';
 
 let register;
 const channel = postal.channel(CHANNELS.register);
@@ -24,6 +25,10 @@ afterEach(() => {
 describe('state', () => {
 	test('is NEW when created', () => {
 		expect(register.state).toBe(STATES.NEW);
+	});
+
+	test('is observable', () => {
+		expect(isObservable(register, 'state')).toBe(true);
 	});
 });
 

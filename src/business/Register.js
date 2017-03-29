@@ -1,5 +1,6 @@
 import { serializable, list, object, date, identifier } from 'serializr';
 import postal from 'postal';
+import { observable } from 'mobx';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal } from '../vendor/serializr/propSchemas';
@@ -33,6 +34,7 @@ class Register {
 	 * @type {Number}
 	 */
 	@serializable
+	@observable
 	state = STATES.NEW;
 	/**
 	 * Employee in charge of this Register.
