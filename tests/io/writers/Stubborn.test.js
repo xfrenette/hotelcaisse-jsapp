@@ -1,5 +1,5 @@
 import Stubborn from 'io/writers/Stubborn';
-import TestWriter from './TestWriter';
+import TestWriter from '../../mock/TestWriter';
 
 let stubborn;
 let testWriter;

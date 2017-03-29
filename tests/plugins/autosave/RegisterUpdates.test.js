@@ -4,7 +4,7 @@ import Register from 'business/Register';
 import CashMovement from 'business/CashMovement';
 import DataChange from 'DataChange';
 import DATA_CHANGE_TYPES from 'const/data-change-types';
-import TestWriter from '../../io/writers/TestWriter';
+import TestWriter from '../../mock/TestWriter';
 
 let registerUpdates;
 let register;
