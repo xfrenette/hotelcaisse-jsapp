@@ -29,7 +29,7 @@
     "node-fetch": "^1.6.3"
   },
   "jest": {
-    "testPathDirs": [
+    "roots": [
       "<rootDir>/tests/"
     ],
     "modulePaths": [
