@@ -1,4 +1,4 @@
-import Auth from './Auth';
+import Auth, { ERRORS as AUTH_ERRORS } from './Auth';
 
 /**
  * Error codes when authenticate() rejects
@@ -6,10 +6,9 @@ import Auth from './Auth';
  * @type {Object}
  */
 const ERRORS = {
-	SERVER_ERROR: 0,
-	NETWORK_ERROR: 1,
-	INVALID_RESPONSE: 2,
-	AUTHENTICATION_FAILED: 3,
+	SERVER_ERROR: 10,
+	NETWORK_ERROR: 11,
+	INVALID_RESPONSE: 12,
 };
 
 /**
@@ -114,7 +113,7 @@ class ApiWithToken extends Auth {
 	processResponseData(responseData) {
 		if (responseData.status === 'error') {
 			const errorMessage = `Authentication failed with error ${responseData.error.code} ${responseData.error.message}`;
-			return Promise.reject(createError(ERRORS.AUTHENTICATION_FAILED, errorMessage));
+			return Promise.reject(createError(AUTH_ERRORS.AUTHENTICATION_FAILED, errorMessage));
 		}
 
 		this.token = responseData.data.token;

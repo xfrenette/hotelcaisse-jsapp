@@ -1,7 +1,17 @@
 import { observable } from 'mobx';
 
 /**
- * Class that handles device authentication. It must be extended (abstract).
+ * Error codes when authenticate() rejects
+ *
+ * @type {Object}
+ */
+const ERRORS = {
+	AUTHENTICATION_FAILED: 1,
+};
+
+/**
+ * Class that handles device authentication. It must be extended (abstract). This specific
+ * implementation must refuse any authentication.
  */
 class Auth {
 	/**
@@ -33,4 +43,5 @@ class Auth {
 }
 
 export default Auth;
+export { ERRORS };
 

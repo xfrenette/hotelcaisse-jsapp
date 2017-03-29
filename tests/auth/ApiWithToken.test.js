@@ -1,4 +1,5 @@
 import ApiWithToken, { ERRORS } from 'auth/ApiWithToken';
+import { ERRORS as AUTH_ERRORS } from 'auth/Auth';
 import { Response } from 'node-fetch';
 import FormData from 'form-data';
 
@@ -104,7 +105,7 @@ describe('processResponseData()', () => {
 		const data = { status: 'error', error: { code: 'test-code' } };
 		apiWithToken.processResponseData(data)
 			.catch((error) => {
-				expect(error.code).toBe(ERRORS.AUTHENTICATION_FAILED);
+				expect(error.code).toBe(AUTH_ERRORS.AUTHENTICATION_FAILED);
 				done();
 			});
 	});
