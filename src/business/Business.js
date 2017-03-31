@@ -82,6 +82,24 @@ class Business {
 			business: this,
 		});
 	}
+
+	/**
+	 * Replaces all attributes of this instance with the values in the supplied Business instance.
+	 *
+	 * @param {Business} newBusiness
+	 */
+	update(newBusiness) {
+		[
+			'uuid',
+			'deviceRegister',
+			'products',
+			'productCategories',
+			'transactionModes',
+			'orders',
+		].forEach((attribute) => {
+			this[attribute] = newBusiness[attribute];
+		});
+	}
 }
 
 export default Business;

@@ -178,3 +178,26 @@ describe('deserializing', () => {
 		expect(newBusiness.orders[1].createdAt).toBeInstanceOf(Date);
 	});
 });
+
+describe('update()', () => {
+	test('replaces all attributes', () => {
+		const attributes = {
+			uuid: 'new-uuid',
+			deviceRegister: new Register(),
+			products: [],
+			productCategories: [],
+			transactionModes: [],
+			orders: [],
+		};
+		const newBusiness = new Business();
+		Object.keys(attributes).forEach((attribute) => {
+			newBusiness[attribute] = attributes[attribute];
+		});
+
+		business.update(newBusiness);
+
+		Object.keys(attributes).forEach((attribute) => {
+			expect(business[attribute]).toBe(attributes[attribute]);
+		});
+	});
+});
