@@ -41,9 +41,12 @@ class Business extends Plugin {
 	}
 
 	/**
-	 * Start the sequential reading of the Readers. When all finished, if a Business was found, sets
-	 * the business property of this.application (passed in bootstrap()). Returns a Promise that
-	 * resolves when everything is finished.
+	 * Start the sequential reading of the Readers. When all finished, if a Business was found,
+	 * updates the business property of this.application (passed in bootstrap()). Returns a Promise
+	 * that resolves when everything is finished.
+	 *
+	 * Note : will update the business, instead or replacing it, because the Business instance in
+	 * application is unique and we may have references to it in different places.
 	 *
 	 * @return {Promise}
 	 */
@@ -51,7 +54,11 @@ class Business extends Plugin {
 		return this.startReaders()
 			.then((loadedBusiness) => {
 				if (loadedBusiness !== null) {
-					this.application.business = loadedBusiness;
+					if (this.application.business) {
+						this.application.business.update(loadedBusiness);
+					} else {
+						this.application.business = loadedBusiness;
+					}
 				}
 			});
 	}

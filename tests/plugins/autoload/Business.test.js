@@ -7,12 +7,17 @@ let businessAutoLoad;
 let testReader1;
 let testReader2;
 let application;
-const serializedBusiness = serialize(new Business());
+let business1 = new Business();
+business1.uuid = '1';
+let business2 = new Business();
+business1.uuid = '2';
+const serializedBusiness1 = serialize(business1);
+const serializedBusiness2 = serialize(business2);
 
 beforeEach(() => {
 	testReader1 = new TestReader();
 	testReader2 = new TestReader();
-	application = {};
+	application = { business: business1 };
 	businessAutoLoad = new BusinessAutoLoad([testReader1, testReader2]);
 	businessAutoLoad.bootstrap(application);
 });
@@ -38,40 +43,41 @@ describe('startReaders()', () => {
 	});
 
 	test('if first resolves, resolves with its data', (done) => {
-		testReader1.data = serializedBusiness;
+		testReader1.data = serializedBusiness2;
 		businessAutoLoad.startReaders()
 			.then((res) => {
-				expect(res).toBeInstanceOf(Business);
+				expect(res.uuid).toBe(business2.uuid);
 				done();
 			});
 	});
 
 	test('if first rejects, resolves with the second\'s data', (done) => {
+		testReader1.data = serializedBusiness1;
 		testReader1.succeed = false;
-		testReader2.data = serializedBusiness;
+		testReader2.data = serializedBusiness2;
 		businessAutoLoad.startReaders()
 			.then((res) => {
-				expect(res).toBeInstanceOf(Business);
+				expect(res.uuid).toBe(business2.uuid);
 				done();
 			});
 	});
 
 	test('if first resolves with non-Business, resolves with the second\'s data', (done) => {
-		testReader1.data = 'allo!';
-		testReader2.data = serializedBusiness;
+		testReader1.data = 'not-business';
+		testReader2.data = serializedBusiness2;
 		businessAutoLoad.startReaders()
 			.then((res) => {
-				expect(res).toBeInstanceOf(Business);
+				expect(res.uuid).toBe(business2.uuid);
 				done();
 			});
 	});
 
 	test('if first resolves with null, resolves with the second\'s data', (done) => {
 		testReader1.data = null;
-		testReader2.data = serializedBusiness;
+		testReader2.data = serializedBusiness2;
 		businessAutoLoad.startReaders()
 			.then((res) => {
-				expect(res).toBeInstanceOf(Business);
+				expect(res.uuid).toBe(business2.uuid);
 				done();
 			});
 	});
@@ -79,19 +85,25 @@ describe('startReaders()', () => {
 
 describe('start()', () => {
 	test('updates application business if new', (done) => {
-		const origBusiness = {};
-		application.business = origBusiness;
-		testReader1.data = serializedBusiness;
+		testReader1.data = serializedBusiness2;
 		businessAutoLoad.start()
 			.then(() => {
-				expect(application.business).toBeInstanceOf(Business);
+				expect(application.business.uuid).toBe(business2.uuid);
 				done();
 			});
 	});
 
 	test('does not update application business if null', (done) => {
-		const origBusiness = {};
-		application.business = origBusiness;
+		businessAutoLoad.start()
+			.then(() => {
+				expect(application.business.uuid).toBe(business1.uuid);
+				done();
+			});
+	});
+
+	test('only updates the business, does not replace it', (done) => {
+		const origBusiness = application.business;
+		testReader1.data = serializedBusiness2;
 		businessAutoLoad.start()
 			.then(() => {
 				expect(application.business).toBe(origBusiness);
