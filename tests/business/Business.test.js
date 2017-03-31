@@ -77,8 +77,13 @@ describe('serializing', () => {
 	let data;
 
 	beforeEach(() => {
+		business.uuid = 'test-uuid';
 		business.deviceRegister.employee = 'test-employee';
 		data = serialize(business);
+	});
+
+	test.only('serializes uuid', () => {
+		expect(data.uuid).toBe(business.uuid);
 	});
 
 	test('serializes deviceRegister', () => {

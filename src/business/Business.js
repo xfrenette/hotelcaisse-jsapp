@@ -24,6 +24,14 @@ const channel = postal.channel(CHANNELS.business);
  */
 class Business {
 	/**
+	 * UUID of the Business. The app cannot create new Business, so the UUID will either be null (not
+	 * yet associated with the server) or a UUID returned by the server.
+	 *
+	 * @type {String}
+	 */
+	@serializable
+	uuid = null;
+	/**
 	 * Register currently assigned to this device.
 	 *
 	 * @type {Register}
