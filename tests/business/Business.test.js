@@ -1,4 +1,5 @@
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from 'const/message-bus';
 import Business from 'business/Business';
@@ -200,4 +201,8 @@ describe('update()', () => {
 			expect(business[attribute]).toBe(attributes[attribute]);
 		});
 	});
+});
+
+test('deviceRegister is observable', () => {
+	expect(isObservable(business, 'deviceRegister')).toBe(true);
 });

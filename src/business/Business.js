@@ -1,4 +1,5 @@
 import { serializable, object, list } from 'serializr';
+import { observable } from 'mobx';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import Register from './Register';
@@ -36,7 +37,8 @@ class Business {
 	 *
 	 * @type {Register}
 	 */
-	@serializable(object(Register));
+	@serializable(object(Register))
+	@observable
 	deviceRegister = null;
 	/**
 	 * List of all *currently* active Product of the business.
