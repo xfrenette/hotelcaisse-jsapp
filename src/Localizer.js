@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import Globalize from 'globalize';
+import get from 'lodash.get';
 import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
 import numberingSystems from 'cldr-data/supplemental/numberingSystems.json';
 import frCAnumbers from 'cldr-data/main/fr-CA/numbers.json';
@@ -29,6 +30,12 @@ class Localizer {
 	 * @type {String}
 	 */
 	currency = null;
+	/**
+	 * Strings in different locales.
+	 *
+	 * @type {Object}
+	 */
+	strings = {};
 	/**
 	 * Globalize instance setup with the locale
 	 *
@@ -63,6 +70,16 @@ class Localizer {
 	 */
 	setCurrency(currency) {
 		this.currency = currency;
+	}
+
+	/**
+	 * Sets the strings object for the specified locale.
+	 *
+	 * @param {String} locale
+	 * @param {Object} strings
+	 */
+	setStrings(locale, strings) {
+		this.strings[locale] = strings;
 	}
 
 	/**
@@ -155,6 +172,25 @@ class Localizer {
 	 */
 	getDecimalSeparator() {
 		return Globalize._numberSymbol('decimal', this.globalize.cldr);
+	}
+
+	/**
+	 * Returns the string specified by the path in the current locale. If the string is not found,
+	 * returns the path.
+	 *
+	 * @param {String} path
+	 * @return {String}
+	 */
+	t(path) {
+		if (!this.locale) {
+			return path;
+		}
+
+		if (!this.strings[this.locale]) {
+			return path;
+		}
+
+		return get(this.strings[this.locale], path, path);
 	}
 }
 
