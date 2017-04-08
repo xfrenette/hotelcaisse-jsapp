@@ -4,15 +4,23 @@ import get from 'lodash.get';
 import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
 import numberingSystems from 'cldr-data/supplemental/numberingSystems.json';
 import frCAnumbers from 'cldr-data/main/fr-CA/numbers.json';
+import enNumbers from 'cldr-data/main/en/numbers.json';
 import frCAcurrencies from 'cldr-data/main/fr-CA/currencies.json';
+import enCurrencies from 'cldr-data/main/en/currencies.json';
 import currencyData from 'cldr-data/supplemental/currencyData.json';
+import plurals from 'cldr-data/supplemental/plurals.json';
+import ordinals from 'cldr-data/supplemental/ordinals.json';
 
 const jsonFiles = [
 	likelySubtags,
 	numberingSystems,
 	frCAnumbers,
+	enNumbers,
 	frCAcurrencies,
+	enCurrencies,
 	currencyData,
+	plurals,
+	ordinals,
 ];
 
 Globalize.load(...jsonFiles);
@@ -172,6 +180,41 @@ class Localizer {
 	 */
 	getDecimalSeparator() {
 		return Globalize._numberSymbol('decimal', this.globalize.cldr);
+	}
+
+	/**
+	 * Returns the currency symbol.
+	 *
+	 * @return {String}
+	 */
+	getCurrencySymbol() {
+		if (!this.currency) {
+			return null;
+		}
+
+		const symbol = this.globalize.cldr.main([
+			'numbers/currencies',
+			this.currency,
+			'symbol',
+		]);
+
+		return symbol;
+	}
+
+	/**
+	 * Returns 1 or -1 if the currency symbol is before or after the number.
+	 *
+	 * @return {Number}
+	 */
+	getCurrencySymbolPosition() {
+		if (!this.currency) {
+			return -1;
+		}
+
+		const formattedCurrency = this.formatCurrency(1);
+		const symbolPos = formattedCurrency.indexOf(this.getCurrencySymbol());
+
+		return symbolPos === formattedCurrency.length - 1 ? 1 : -1;
 	}
 
 	/**

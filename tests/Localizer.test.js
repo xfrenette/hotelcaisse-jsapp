@@ -120,7 +120,7 @@ describe('t()', () => {
 		const enStrings = {
 			group: {
 				string: 'test-en-string',
-			}
+			},
 		};
 		localizer.setStrings('en-CA', enStrings);
 		// Before we change the locale
@@ -138,3 +138,29 @@ describe('t()', () => {
 		expect(localizer.t('group.string')).toBe('group.string');
 	});
 });
+
+describe('getCurrencySymbol', () => {
+	test('returns the symbol', () => {
+		expect(localizer.getCurrencySymbol()).toBe('$');
+	});
+
+	test('returns null if no currency', () => {
+		localizer.setCurrency(null);
+		expect(localizer.getCurrencySymbol()).toBeNull();
+	});
+});
+
+describe('getCurrencySymbolPosition()', () => {
+	test('returns correct position', () => {
+		expect(localizer.getCurrencySymbolPosition()).toBe(1);
+		localizer.setLocale('en');
+		localizer.setCurrency('USD');
+		expect(localizer.getCurrencySymbolPosition()).toBe(-1);
+	});
+
+	test('returns -1 if no currency', () => {
+		localizer.setCurrency(null);
+		expect(localizer.getCurrencySymbolPosition()).toBe(-1);
+	});
+});
+
