@@ -91,6 +91,7 @@ class Register {
 	 * @type {Array<CashMovement>}
 	 */
 	@serializable(list(object(CashMovement)))
+	@observable
 	cashMovements = [];
 
 	/**
