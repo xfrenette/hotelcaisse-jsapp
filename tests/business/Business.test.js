@@ -83,7 +83,7 @@ describe('serializing', () => {
 		data = serialize(business);
 	});
 
-	test.only('serializes uuid', () => {
+	test('serializes uuid', () => {
 		expect(data.uuid).toBe(business.uuid);
 	});
 

@@ -45,7 +45,7 @@ describe('addTransaction()', () => {
 	});
 });
 
-describe.only('cashMovements', () => {
+describe('cashMovements', () => {
 	test('is observable', () => {
 		expect(isObservable(register, 'cashMovements')).toBe(true);
 	});
