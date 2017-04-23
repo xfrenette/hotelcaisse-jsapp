@@ -65,7 +65,8 @@ describe('addCashMovement()', () => {
 
 	test('saves in internal array', () => {
 		register.addCashMovement(cashMovement);
-		expect(register.cashMovements).toEqual([cashMovement]);
+		expect(register.cashMovements.length).toBe(1);
+		expect(register.cashMovements[0]).toBe(cashMovement);
 	});
 
 	test('publishes message', (done) => {
@@ -94,14 +95,17 @@ describe('removeCashMovement()', () => {
 
 	test('removes cashMovement from array', () => {
 		register.removeCashMovement(cashMovement1);
-		expect(register.cashMovements).toEqual([cashMovement2]);
+		expect(register.cashMovements.length).toBe(1);
+		expect(register.cashMovements[0]).toBe(cashMovement2);
 		register.removeCashMovement(cashMovement2);
-		expect(register.cashMovements).toEqual([]);
+		expect(register.cashMovements.length).toBe(0);
 	});
 
 	test('works with non-existing cashMovement', () => {
 		register.removeCashMovement(new CashMovement());
-		expect(register.cashMovements).toEqual([cashMovement1, cashMovement2]);
+		expect(register.cashMovements.length).toBe(2);
+		expect(register.cashMovements[0]).toBe(cashMovement1);
+		expect(register.cashMovements[1]).toBe(cashMovement2);
 	});
 
 	test('removes register from cashMovement', () => {
