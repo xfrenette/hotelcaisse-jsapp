@@ -9,6 +9,13 @@ import { decimal } from '../vendor/serializr/propSchemas';
  */
 class CashMovement {
 	/**
+	 * Unique identifier of this CashMovement
+	 *
+	 * @type {String}
+	 */
+	@serializable
+	uuid = null;
+	/**
 	 * Amount of the cash movement
 	 *
 	 * @type {Decimal}

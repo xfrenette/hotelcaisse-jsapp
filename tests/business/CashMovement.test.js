@@ -27,11 +27,13 @@ describe('serializing', () => {
 	beforeEach(() => {
 		cashMovement = new CashMovement(new Decimal(32.46));
 		cashMovement.note = 'test-note';
+		cashMovement.uuid = 'test-uuid';
 		data = serialize(cashMovement);
 	});
 
 	test('serializes primitives', () => {
 		expect(data.note).toBe(cashMovement.note);
+		expect(data.uuid).toBe(cashMovement.uuid);
 		expect(data.createdAt).toEqual(expect.any(Number));
 	});
 
