@@ -1,67 +1,50 @@
 /**
- * Default loggerthat other loggers should extend. This instance will not do anything but has some
- * methods implemented that implementations may use.
+ * Class to save log messages. It uses a system of namespace, so before being able to log, you must
+ * call the getNamespace(namespace) method that will return an object containing the loggin methods.
+ *
+ * The returned object will have the following methods :
+ * - error(message, data)
+ * - warn(message, data)
+ * - info(message, data)
+ * - debug(message, data)
+ * - trace(message, data)
+ *
+ * This specific implementation does nothing when a message is logged.
  */
+const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
+
 class Logger {
+	/**
+	 * Method that does the actual logging. It should not be called directly but through the methods
+	 * in the object returned by getNamespace(namespace).
+	 *
+	 * @param {String} type
+	 * @param {String} namespace
+	 * @param {String} message
+	 * @param {mixed} data
+	 */
 	// eslint-disable-next-line no-unused-vars
-	log(type, msg, data) {
-
-	}
-
-	error(msg, data) {
-		this.log('error', msg, data);
-	}
-
-	warn(msg, data) {
-		this.log('warn', msg, data);
-	}
-
-	info(msg, data) {
-		this.log('info', msg, data);
-	}
-
-	verbose(msg, data) {
-		this.log('verbose', msg, data);
-	}
-
-	debug(msg, data) {
-		this.log('debug', msg, data);
-	}
-
-	silly(msg, data) {
-		this.log('silly', msg, data);
+	log(type, namespace, message, data) {
+		// This implementation does nothing, see children classes
 	}
 
 	/**
-	 * Returns an object with all the same logging methods as a Logger, but every
-	 * logged message will be prepended with the namespace.
+	 * Returns the object containing all the logging methods bound to the specified namespace.
 	 *
 	 * @param {String} namespace
 	 * @return {Object}
 	 */
-	withNamespace(namespace) {
-		const methods = ['error', 'warn', 'info', 'verbose', 'debug', 'silly'];
-		const proxy = {};
+	getNamespace(namespace) {
+		const namespacedLog = {};
 		const logger = this;
 
-		methods.forEach((method) => {
-			proxy[method] = (rawMsg, data) => {
-				const msg = logger.formatWithNamespace.call(logger, namespace, rawMsg);
-				return logger[method].call(logger, msg, data);
-			};
+		logMethods.forEach((method) => {
+			namespacedLog[method] = (message, data) => (
+				logger.log.call(logger, method, namespace, message, data)
+			);
 		});
 
-		// Special case for "log"
-		proxy.log = (type, rawMsg, data) => {
-			const msg = logger.formatWithNamespace.call(logger, namespace, rawMsg);
-			return logger.log.call(logger, type, msg, data);
-		};
-
-		return proxy;
-	}
-
-	formatWithNamespace(namespace, msg) {
-		return `${namespace} : ${msg}`;
+		return namespacedLog;
 	}
 }
 
