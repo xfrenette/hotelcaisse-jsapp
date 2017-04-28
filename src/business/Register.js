@@ -4,6 +4,7 @@ import { observable } from 'mobx';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal } from '../vendor/serializr/propSchemas';
+import validate from '../Validator';
 
 /**
  * All messages by this class are published on the same channel.
@@ -93,14 +94,55 @@ class Register {
 	@serializable(list(object(CashMovement)))
 	@observable
 	cashMovements = [];
+	/**
+	 * Constraints on the values when opening
+	 *
+	 * @type {Object}
+	 */
+	openConstraints = {
+		employee: {
+			presence: true,
+			typeOf: 'string',
+		},
+		cashAmount: {
+			presence: true,
+			decimal: { gte: 0 },
+		},
+	};
+	/**
+	 * Constraints on the values when closing
+	 *
+	 * @type {Object}
+	 */
+	closeConstraints = {
+		cashAmount: {
+			presence: true,
+			decimal: { gte: 0 },
+		},
+		POSTRef: {
+			presence: true,
+			typeOf: 'string',
+		},
+		POSTAmount: {
+			presence: true,
+			decimal: { gte: 0 },
+		},
+	};
 
 	/**
-	 * Opens the Register and saves opening data.
+	 * Opens the Register and saves opening data. The data will be validated before opening, but it
+	 * will fail silently if validation fails, so do validation before with validateOpen().
 	 *
 	 * @param {String} employee Employee's name
 	 * @param {Decimal} cashAmount
 	 */
 	open(employee, cashAmount) {
+		const validationResult = this.validateOpen(employee, cashAmount);
+
+		if (typeof validationResult !== 'undefined') {
+			return;
+		}
+
 		this.openingCash = cashAmount;
 		this.openedAt = new Date();
 		this.employee = employee;
@@ -112,13 +154,21 @@ class Register {
 	}
 
 	/**
-	 * Sets the Register as closed and saves closing data.
+	 * Sets the Register as closed and saves closing data. The data will be validated before
+	 * closing, but it will fail silently if validation fails, so do validation before with
+	 * validateClose().
 	 *
 	 * @param {Decimal} cashAmount
 	 * @param {String} POSTRef POST batch reference number
 	 * @param {Decimal} POSTAmount POST batch total
 	 */
 	close(cashAmount, POSTRef, POSTAmount) {
+		const validationResult = this.validateClose(cashAmount, POSTRef, POSTAmount);
+
+		if (typeof validationResult !== 'undefined') {
+			return;
+		}
+
 		this.POSTRef = POSTRef;
 		this.POSTAmount = POSTAmount;
 		this.closingCash = cashAmount;
@@ -167,6 +217,33 @@ class Register {
 			cashMovement,
 			register: this,
 		});
+	}
+
+	/**
+	 * Validates values to open. If valid, returns undefined, else returns an object with keys of
+	 * invalid values.
+	 *
+	 * @param {String} employee
+	 * @param {Decimal} cashAmount
+	 * @return {mixed}
+	 */
+	validateOpen(employee, cashAmount) {
+		const values = { employee, cashAmount };
+		return validate(values, this.openConstraints);
+	}
+
+	/**
+	 * Validates values to close. If valid, returns undefined, else returns an object with keys of
+	 * invalid values.
+	 *
+	 * @param {Decimal} cashAmount
+	 * @param {String} employee
+	 * @param {Decimal} POSTAmount
+	 * @return {mixed}
+	 */
+	validateClose(cashAmount, POSTRef, POSTAmount) {
+		const values = { cashAmount, POSTRef, POSTAmount };
+		return validate(values, this.closeConstraints);
 	}
 }
 

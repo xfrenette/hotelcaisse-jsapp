@@ -159,7 +159,12 @@ describe('open()', () => {
 				done();
 			},
 		);
-		register.open();
+		register.open('test', new Decimal(1));
+	});
+
+	test('does nothing if invalid data', () => {
+		register.open('test', new Decimal(-1));
+		expect(register.state).not.toBe(STATES.OPENED);
 	});
 });
 
@@ -202,7 +207,12 @@ describe('close()', () => {
 				done();
 			},
 		);
-		register.close();
+		register.close(new Decimal(1), 'test', new Decimal(1));
+	});
+
+	test('does nothing if invalid data', () => {
+		register.close(new Decimal(-1), 'test', new Decimal(1));
+		expect(register.state).not.toBe(STATES.CLOSED);
 	});
 });
 
@@ -318,3 +328,58 @@ describe('deserializing', () => {
 		expect(newRegister.cashMovements[0]).toBeInstanceOf(CashMovement);
 	});
 });
+
+describe('validateOpen', () => {
+	test('invalid employee', () => {
+		const invalidValues = [undefined, '', true, ' '];
+		invalidValues.forEach((value) => {
+			const res = register.validateOpen(value, new Decimal(23));
+			expect(res).not.toBeUndefined();
+		});
+	});
+
+	test('invalid cashAmount', () => {
+		const invalidValues = [undefined, 12, new Decimal(-2)];
+		invalidValues.forEach((value) => {
+			const res = register.validateOpen('test', value);
+			expect(res).not.toBeUndefined();
+		});
+	});
+
+	test('valid values', () => {
+		const res = register.validateOpen('test', new Decimal(12));
+		expect(res).toBeUndefined();
+	});
+});
+
+describe('validateClose', () => {
+	test('invalid cashAmount', () => {
+		const invalidValues = [undefined, 12, new Decimal(-2)];
+		invalidValues.forEach((value) => {
+			const res = register.validateClose(value, 'test', new Decimal(0));
+			expect(res).not.toBeUndefined();
+		});
+	});
+
+	test('invalid POSTRef', () => {
+		const invalidValues = [undefined, '', true, ' '];
+		invalidValues.forEach((value) => {
+			const res = register.validateClose(new Decimal(0), value, new Decimal(0));
+			expect(res).not.toBeUndefined();
+		});
+	});
+
+	test('invalid POSTAmount', () => {
+		const invalidValues = [undefined, 12, new Decimal(-2)];
+		invalidValues.forEach((value) => {
+			const res = register.validateClose(new Decimal(0), 'test', value);
+			expect(res).not.toBeUndefined();
+		});
+	});
+
+	test('valid values', () => {
+		const res = register.validateClose(new Decimal(12), 'test', new Decimal(12));
+		expect(res).toBeUndefined();
+	});
+});
+
