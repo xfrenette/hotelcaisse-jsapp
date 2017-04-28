@@ -1,3 +1,4 @@
+- Ça doit pouvoir rouler dans react-native, et ça ne sera pas roulé dans Node !!! Donc les modules qui utilisent des modules "core" de node (comme "fs") ne fonctionneront pas sur l'appareil, même si ça fonctionne quand on roule les tests (depuis Node)
 - Quand on cré certains élément sur l'app dont on aura besoin de récupérer l'id généré par le serveur (ex: nouveau register, nouveau CashMovement, nouveau Order), un id temporaire est créé dans l'élément et quand le serveur retourne le nouvel id, il est remplacé
 On a besoin des ids pour les éléments suivants:
 	- CashMovement: car on peut le deleter
