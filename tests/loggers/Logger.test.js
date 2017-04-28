@@ -1,7 +1,10 @@
-import Logger from 'loggers/Logger';
+import Logger, { mixin as LoggerMixin } from 'loggers/Logger';
 
 let logger;
 const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
+
+class MockClass { }
+class SubLogger extends LoggerMixin(MockClass) { }
 
 beforeEach(() => {
 	logger = new Logger();
@@ -35,5 +38,16 @@ describe('getNamespace()', () => {
 		const res = logger.getNamespace('test');
 		res.debug('test');
 		expect(thisArg).toBe(logger);
+	});
+});
+
+describe('mixin', () => {
+	test('correctly extends MockClass', () => {
+		const subLogger = new SubLogger();
+		expect(subLogger).toBeInstanceOf(MockClass);
+	});
+
+	test('has same properties as Logger', () => {
+		expect(SubLogger.prototype.getNamespace).toBeInstanceOf(Function);
 	});
 });

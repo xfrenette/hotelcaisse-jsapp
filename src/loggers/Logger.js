@@ -10,10 +10,14 @@
  * - trace(message, data)
  *
  * This specific implementation does nothing when a message is logged.
+ *
+ * Note that we first declare a mixin function loggerMixin that can be used to use this class as a
+ * mixin. We then export, as the default, an actual class using this mixin and a mixin property
+ * returning the function.
  */
 const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
 
-class Logger {
+const loggerMixin = superClass => class extends superClass {
 	/**
 	 * Method that does the actual logging. It should not be called directly but through the methods
 	 * in the object returned by getNamespace(namespace).
@@ -46,6 +50,13 @@ class Logger {
 
 		return namespacedLog;
 	}
-}
+};
 
-export default Logger;
+// We extend a no-op class here so it still extends Object (for an unknown reason, we cannot extend
+// Object directly, maybe because of Babel ?)
+export default loggerMixin(class {});
+
+/**
+ * A "mixin" class that can be used when a class wants to extend the Logger and AnotherClass.
+ */
+export const mixin = loggerMixin;
