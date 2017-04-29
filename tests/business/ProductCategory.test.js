@@ -7,11 +7,11 @@ let productCategory;
 beforeEach(() => {
 	const product1 = new Product();
 	product1.name = 'Product 1';
-	product1.id = 'p1';
+	product1.uuid = 'p1';
 
 	const product2 = new Product();
 	product2.name = 'Product 2';
-	product2.id = 'p2';
+	product2.uuid = 'p2';
 
 	productCategory = new ProductCategory();
 	productCategory.name = 'test-name';
@@ -30,9 +30,9 @@ describe('serializing', () => {
 		expect(data.name).toBe(productCategory.name);
 	});
 
-	test('serializes products as ids', () => {
+	test('serializes products as uuids', () => {
 		expect(data.products.length).toBe(productCategory.products.length);
-		expect(data.products[1]).toBe(productCategory.products[1].id);
+		expect(data.products[1]).toBe(productCategory.products[1].uuid);
 	});
 });
 

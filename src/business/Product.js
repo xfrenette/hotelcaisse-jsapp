@@ -20,7 +20,7 @@ class Product {
 	 * @type {String|null}
 	 */
 	@serializable(identifier())
-	id = null;
+	uuid = null;
 	/**
 	 * Name of the product. If a variant, name of the variant.
 	 *

@@ -108,7 +108,7 @@ describe('serializing', () => {
 	let data;
 
 	beforeEach(() => {
-		product.id = 'test-id';
+		product.uuid = 'test-id';
 		product.name = 'test-name';
 		product.description = 'test-description';
 		product.price = new Decimal(12.34);
@@ -119,7 +119,7 @@ describe('serializing', () => {
 	});
 
 	test('saves primitives', () => {
-		expect(data.id).toBe(product.id);
+		expect(data.uuid).toBe(product.uuid);
 		expect(data.name).toBe(product.name);
 		expect(data.description).toBe(product.description);
 		expect(data.isCustom).toBe(product.isCustom);
@@ -149,7 +149,7 @@ describe('serializing', () => {
 
 describe('deserializing', () => {
 	const data = {
-		id: 'test-id',
+		uuid: 'test-id',
 		name: 'test-name',
 		description: 'test-description',
 		price: '12.34',
@@ -169,7 +169,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores primitives', () => {
-		expect(product.id).toBe(data.id);
+		expect(product.uuid).toBe(data.uuid);
 		expect(product.name).toBe(data.name);
 		expect(product.description).toBe(data.description);
 		expect(product.isCustom).toBe(data.isCustom);

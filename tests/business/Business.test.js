@@ -119,8 +119,8 @@ describe('deserializing', () => {
 			employee: 'test-employee',
 		},
 		products: [
-			{ id: 'p1', name: 'product-1' },
-			{ id: 'p2' },
+			{ uuid: 'p1', name: 'product-1' },
+			{ uuid: 'p2' },
 		],
 		productCategories: [
 			{
