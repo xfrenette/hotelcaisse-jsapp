@@ -1,4 +1,4 @@
-import { serializable, date, object } from 'serializr';
+import { serializable, date, object, identifier } from 'serializr';
 import Product from './Product';
 
 /**
@@ -12,6 +12,13 @@ import Product from './Product';
  * the Product "frozen" (it keeps a clone of it).
  */
 class Item {
+	/**
+	 * UUID of this Item.
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = null;
 	/**
 	 * The product of the Item.
 	 *

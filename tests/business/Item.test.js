@@ -151,11 +151,13 @@ describe('serializing', () => {
 		product.name = 'test-name';
 		item.product = product;
 		item.quantity = 2;
+		item.uuid = 'test-uuid',
 		data = serialize(item);
 	});
 
 	test('saves primitives', () => {
 		expect(data.quantity).toBe(item.quantity);
+		expect(data.uuid).toBe(item.uuid);
 		expect(data.createdAt).toEqual(expect.any(Number));
 	});
 
@@ -171,6 +173,7 @@ describe('deserializing', () => {
 			name: 'test-name',
 		},
 		quantity: 2,
+		uuid: 'test-uuid',
 		createdAt: (new Date()).getTime(),
 	};
 
@@ -180,6 +183,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(restoredItem.quantity).toBe(data.quantity);
+		expect(restoredItem.uuid).toBe(data.uuid);
 		expect(restoredItem.createdAt).toBeInstanceOf(Date);
 	});
 
