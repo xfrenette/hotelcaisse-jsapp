@@ -64,3 +64,31 @@ describe('deserializing', () => {
 		expect(cashMovement.amount.toString()).toBe(data.amount);
 	});
 });
+
+describe('CashMovement.validate()', () => {
+	test('rejects invalid amount', () => {
+		const invalidValues = [undefined, null, 12, '12'];
+		invalidValues.forEach((value) => {
+			expect(CashMovement.validate({ amount: value })).not.toBeUndefined();
+		});
+	});
+
+	test('rejects invalid note', () => {
+		const invalidValues = [true, new Date()];
+		invalidValues.forEach((value) => {
+			expect(CashMovement.validate({ note: value })).not.toBeUndefined();
+		});
+	});
+
+	test('validates valid data', () => {
+		const values = { amount: new Decimal(12), note: 'Test' };
+		expect(CashMovement.validate(values)).toBeUndefined();
+	});
+
+	test('validates empty note', () => {
+		const validValues = [undefined, null, '', ' '];
+		validValues.forEach((value) => {
+			expect(CashMovement.validate({ note: value })).toBeUndefined();
+		});
+	});
+});
