@@ -65,12 +65,11 @@ class CashMovement {
 	 */
 	register = null;
 
-	constructor(amount) {
+	constructor(uuid = null, amount = null, note = null) {
 		this.createdAt = new Date();
-
-		if (amount) {
-			this.amount = amount;
-		}
+		this.uuid = uuid;
+		this.amount = amount;
+		this.note = note;
 	}
 }
 

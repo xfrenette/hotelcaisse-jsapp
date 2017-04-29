@@ -8,10 +8,22 @@ describe('constructor()', () => {
 		expect(cashMovement.createdAt).toBeInstanceOf(Date);
 	});
 
+	test('sets uuid if present', () => {
+		const uuid = 'test-uuid';
+		const cashMovement = new CashMovement(uuid);
+		expect(cashMovement.uuid).toBe(uuid);
+	});
+
 	test('sets amount if present', () => {
 		const decimal = new Decimal(10);
-		const cashMovement = new CashMovement(decimal);
+		const cashMovement = new CashMovement(null, decimal);
 		expect(cashMovement.amount).toBe(decimal);
+	});
+
+	test('sets note if present', () => {
+		const note = 'test-note';
+		const cashMovement = new CashMovement(null, null, note);
+		expect(cashMovement.note).toBe(note);
 	});
 
 	test('doesn\'t set amount if not present', () => {
@@ -25,9 +37,7 @@ describe('serializing', () => {
 	let cashMovement;
 
 	beforeEach(() => {
-		cashMovement = new CashMovement(new Decimal(32.46));
-		cashMovement.note = 'test-note';
-		cashMovement.uuid = 'test-uuid';
+		cashMovement = new CashMovement('test-uuid', new Decimal(32.46), 'test-note');
 		data = serialize(cashMovement);
 	});
 
@@ -46,6 +56,7 @@ describe('deserializing', () => {
 	let cashMovement;
 	const data = {
 		createdAt: (new Date()).getTime(),
+		uuid: 'test-uuid',
 		note: 'test-note',
 		amount: '1.34',
 	};
@@ -56,6 +67,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(cashMovement.note).toBe(data.note);
+		expect(cashMovement.uuid).toBe(data.uuid);
 		expect(cashMovement.createdAt).toBeInstanceOf(Date);
 	});
 
