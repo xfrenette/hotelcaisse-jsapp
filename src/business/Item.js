@@ -41,8 +41,9 @@ class Item {
 	@serializable(date())
 	createdAt = null;
 
-	constructor() {
+	constructor(uuid = null) {
 		this.createdAt = new Date();
+		this.uuid = uuid;
 	}
 
 	get name() {

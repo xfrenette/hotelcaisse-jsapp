@@ -26,6 +26,12 @@ describe('constructor()', () => {
 	test('sets createdAt time', () => {
 		expect(item.createdAt).toBeInstanceOf(Date);
 	});
+
+	test('sets uuid', () => {
+		const uuid = 'test-uuid';
+		item = new Item(uuid);
+		expect(item.uuid).toBe(uuid);
+	});
 });
 
 describe('unitPrice', () => {
