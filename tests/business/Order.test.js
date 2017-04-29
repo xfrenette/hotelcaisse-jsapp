@@ -50,8 +50,8 @@ beforeEach(() => {
 	item2.product = product2;
 	item2.quantity = quantities[1];
 
-	const transaction1 = new Transaction(new Decimal(12.43));
-	const transaction2 = new Transaction(new Decimal(-5.23));
+	const transaction1 = new Transaction('transaction1', new Decimal(12.43));
+	const transaction2 = new Transaction('transaction2', new Decimal(-5.23));
 
 	const credit1 = new Credit('credit1', new Decimal(1.21));
 	const credit2 = new Credit('credit2', new Decimal(0.24));

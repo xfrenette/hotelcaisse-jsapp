@@ -7,6 +7,7 @@ let transaction;
 
 beforeEach(() => {
 	transaction = new Transaction(
+		'test-uuid',
 		new Decimal(123),
 		new TransactionMode('test')
 	);
@@ -17,15 +18,21 @@ describe('constructor()', () => {
 		expect(transaction.createdAt).toBeInstanceOf(Date);
 	});
 
+	test('sets uuid', () => {
+		const uuid = 'test-uuid';
+		transaction = new Transaction(uuid);
+		expect(transaction.uuid).toBe(uuid);
+	});
+
 	test('sets amount', () => {
 		const decimal = new Decimal(10);
-		transaction = new Transaction(decimal);
+		transaction = new Transaction(null, decimal);
 		expect(transaction.amount).toBe(decimal);
 	});
 
 	test('sets transactionMode', () => {
 		const transactionMode = new TransactionMode(10);
-		transaction = new Transaction(new Decimal(1), transactionMode);
+		transaction = new Transaction(null, null, transactionMode);
 		expect(transaction.transactionMode).toBe(transactionMode);
 	});
 });
@@ -35,6 +42,7 @@ describe('serializing', () => {
 
 	beforeEach(() => {
 		transaction.note = 'test-note';
+		transaction.uuid = 'test-uuid';
 		data = serialize(transaction);
 	});
 
@@ -46,6 +54,7 @@ describe('serializing', () => {
 	test('saves primitives', () => {
 		expect(data).toEqual(expect.objectContaining({
 			note: transaction.note,
+			uuid: transaction.uuid,
 			createdAt: expect.any(Number),
 		}));
 	});
@@ -63,6 +72,7 @@ describe('deserializing', () => {
 			name: 'test-tm',
 		},
 		note: 'test-note',
+		uuid: 'test-uuid',
 		createdAt: (new Date()).getTime(),
 	};
 
@@ -76,6 +86,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(newTransaction.note).toBe(jsonObject.note);
+		expect(newTransaction.uuid).toBe(jsonObject.uuid);
 	});
 
 	test('restores transactionMode', () => {

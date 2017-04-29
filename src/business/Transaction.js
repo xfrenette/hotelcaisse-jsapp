@@ -1,16 +1,21 @@
-import { serializable, date, object } from 'serializr';
+import { serializable, date, object, identifier } from 'serializr';
 import TransactionMode from './TransactionMode';
 import { decimal } from '../vendor/serializr/propSchemas';
 
 /**
- * A Transaction is an exchange of money between the business
- * and the customer. The Transaction is generally added
- * to the active register and to an Order. It can be a payment
- * (positive amount) or a refund (negative amount) from or to a
- * customer. A Transaction is made with a specific
- * TransactionMode (cash, credit card, ...)
+ * A Transaction is an exchange of money between the business and the customer. The Transaction is
+ * generally added to the active register and to an Order. The amount sign (positive or negative)
+ * is as viewed by the business (a payment from a customer is positive, a reimbursment is
+ * negative). A Transaction is made with a specific TransactionMode (cash, credit card, ...)
  */
 class Transaction {
+	/**
+	 * UUID of the transaction
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = null;
 	/**
 	 * Amount of the transaction. Positive is a payment,
 	 * negative is a refund.
@@ -52,12 +57,9 @@ class Transaction {
 	 */
 	register = null;
 
-	/**
-	 * @param {Decimal} amount
-	 * @param {TransactionMode} transactionMode
-	 */
-	constructor(amount, transactionMode) {
+	constructor(uuid = null, amount = null, transactionMode = null) {
 		this.createdAt = new Date();
+		this.uuid = uuid;
 		this.amount = amount;
 		this.transactionMode = transactionMode;
 	}
