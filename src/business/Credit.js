@@ -1,11 +1,18 @@
-import { serializable, date } from 'serializr';
+import { serializable, date, identifier } from 'serializr';
 import { decimal } from '../vendor/serializr/propSchemas';
 
 /**
- * A Credit represents an amount of money a customer has already paid outside
- * of the system. It is generally applied (added) to an Order.
+ * A Credit represents an amount of money a customer has already paid outside of the system. It is
+ * generally applied (added) to an Order.
  */
 class Credit {
+	/**
+	 * UUID of this credit.
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = null;
 	/**
 	 * Amount of the credit.
 	 *

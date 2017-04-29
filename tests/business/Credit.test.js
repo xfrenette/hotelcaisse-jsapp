@@ -26,6 +26,7 @@ describe('serializing', () => {
 
 	beforeEach(() => {
 		credit = new Credit(new Decimal(12.56));
+		credit.uuid = 'test-uuid';
 		credit.note = 'test-note';
 		data = serialize(credit);
 	});
@@ -33,6 +34,7 @@ describe('serializing', () => {
 	test('saves primitives', () => {
 		expect(data).toEqual(expect.objectContaining({
 			note: credit.note,
+			uuid: credit.uuid,
 			createdAt: expect.any(Number),
 		}));
 	});
@@ -45,6 +47,7 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	let credit;
 	const jsonObject = {
+		uuid: 'test-uuid',
 		amount: '-1.23',
 		note: 'test-note',
 		createdAt: (new Date()).getTime(),
@@ -60,6 +63,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(credit.note).toBe(jsonObject.note);
+		expect(credit.uuid).toBe(jsonObject.uuid);
 	});
 
 	test('restores amount', () => {
