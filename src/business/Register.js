@@ -5,6 +5,7 @@ import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
+import utils from '../utils';
 
 /**
  * All messages by this class are published on the same channel.
@@ -138,7 +139,7 @@ class Register {
 	 * @param {Decimal} cashAmount
 	 */
 	open(employee, cashAmount) {
-		const validationResult = this.validateOpen({ employee, cashAmount });
+		const validationResult = Register.validateOpen({ employee, cashAmount });
 
 		if (typeof validationResult !== 'undefined') {
 			return;
@@ -164,7 +165,7 @@ class Register {
 	 * @param {Decimal} POSTAmount POST batch total
 	 */
 	close(cashAmount, POSTRef, POSTAmount) {
-		const validationResult = this.validateClose({ cashAmount, POSTRef, POSTAmount });
+		const validationResult = Register.validateClose({ cashAmount, POSTRef, POSTAmount });
 
 		if (typeof validationResult !== 'undefined') {
 			return;
@@ -219,45 +220,33 @@ class Register {
 			register: this,
 		});
 	}
-
-	/**
-	 * Validates values to open. Receives an object with employee and/or cashAmount keys. If the key
-	 * is present, its value will be validated. If valid, returns undefined, else returns an object
-	 * with keys of invalid values.
-	 *
-	 * @param {object} values (valid keys: employee, cashAmount)
-	 * @return {mixed}
-	 */
-	validateOpen(values) {
-		const constraints = {};
-		Object.keys(values).forEach((key) => {
-			const hasKey = Object.prototype.hasOwnProperty.call(openConstraints, key);
-			if (hasKey) {
-				constraints[key] = openConstraints[key];
-			}
-		});
-		return validate(values, constraints);
-	}
-
-	/**
-	 * Validates values to close. Receives an object with (one or many of) cashAmount, POSTRef,
-	 * POSTAmount keys. If the key is present, its value will be validated. If valid, returns
-	 * undefined, else returns an object with keys of invalid values.
-	 *
-	 * @param {Object} values (valid keys: cashAmount, employee, POSTAmount)
-	 * @return {mixed}
-	 */
-	validateClose(values) {
-		const constraints = {};
-		Object.keys(values).forEach((key) => {
-			const hasKey = Object.prototype.hasOwnProperty.call(closeConstraints, key);
-			if (hasKey) {
-				constraints[key] = closeConstraints[key];
-			}
-		});
-		return validate(values, constraints);
-	}
 }
+
+/**
+ * Validates values to open. Receives an object with employee and/or cashAmount keys. If the key
+ * is present, its value will be validated. If valid, returns undefined, else returns an object
+ * with keys of invalid values.
+ *
+ * @param {object} values (valid keys: employee, cashAmount)
+ * @return {mixed}
+ */
+Register.validateOpen = (values) => {
+	const constraints = utils.getConstraintsFor(openConstraints, values);
+	return validate(values, constraints);
+};
+
+/**
+ * Validates values to close. Receives an object with (one or many of) cashAmount, POSTRef,
+ * POSTAmount keys. If the key is present, its value will be validated. If valid, returns
+ * undefined, else returns an object with keys of invalid values.
+ *
+ * @param {Object} values (valid keys: cashAmount, employee, POSTAmount)
+ * @return {mixed}
+ */
+Register.validateClose = (values) => {
+	const constraints = utils.getConstraintsFor(closeConstraints, values);
+	return validate(values, constraints);
+};
 
 export default Register;
 export const STATES = {
