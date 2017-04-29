@@ -1,4 +1,11 @@
 /**
+ * All log methods
+ *
+ * @type {Array}
+ */
+const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
+
+/**
  * Class to save log messages. It uses a system of namespace, so before being able to log, you must
  * call the getNamespace(namespace) method that will return an object containing the loggin methods.
  *
@@ -15,8 +22,6 @@
  * mixin. We then export, as the default, an actual class using this mixin and a mixin property
  * returning the function.
  */
-const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
-
 const loggerMixin = superClass => class extends superClass {
 	/**
 	 * Method that does the actual logging. It should not be called directly but through the methods
