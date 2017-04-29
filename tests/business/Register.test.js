@@ -333,7 +333,7 @@ describe('validateOpen', () => {
 	test('invalid employee', () => {
 		const invalidValues = [undefined, '', true, ' '];
 		invalidValues.forEach((value) => {
-			const res = register.validateOpen(value, new Decimal(23));
+			const res = register.validateOpen({ employee: value });
 			expect(res).not.toBeUndefined();
 		});
 	});
@@ -341,13 +341,13 @@ describe('validateOpen', () => {
 	test('invalid cashAmount', () => {
 		const invalidValues = [undefined, 12, new Decimal(-2)];
 		invalidValues.forEach((value) => {
-			const res = register.validateOpen('test', value);
+			const res = register.validateOpen({ cashAmount: value });
 			expect(res).not.toBeUndefined();
 		});
 	});
 
 	test('valid values', () => {
-		const res = register.validateOpen('test', new Decimal(12));
+		const res = register.validateOpen({ employee: 'test', cashAmount: new Decimal(12) });
 		expect(res).toBeUndefined();
 	});
 });
@@ -356,7 +356,7 @@ describe('validateClose', () => {
 	test('invalid cashAmount', () => {
 		const invalidValues = [undefined, 12, new Decimal(-2)];
 		invalidValues.forEach((value) => {
-			const res = register.validateClose(value, 'test', new Decimal(0));
+			const res = register.validateClose({ cashAmount: value });
 			expect(res).not.toBeUndefined();
 		});
 	});
@@ -364,7 +364,7 @@ describe('validateClose', () => {
 	test('invalid POSTRef', () => {
 		const invalidValues = [undefined, '', true, ' '];
 		invalidValues.forEach((value) => {
-			const res = register.validateClose(new Decimal(0), value, new Decimal(0));
+			const res = register.validateClose({ POSTRef: value });
 			expect(res).not.toBeUndefined();
 		});
 	});
@@ -372,13 +372,14 @@ describe('validateClose', () => {
 	test('invalid POSTAmount', () => {
 		const invalidValues = [undefined, 12, new Decimal(-2)];
 		invalidValues.forEach((value) => {
-			const res = register.validateClose(new Decimal(0), 'test', value);
+			const res = register.validateClose({ POSTAmount: value });
 			expect(res).not.toBeUndefined();
 		});
 	});
 
 	test('valid values', () => {
-		const res = register.validateClose(new Decimal(12), 'test', new Decimal(12));
+		const values = { cashAmount: new Decimal(12), POSTRef: 'test', POSTAmount: new Decimal(12) };
+		const res = register.validateClose(values);
 		expect(res).toBeUndefined();
 	});
 });

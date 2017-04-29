@@ -14,6 +14,41 @@ import validate from '../Validator';
 const channel = postal.channel(CHANNELS.register);
 
 /**
+ * Constraints on the values when opening
+ *
+ * @type {Object}
+ */
+const openConstraints = {
+	employee: {
+		presence: true,
+		typeOf: 'string',
+	},
+	cashAmount: {
+		presence: true,
+		decimal: { gte: 0 },
+	},
+};
+/**
+ * Constraints on the values when closing
+ *
+ * @type {Object}
+ */
+const closeConstraints = {
+	cashAmount: {
+		presence: true,
+		decimal: { gte: 0 },
+	},
+	POSTRef: {
+		presence: true,
+		typeOf: 'string',
+	},
+	POSTAmount: {
+		presence: true,
+		decimal: { gte: 0 },
+	},
+};
+
+/**
  * The Register records all Transactions and CashMovements of a business day.
  *
  * Notes:
@@ -94,40 +129,6 @@ class Register {
 	@serializable(list(object(CashMovement)))
 	@observable
 	cashMovements = [];
-	/**
-	 * Constraints on the values when opening
-	 *
-	 * @type {Object}
-	 */
-	openConstraints = {
-		employee: {
-			presence: true,
-			typeOf: 'string',
-		},
-		cashAmount: {
-			presence: true,
-			decimal: { gte: 0 },
-		},
-	};
-	/**
-	 * Constraints on the values when closing
-	 *
-	 * @type {Object}
-	 */
-	closeConstraints = {
-		cashAmount: {
-			presence: true,
-			decimal: { gte: 0 },
-		},
-		POSTRef: {
-			presence: true,
-			typeOf: 'string',
-		},
-		POSTAmount: {
-			presence: true,
-			decimal: { gte: 0 },
-		},
-	};
 
 	/**
 	 * Opens the Register and saves opening data. The data will be validated before opening, but it
@@ -137,7 +138,7 @@ class Register {
 	 * @param {Decimal} cashAmount
 	 */
 	open(employee, cashAmount) {
-		const validationResult = this.validateOpen(employee, cashAmount);
+		const validationResult = this.validateOpen({ employee, cashAmount });
 
 		if (typeof validationResult !== 'undefined') {
 			return;
@@ -163,7 +164,7 @@ class Register {
 	 * @param {Decimal} POSTAmount POST batch total
 	 */
 	close(cashAmount, POSTRef, POSTAmount) {
-		const validationResult = this.validateClose(cashAmount, POSTRef, POSTAmount);
+		const validationResult = this.validateClose({ cashAmount, POSTRef, POSTAmount });
 
 		if (typeof validationResult !== 'undefined') {
 			return;
@@ -220,30 +221,41 @@ class Register {
 	}
 
 	/**
-	 * Validates values to open. If valid, returns undefined, else returns an object with keys of
-	 * invalid values.
+	 * Validates values to open. Receives an object with employee and/or cashAmount keys. If the key
+	 * is present, its value will be validated. If valid, returns undefined, else returns an object
+	 * with keys of invalid values.
 	 *
-	 * @param {String} employee
-	 * @param {Decimal} cashAmount
+	 * @param {object} values (valid keys: employee, cashAmount)
 	 * @return {mixed}
 	 */
-	validateOpen(employee, cashAmount) {
-		const values = { employee, cashAmount };
-		return validate(values, this.openConstraints);
+	validateOpen(values) {
+		const constraints = {};
+		Object.keys(values).forEach((key) => {
+			const hasKey = Object.prototype.hasOwnProperty.call(openConstraints, key);
+			if (hasKey) {
+				constraints[key] = openConstraints[key];
+			}
+		});
+		return validate(values, constraints);
 	}
 
 	/**
-	 * Validates values to close. If valid, returns undefined, else returns an object with keys of
-	 * invalid values.
+	 * Validates values to close. Receives an object with (one or many of) cashAmount, POSTRef,
+	 * POSTAmount keys. If the key is present, its value will be validated. If valid, returns
+	 * undefined, else returns an object with keys of invalid values.
 	 *
-	 * @param {Decimal} cashAmount
-	 * @param {String} employee
-	 * @param {Decimal} POSTAmount
+	 * @param {Object} values (valid keys: cashAmount, employee, POSTAmount)
 	 * @return {mixed}
 	 */
-	validateClose(cashAmount, POSTRef, POSTAmount) {
-		const values = { cashAmount, POSTRef, POSTAmount };
-		return validate(values, this.closeConstraints);
+	validateClose(values) {
+		const constraints = {};
+		Object.keys(values).forEach((key) => {
+			const hasKey = Object.prototype.hasOwnProperty.call(closeConstraints, key);
+			if (hasKey) {
+				constraints[key] = closeConstraints[key];
+			}
+		});
+		return validate(values, constraints);
 	}
 }
 
