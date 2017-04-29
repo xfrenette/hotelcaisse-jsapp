@@ -42,21 +42,21 @@ beforeEach(() => {
 	product2.addTax('tax2', taxes.tax2_2);
 	product2.addTax('tax3', taxes.tax3);
 
-	item1 = new Item();
+	item1 = new Item('item1');
 	item1.product = product1;
 	item1.quantity = quantities[0];
 
-	item2 = new Item();
+	item2 = new Item('item2');
 	item2.product = product2;
 	item2.quantity = quantities[1];
 
 	const transaction1 = new Transaction(new Decimal(12.43));
 	const transaction2 = new Transaction(new Decimal(-5.23));
 
-	const credit1 = new Credit(new Decimal(1.21));
-	const credit2 = new Credit(new Decimal(0.24));
+	const credit1 = new Credit('credit1', new Decimal(1.21));
+	const credit2 = new Credit('credit2', new Decimal(0.24));
 
-	order = new Order();
+	order = new Order('test-uuid');
 	order.note = 'test-note';
 	order.items.push(item1);
 	order.items.push(item2);
@@ -78,6 +78,12 @@ afterEach(() => {
 describe('constructor()', () => {
 	test('sets createdAt', () => {
 		expect(order.createdAt).toBeInstanceOf(Date);
+	});
+
+	test('sets uuid', () => {
+		const uuid = 'test-uuid';
+		order = new Order(uuid);
+		expect(order.uuid).toBe(uuid);
 	});
 });
 

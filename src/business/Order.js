@@ -21,12 +21,12 @@ const channel = postal.channel(CHANNELS.order);
  * Credits and a list of Transactions (payments or refunds).
  *
  * We wish the Order to send a message when it is modified. But since the desired new Order may
- * require mult iple changes (ex: 2 new items, 1 new payment mode, 1 new credit, all done one at a
+ * require multiple changes (ex: 2 new items, 1 new payment mode, 1 new credit, all done one at a
  * time), it could clutter the system if a message had to be processed for each modifications. To
  * fix this, the Order comes with a 'modifications transaction' feature: you start recording
- * changes by calling recordChanges(), you modify the Order as you and then you call commit() when
- * finished. This will publish a 'commit' message containing only the changes that were made. This
- * system also allows for a revert() method that can cancel all the modifications
+ * changes by calling recordChanges(), you modify the Order as you want and then you call commit()
+ * when finished. This will publish a 'commit' message containing only the changes that were made.
+ * This system also allows for a revert() method that can cancel all the modifications.
  */
 class Order {
 	/**
@@ -35,7 +35,7 @@ class Order {
 	 * @type {String}
 	 */
 	@serializable(identifier())
-	uuid = 'Order-TODO';
+	uuid = null;
 	/**
 	 * Creation date time.
 	 *
@@ -91,8 +91,9 @@ class Order {
 	 */
 	restorationData = null;
 
-	constructor() {
+	constructor(uuid = null) {
 		this.createdAt = new Date();
+		this.uuid = uuid;
 	}
 
 	/**
