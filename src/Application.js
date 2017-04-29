@@ -1,5 +1,6 @@
 import Config from './Config';
 import Business from './business/Business';
+import Logger from './loggers/Logger';
 
 /**
  * Object representing the application. Once created, we call bootstrap() to bootstrap it and the
@@ -19,6 +20,12 @@ class Application {
 	 * @type {Business}
 	 */
 	business = null;
+	/**
+	 * Logger instance of the application. The default one does nothing.
+	 *
+	 * @type {Logger}
+	 */
+	logger = new Logger();
 
 	/**
 	 * If a config object is supplied, sets the config.
@@ -27,6 +34,7 @@ class Application {
 	 */
 	constructor(config = null) {
 		this.setConfig(config);
+		this.setLogger(this.config.get('logger'));
 	}
 
 	/**
@@ -64,6 +72,17 @@ class Application {
 	setConfig(config) {
 		if (config !== null && typeof config === 'object') {
 			this.config.set(config);
+		}
+	}
+
+	/**
+	 * Sets the logger.
+	 *
+	 * @param {Logger} newLogger
+	 */
+	setLogger(newLogger) {
+		if (newLogger) {
+			this.logger = newLogger;
 		}
 	}
 }

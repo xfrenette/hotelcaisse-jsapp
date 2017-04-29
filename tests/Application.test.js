@@ -13,6 +13,12 @@ describe('constructor()', () => {
 		application = new Application(config);
 		expect(application.config.getAll()).toEqual(config);
 	});
+
+	test('sets logger', () => {
+		const logger = {};
+		const config = { logger };
+		expect(application.logger).toEqual(logger);
+	});
 });
 
 describe('bootstrap()', () => {
