@@ -1,10 +1,17 @@
-import { serializable, reference, list } from 'serializr';
+import { serializable, reference, list, identifier } from 'serializr';
 import Product from './Product';
 
 /**
  * A ProductCategory represents a category of products. It has a name and a list of Products.
  */
 class ProductCategory {
+	/**
+	 * UUID of the category.
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	uuid = null;
 	/**
 	 * Name of the category.
 	 *

@@ -15,6 +15,7 @@ beforeEach(() => {
 
 	productCategory = new ProductCategory();
 	productCategory.name = 'test-name';
+	productCategory.uuid = 'test-uuid';
 	productCategory.products.push(product1);
 	productCategory.products.push(product2);
 });
@@ -28,6 +29,7 @@ describe('serializing', () => {
 
 	test('serializes primitives', () => {
 		expect(data.name).toBe(productCategory.name);
+		expect(data.uuid).toBe(productCategory.uuid);
 	});
 
 	test('serializes products as uuids', () => {
@@ -40,6 +42,7 @@ describe('deserializing', () => {
 	let newProductCategory;
 	const data = {
 		name: 'test-name',
+		uuid: 'test-uuid',
 		products: [],
 	};
 
@@ -49,6 +52,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(newProductCategory.name).toBe(data.name);
+		expect(newProductCategory.uuid).toBe(data.uuid);
 	});
 
 	// NOTE: we cannot test here that the products array is restored, because it must reference
