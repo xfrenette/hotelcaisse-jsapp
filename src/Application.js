@@ -26,6 +26,13 @@ class Application {
 	 * @type {Logger}
 	 */
 	logger = new Logger();
+	/**
+	 * Log namespaced 'app' to be used internally by this instance. DO NOT USE this property in
+	 * other classes !
+	 *
+	 * @type {Logger}
+	 */
+	log = null;
 
 	/**
 	 * If a config object is supplied, sets the config.
@@ -35,16 +42,19 @@ class Application {
 	constructor(config = null) {
 		this.setConfig(config);
 		this.setLogger(this.config.get('logger'));
+		this.log.info('instantiated');
 	}
 
 	/**
 	 * Creates instance of Business and bootstraps all the plugins.
 	 */
 	bootstrap() {
+		this.log.info('bootstrapping start');
 		this.business = new Business();
 		this.config.get('plugins', []).forEach((plugin) => {
 			plugin.bootstrap(this);
 		});
+		this.log.info('bootstrapping end');
 	}
 
 	/**
@@ -54,14 +64,39 @@ class Application {
 	 * @return {Promise}
 	 */
 	start() {
+		this.log.info('starting');
+
 		let promise = Promise.resolve();
 
 		this.config.get('plugins', []).forEach((plugin) => {
 			// The promise is redefined at each pass so plugins' start() are called sequentially.
-			promise = promise.then(() => plugin.start());
+			promise = promise.then(() => this.startPlugin(plugin));
+		});
+
+		promise.then(() => {
+			this.log.info('started');
 		});
 
 		return promise;
+	}
+
+	startPlugin(plugin) {
+		const logStarting = `plugin [${plugin.id}] : starting`;
+		const logStarted = `plugin [${plugin.id}] : started`;
+
+		this.log.info(logStarting);
+
+		const pluginStartPromise = plugin.start();
+
+		if (pluginStartPromise && pluginStartPromise.then) {
+			pluginStartPromise.then(() => {
+				this.log.info(logStarted);
+			});
+		} else {
+			this.log.info(logStarted);
+		}
+
+		return pluginStartPromise;
 	}
 
 	/**
@@ -84,6 +119,7 @@ class Application {
 		if (newLogger) {
 			this.logger = newLogger;
 		}
+		this.log = this.logger.getNamespace('app');
 	}
 }
 
