@@ -1,4 +1,4 @@
-import { serializable, date } from 'serializr';
+import { serializable, date, identifier } from 'serializr';
 import validate from '../Validator';
 import utils from '../utils';
 import { decimal } from '../vendor/serializr/propSchemas';
@@ -33,7 +33,7 @@ class CashMovement {
 	 *
 	 * @type {String}
 	 */
-	@serializable
+	@serializable(identifier())
 	uuid = null;
 	/**
 	 * Amount of the cash movement

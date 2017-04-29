@@ -1,4 +1,4 @@
-import { serializable, object, list } from 'serializr';
+import { serializable, object, list, identifier } from 'serializr';
 import { observable } from 'mobx';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from '../const/message-bus';
@@ -30,7 +30,7 @@ class Business {
 	 *
 	 * @type {String}
 	 */
-	@serializable
+	@serializable(identifier())
 	uuid = null;
 	/**
 	 * Register currently assigned to this device.

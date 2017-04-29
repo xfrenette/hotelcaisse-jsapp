@@ -64,7 +64,7 @@ class Register {
 	 * @type {String}
 	 */
 	@serializable(identifier())
-	uuid = 'TODO';
+	uuid = null;
 	/**
 	 * The Register can be OPENED or CLOSED. It is NEW when created, before being opened or closed.
 	 *
