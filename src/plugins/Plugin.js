@@ -10,15 +10,36 @@ class Plugin {
 	 * @type {Application}
 	 */
 	application = null;
+	/**
+	 * Unique id of this plugin
+	 *
+	 * @type {String}
+	 */
+	id = '--plugin-no-id--';
+	/**
+	 * Namespaced logger
+	 *
+	 * @type {Logger}
+	 */
+	log = null;
 
 	/**
 	 * Bootstrapping where the plugin may initialize data, but should not modify anything until
-	 * start() is called. Receives the Application in parameter.
+	 * start() is called. Receives the Application in parameter. Also sets up a logger namespaced
+	 * with the plugin id.
 	 *
 	 * @param {Application} app
 	 */
 	bootstrap(application) {
 		this.application = application;
+		this.createLogger();
+	}
+
+	/**
+	 * Saves in this.log a namespaced logger created from application.logger.
+	 */
+	createLogger() {
+		this.log = this.application.logger.getNamespace(this.id);
 	}
 
 	/**
