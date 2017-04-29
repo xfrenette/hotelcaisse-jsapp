@@ -9,14 +9,30 @@ describe('constructor()', () => {
 	});
 
 	test('sets amount if present', () => {
+		let credit = new Credit();
+		expect(credit.amount).toBeNull();
+
 		const decimal = new Decimal(10);
-		const credit = new Credit(decimal);
+		credit = new Credit(null, decimal);
 		expect(credit.amount).toBe(decimal);
 	});
 
-	test('doesn\'t set amount if not present', () => {
-		const credit = new Credit();
-		expect(credit.amount).toBeNull();
+	test('sets uuid if present', () => {
+		let credit = new Credit();
+		expect(credit.uuid).toBeNull();
+
+		const uuid = 'test-uuid';
+		credit = new Credit(uuid);
+		expect(credit.uuid).toBe(uuid);
+	});
+
+	test('sets note if present', () => {
+		let credit = new Credit();
+		expect(credit.note).toBeNull();
+
+		const note = 'test-note';
+		credit = new Credit(null, null, note);
+		expect(credit.note).toBe(note);
 	});
 });
 
@@ -25,9 +41,7 @@ describe('serializing', () => {
 	let credit;
 
 	beforeEach(() => {
-		credit = new Credit(new Decimal(12.56));
-		credit.uuid = 'test-uuid';
-		credit.note = 'test-note';
+		credit = new Credit('test-uuid', new Decimal(12.56), 'test-note');
 		data = serialize(credit);
 	});
 
