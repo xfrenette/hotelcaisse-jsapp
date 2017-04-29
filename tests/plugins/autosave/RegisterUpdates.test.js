@@ -1,6 +1,7 @@
-import { serialize, deserialize } from 'serializr';
+import { serialize } from 'serializr';
 import RegisterUpdates from 'plugins/autosave/RegisterUpdates';
 import Register from 'business/Register';
+import Decimal from 'decimal.js';
 import CashMovement from 'business/CashMovement';
 import DataChange from 'DataChange';
 import DATA_CHANGE_TYPES from 'const/data-change-types';
@@ -27,7 +28,7 @@ describe('registerOpened()', () => {
 	test('called when register opens', () => {
 		registerUpdates.registerOpened = jest.fn();
 		registerUpdates.start();
-		register.open();
+		register.open('test', new Decimal(1));
 		expect(registerUpdates.registerOpened).toHaveBeenCalledWith(register);
 	});
 
@@ -55,7 +56,7 @@ describe('registerClosed()', () => {
 	test('called when register closes', () => {
 		registerUpdates.registerClosed = jest.fn();
 		registerUpdates.start();
-		register.close();
+		register.close(new Decimal(1), 'test', new Decimal(1));
 		expect(registerUpdates.registerClosed).toHaveBeenCalledWith(register);
 	});
 
