@@ -17,6 +17,7 @@ const channel = postal.channel(CHANNELS.register);
  */
 class RegisterUpdates extends Plugin {
 	writer = null;
+	id = 'autosave-registerupdates';
 
 	/**
 	 * @param {Writer} writer

@@ -19,6 +19,7 @@ const orderChannel = postal.channel(CHANNELS.order);
  */
 class OrderUpdates extends Plugin {
 	writer = null;
+	id = 'autosave-orderupdates';
 
 	/**
 	 * @param {Writer} writer

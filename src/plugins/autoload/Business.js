@@ -31,6 +31,7 @@ class Business extends Plugin {
 	 * @type {Array}
 	 */
 	readers = [];
+	id = 'autoload-business';
 
 	/**
 	 * @param {Array} List of readers
