@@ -1,6 +1,7 @@
 import { serialize } from 'serializr';
 import BusinessAutoLoad from 'plugins/autoload/Business';
 import Business from 'business/Business';
+import Application from 'Application';
 import TestReader from '../../mock/TestReader';
 
 let businessAutoLoad;
@@ -17,7 +18,8 @@ const serializedBusiness2 = serialize(business2);
 beforeEach(() => {
 	testReader1 = new TestReader();
 	testReader2 = new TestReader();
-	application = { business: business1 };
+	application = new Application();
+	application.business = business1;
 	businessAutoLoad = new BusinessAutoLoad([testReader1, testReader2]);
 	businessAutoLoad.bootstrap(application);
 });
