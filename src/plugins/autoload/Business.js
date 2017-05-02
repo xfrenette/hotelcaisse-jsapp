@@ -3,22 +3,6 @@ import BusinessModel from '../../business/Business';
 import Plugin from '../Plugin';
 
 /**
- * Function that tries to deserialize an object in a Business instance, then returns it. If it
- * cannot deserialize it, returns null. Note that any object can be "deserialized" as a Business,
- * it would be an empty Business instance, so be careful.
- *
- * @param {Object} data
- * @return {Business|null}
- */
-function deserializeBusiness(data) {
-	try {
-		return deserialize(BusinessModel, data);
-	} catch(e) {
-		return null;
-	}
-}
-
-/**
  * Plugin that receives a list of Readers that may contain a serialized Business instance. When the
  * plugin starts, tries, in serie, the readers. At the first one that returns a serialized Business
  * instance, the plugin stops (doesn't call the following readers) and sets the business attribute
@@ -102,15 +86,32 @@ class Business extends Plugin {
 			promise = promise.then((prevData) => {
 				if (prevData !== null) {
 					return prevData;
-				} else {
-					return reader.read()
-						.then(data => deserializeBusiness(data))
-						.catch(() => null);
 				}
+
+				return reader.read()
+					.then(data => this.deserializeBusiness(data))
+					.catch(() => null);
 			});
 		});
 
 		return promise;
+	}
+
+	/**
+	 * Tries to deserialize an object in a Business instance, then returns it. If it cannot
+	 * deserialize it, returns null. Note that many object can be "deserialized" as a Business, it
+	 * would be an empty Business instance, so be careful.
+	 *
+	 * @param {Object} data
+	 * @return {Business|null}
+	 */
+	deserializeBusiness(data) {
+		try {
+			return deserialize(BusinessModel, data);
+		} catch(e) {
+			this.log.warn(`Could not deserialize Business: ${e.toString()}`);
+			return null;
+		}
 	}
 }
 
