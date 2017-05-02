@@ -48,13 +48,13 @@ class Business {
 	@serializable(list(object(Product)))
 	products = [];
 	/**
-	 * List of all *currently* active product categories. All the Product referenced by the
-	 * ProductCategory are also present in the products array above.
+	 * Root ProductCategory containing all the products and other sub-categories. All products in
+	 * this or sub category are guaranteed to be in the products array above.
 	 *
-	 * @type {Array<ProductCategory>}
+	 * @type {ProductCategory}
 	 */
-	@serializable(list(object(ProductCategory)))
-	productCategories = [];
+	@serializable(object(ProductCategory))
+	rootProductCategory = null;
 	/**
 	 * List of *currently* accepted transaction modes.
 	 *
@@ -95,7 +95,7 @@ class Business {
 			'uuid',
 			'deviceRegister',
 			'products',
-			'productCategories',
+			'rootProductCategory',
 			'transactionModes',
 			'orders',
 		].forEach((attribute) => {
