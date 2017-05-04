@@ -1,3 +1,4 @@
+import { observable, computed } from 'mobx';
 import { serializable, date, object, identifier } from 'serializr';
 import Product from './Product';
 
@@ -31,6 +32,7 @@ class Item {
 	 *
 	 * @type {Number}
 	 */
+	@observable
 	@serializable
 	quantity = 1;
 	/**
@@ -89,6 +91,7 @@ class Item {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get subtotal() {
 		return this.unitPrice.mul(this.quantity);
 	}
@@ -98,6 +101,7 @@ class Item {
 	 *
 	 * @return {array}
 	 */
+	@computed
 	get taxesTotals() {
 		return this.unitTaxes.map(
 			({ name, amount }) => ({ name, amount: amount.mul(this.quantity) })
@@ -110,6 +114,7 @@ class Item {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get total() {
 		return this.unitFullPrice.mul(this.quantity);
 	}

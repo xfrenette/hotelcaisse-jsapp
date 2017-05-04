@@ -1,6 +1,7 @@
 import Item from 'business/Item';
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
+import { isObservable } from 'mobx';
 import { serialize, deserialize } from 'serializr';
 
 let item;
@@ -31,6 +32,12 @@ describe('constructor()', () => {
 		const uuid = 'test-uuid';
 		item = new Item(uuid);
 		expect(item.uuid).toBe(uuid);
+	});
+});
+
+describe('quantity', () => {
+	test('is observable', () => {
+		expect(isObservable(item, 'quantity')).toBe(true);
 	});
 });
 
@@ -71,6 +78,10 @@ describe('subtotal', () => {
 			expect(item.subtotal.eq(expected)).toBeTruthy();
 		});
 	});
+
+	test('is observable', () => {
+		expect(isObservable(item, 'subtotal')).toBe(true);
+	});
 });
 
 describe('unitTaxes', () => {
@@ -96,6 +107,10 @@ describe('taxesTotals', () => {
 			);
 			expect(item.taxesTotals).toEqual(expected);
 		});
+	});
+
+	test('is observable', () => {
+		expect(isObservable(item, 'taxesTotals')).toBe(true);
 	});
 });
 
@@ -125,6 +140,10 @@ describe('total', () => {
 			const expected = item.unitFullPrice.mul(quantity);
 			expect(item.total.eq(expected)).toBeTruthy();
 		});
+	});
+
+	test('is observable', () => {
+		expect(isObservable(item, 'taxesTotals')).toBe(true);
 	});
 });
 
