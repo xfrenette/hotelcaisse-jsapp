@@ -8,6 +8,7 @@ import Credit from 'business/Credit';
 import Customer from 'business/Customer';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 import postal from 'postal';
 
 let order;
@@ -87,6 +88,24 @@ describe('constructor()', () => {
 	});
 });
 
+describe('items', () => {
+	test('is observable', () => {
+		expect(isObservable(order, 'items')).toBe(true);
+	});
+});
+
+describe('credits', () => {
+	test('is observable', () => {
+		expect(isObservable(order, 'credits')).toBe(true);
+	});
+});
+
+describe('transactions', () => {
+	test('is observable', () => {
+		expect(isObservable(order, 'transactions')).toBe(true);
+	});
+});
+
 describe('itemsSubtotal', () => {
 	test('returns Decimal', () => {
 		expect(order.itemsSubtotal).toBeInstanceOf(Decimal);
@@ -99,6 +118,10 @@ describe('itemsSubtotal', () => {
 		);
 		expect(order.itemsSubtotal.eq(sum)).toBeTruthy();
 	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'itemsSubtotal')).toBe(true);
+	});
 });
 
 describe('taxesTotals', () => {
@@ -108,6 +131,10 @@ describe('taxesTotals', () => {
 
 	test('returns correct array of taxes', () => {
 		expect(order.taxesTotals).toEqual(taxesTotals);
+	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'taxesTotals')).toBe(true);
 	});
 });
 
@@ -122,6 +149,10 @@ describe('itemsTotal', () => {
 			new Decimal(0)
 		);
 		expect(order.itemsTotal).toEqual(expected);
+	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'itemsTotal')).toBe(true);
 	});
 });
 
@@ -138,6 +169,10 @@ describe('transactionsTotal', () => {
 
 		expect(order.transactionsTotal).toEqual(sum);
 	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'transactionsTotal')).toBe(true);
+	});
 });
 
 describe('creditsTotal', () => {
@@ -153,6 +188,10 @@ describe('creditsTotal', () => {
 
 		expect(order.creditsTotal).toEqual(sum);
 	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'creditsTotal')).toBe(true);
+	});
 });
 
 describe('total', () => {
@@ -165,6 +204,10 @@ describe('total', () => {
 
 		expect(order.total).toEqual(total);
 	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'total')).toBe(true);
+	});
 });
 
 describe('balance', () => {
@@ -176,15 +219,19 @@ describe('balance', () => {
 		const balance = order.total.sub(order.transactionsTotal);
 		expect(order.balance).toEqual(balance);
 	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'balance')).toBe(true);
+	});
 });
 
 describe('addItem()', () => {
 	test('adds to items array', () => {
 		order = new Order();
 		order.addItem(item1);
-		expect(order.items).toEqual([item1]);
+		expect(order.items.slice()).toEqual([item1]);
 		order.addItem(item2);
-		expect(order.items).toEqual([item1, item2]);
+		expect(order.items.slice()).toEqual([item1, item2]);
 	});
 
 	test('publishes message', (done) => {
@@ -208,9 +255,9 @@ describe('addCredit()', () => {
 	test('adds to credits array', () => {
 		order = new Order();
 		order.addCredit(credit1);
-		expect(order.credits).toEqual([credit1]);
+		expect(order.credits.slice()).toEqual([credit1]);
 		order.addCredit(credit2);
-		expect(order.credits).toEqual([credit1, credit2]);
+		expect(order.credits.slice()).toEqual([credit1, credit2]);
 	});
 
 	test('publishes message', (done) => {
@@ -234,9 +281,9 @@ describe('addTransaction()', () => {
 	test('adds to transactions array', () => {
 		order = new Order();
 		order.addTransaction(transaction1);
-		expect(order.transactions).toEqual([transaction1]);
+		expect(order.transactions.slice()).toEqual([transaction1]);
 		order.addTransaction(transaction2);
-		expect(order.transactions).toEqual([transaction1, transaction2]);
+		expect(order.transactions.slice()).toEqual([transaction1, transaction2]);
 	});
 
 	test('publishes message', (done) => {
@@ -258,7 +305,7 @@ describe('restoreFrom()', () => {
 	newCustomer.name = 'new-customer-name';
 	const restorationData = {
 		note: 'test-note',
-		items: ['a', 'b'],
+		items: [{ uuid: 'item1' }, { uuid: 'item2' }],
 		credits: ['c', 'd'],
 		transactions: ['e', 'f'],
 		customer: newCustomer,
@@ -279,17 +326,17 @@ describe('restoreFrom()', () => {
 
 	test('restores items', () => {
 		order.restoreFrom(restorationData);
-		expect(order.items).toBe(restorationData.items);
+		expect(order.items.slice()).toEqual(restorationData.items);
 	});
 
 	test('restores credits', () => {
 		order.restoreFrom(restorationData);
-		expect(order.credits).toBe(restorationData.credits);
+		expect(order.credits.slice()).toEqual(restorationData.credits);
 	});
 
 	test('restores transactions', () => {
 		order.restoreFrom(restorationData);
-		expect(order.transactions).toBe(restorationData.transactions);
+		expect(order.transactions.slice()).toEqual(restorationData.transactions);
 	});
 
 	test('restores customer', () => {
@@ -456,7 +503,7 @@ describe('createRestorationData()', () => {
 	test('saves items', () => {
 		const res = order.createRestorationData();
 		expect(res.items).not.toBe(order.items);
-		expect(res.items).toEqual(order.items);
+		expect(res.items).toEqual(order.items.slice());
 		order.addItem(new Item());
 		expect(res.items.length).toBe(order.items.length - 1);
 	});
@@ -464,7 +511,7 @@ describe('createRestorationData()', () => {
 	test('saves credits', () => {
 		const res = order.createRestorationData();
 		expect(res.credits).not.toBe(order.credits);
-		expect(res.credits).toEqual(order.credits);
+		expect(res.credits).toEqual(order.credits.slice());
 		order.addCredit(new Credit());
 		expect(res.credits.length).toBe(order.credits.length - 1);
 	});
@@ -472,7 +519,7 @@ describe('createRestorationData()', () => {
 	test('saves transactions', () => {
 		const res = order.createRestorationData();
 		expect(res.transactions).not.toBe(order.transactions);
-		expect(res.transactions).toEqual(order.transactions);
+		expect(res.transactions).toEqual(order.transactions.slice());
 		order.addTransaction(new Transaction());
 		expect(res.transactions.length).toBe(order.transactions.length - 1);
 	});

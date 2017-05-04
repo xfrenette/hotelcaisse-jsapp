@@ -1,4 +1,5 @@
 import { serializable, list, date, object, identifier } from 'serializr';
+import { observable, computed, isObservableArray } from 'mobx';
 import postal from 'postal';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
@@ -48,6 +49,7 @@ class Order {
 	 *
 	 * @type {Array<Item>}
 	 */
+	@observable
 	@serializable(list(object(Item)))
 	items = [];
 	/**
@@ -55,6 +57,7 @@ class Order {
 	 *
 	 * @type {Array<Credit>}
 	 */
+	@observable
 	@serializable(list(object(Credit)))
 	credits = [];
 	/**
@@ -62,6 +65,7 @@ class Order {
 	 *
 	 * @type {Array<Transaction>}
 	 */
+	@observable
 	@serializable(list(object(Transaction)))
 	transactions = [];
 	/**
@@ -101,6 +105,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get itemsSubtotal() {
 		return this.items.reduce(
 			(sum, item) => sum.add(item.subtotal),
@@ -116,6 +121,7 @@ class Order {
 	 *
 	 * @return {Array}
 	 */
+	@computed
 	get taxesTotals() {
 		// We construct a temporary object that is the sum of each tax. The object will have this
 		// shape:
@@ -153,6 +159,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get itemsTotal() {
 		return this.items.reduce(
 			(sum, item) => sum.add(item.total),
@@ -165,6 +172,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get transactionsTotal() {
 		return this.transactions.reduce(
 			(prevSum, transaction) => prevSum.add(transaction.amount),
@@ -177,6 +185,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get creditsTotal() {
 		return this.credits.reduce(
 			(prevSum, credit) => prevSum.add(credit.amount),
@@ -191,6 +200,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get total() {
 		return this.itemsTotal.sub(this.creditsTotal);
 	}
@@ -203,6 +213,7 @@ class Order {
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get balance() {
 		return this.total.sub(this.transactionsTotal);
 	}
@@ -306,7 +317,11 @@ class Order {
 		const fields = ['note', 'items', 'credits', 'transactions'];
 		fields.forEach((field) => {
 			if (restorationData[field]) {
-				this[field] = restorationData[field];
+				if (isObservableArray(this[field])) {
+					this[field].replace(restorationData[field]);
+				} else {
+					this[field] = restorationData[field];
+				}
 			}
 		});
 
@@ -323,9 +338,9 @@ class Order {
 	createRestorationData() {
 		return {
 			note: this.note,
-			items: [...this.items],
-			transactions: [...this.transactions],
-			credits: [...this.credits],
+			items: this.items.slice(),
+			transactions: this.transactions.slice(),
+			credits: this.credits.slice(),
 			customer: this.customer.clone(),
 		};
 	}
