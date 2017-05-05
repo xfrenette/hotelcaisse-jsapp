@@ -1,4 +1,4 @@
-import { serializable, identifier, list, object, getDefaultModelSchema } from 'serializr';
+import { serializable, identifier, list, object, getDefaultModelSchema, reference } from 'serializr';
 import Decimal from 'decimal.js';
 import { decimal, productTax } from '../vendor/serializr/propSchemas';
 
@@ -63,8 +63,11 @@ class Product {
 	/**
 	 * If this product is a variant, reference to the parent product. Else, null.
 	 *
+	 * For @serializable, see the constructor since a self-reference causes problems with Babel 6.
+	 *
 	 * @type {Product|null}
 	 */
+	// @serializable(reference(Product)) // see constructor
 	parent = null;
 	/**
 	 * All the variants of this product. Empty array if no variants.
@@ -73,11 +76,13 @@ class Product {
 	 *
 	 * @type {Array<Product>}
 	 */
-	// @seriablizable(list(object(Product))) // see constructor
+	// @serializable(list(object(Product))) // see constructor
 	variants = [];
 
 	constructor() {
+		// Add serializable props that have self references
 		getDefaultModelSchema(Product).props.variants = list(object(Product));
+		getDefaultModelSchema(Product).props.parent = reference(Product);
 	}
 
 	/**

@@ -115,6 +115,7 @@ describe('serializing', () => {
 		product.isCustom = true;
 		product.addTax('tax1', new Decimal(5.25));
 		product.addTax('tax2', new Decimal(8.14));
+		product.parent = { uuid: 'test-parent-uuid' };
 		data = serialize(product);
 	});
 
@@ -145,11 +146,16 @@ describe('serializing', () => {
 		expect(data.variants.length).toBe(1);
 		expect(data.variants[0].name).toBe(variant.name);
 	});
+
+	test('saves parent', () => {
+		expect(data.parent).toBe(product.parent.uuid);
+	});
 });
 
 describe('deserializing', () => {
+	const uuid = 'test-id';
 	const data = {
-		uuid: 'test-id',
+		uuid,
 		name: 'test-name',
 		description: 'test-description',
 		price: '12.34',
@@ -159,8 +165,8 @@ describe('deserializing', () => {
 			{ name: 'tax2', amount: '4.56' },
 		],
 		variants: [
-			{ name: 'variant1' },
-			{ name: 'variant2' },
+			{ uuid: 'variant1', parent: uuid },
+			{ uuid: 'variant2', parent: uuid },
 		],
 	};
 
@@ -190,6 +196,7 @@ describe('deserializing', () => {
 		expect(product.variants.length).toBe(data.variants.length);
 		const variant = product.variants[0];
 		expect(variant).toBeInstanceOf(Product);
-		expect(variant.name).toBe(data.variants[0].name);
+		expect(variant.uudi).toBe(data.variants[0].uudi);
+		expect(variant.parent).toBe(product);
 	});
 });
