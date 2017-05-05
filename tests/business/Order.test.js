@@ -225,26 +225,11 @@ describe('balance', () => {
 	});
 });
 
-describe('addItem()', () => {
-	test('adds to items array', () => {
-		order = new Order();
-		order.addItem(item1);
-		expect(order.items.slice()).toEqual([item1]);
-		order.addItem(item2);
-		expect(order.items.slice()).toEqual([item1, item2]);
-	});
-
-	test('publishes message', (done) => {
-		order = new Order();
-		subscription = channel.subscribe(
-			TOPICS.order.item.added,
-			(data) => {
-				expect(data.item).toBe(item1);
-				expect(data.order).toBe(order);
-				done();
-			},
-		);
-		order.addItem(item1);
+describe('removeItem', () => {
+	test('removes based on uuid', () => {
+		const itemCopy = new Item(item1.uuid);
+		order.removeItem(itemCopy);
+		expect(order.items.slice()).toEqual([item2]);
 	});
 });
 
@@ -417,8 +402,8 @@ describe('getChanges()', () => {
 		test('items', () => {
 			const newItem1 = new Item();
 			const newItem2 = new Item();
-			order.addItem(newItem1);
-			order.addItem(newItem2);
+			order.items.push(newItem1);
+			order.items.push(newItem2);
 			const res = order.getChanges();
 			expect(res.items).toEqual([newItem1, newItem2]);
 		});
@@ -504,7 +489,7 @@ describe('createRestorationData()', () => {
 		const res = order.createRestorationData();
 		expect(res.items).not.toBe(order.items);
 		expect(res.items).toEqual(order.items.slice());
-		order.addItem(new Item());
+		order.items.push(new Item());
 		expect(res.items.length).toBe(order.items.length - 1);
 	});
 

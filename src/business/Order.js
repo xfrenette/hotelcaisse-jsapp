@@ -219,17 +219,13 @@ class Order {
 	}
 
 	/**
-	 * Adds an Item to the array and publishes a message.
+	 * Removes an item using its uuid
 	 *
 	 * @param {Item} item
 	 */
-	addItem(item) {
-		this.items.push(item);
-
-		channel.publish(TOPICS.order.item.added, {
-			item,
-			order: this,
-		});
+	removeItem(item) {
+		const filteredItems = this.items.filter(currItem => currItem.uuid !== item.uuid);
+		this.items.replace(filteredItems);
 	}
 
 	/**
