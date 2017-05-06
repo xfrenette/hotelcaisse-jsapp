@@ -41,6 +41,12 @@ describe('quantity', () => {
 	});
 });
 
+describe('product', () => {
+	test('is observable', () => {
+		expect(isObservable(item, 'product')).toBe(true);
+	});
+});
+
 describe('unitPrice', () => {
 	test('returns right value', () => {
 		item.product = product;

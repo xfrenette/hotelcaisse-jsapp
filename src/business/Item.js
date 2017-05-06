@@ -26,6 +26,7 @@ class Item {
 	 * @type {Product}
 	 */
 	@serializable(object(Product))
+	@observable
 	product = null;
 	/**
 	 * Quantity of the Item. Can be negative (when a refunded Item).
