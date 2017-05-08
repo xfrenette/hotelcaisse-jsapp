@@ -73,6 +73,14 @@ class CashMovement {
 	}
 }
 
+/**
+ * Validates the values for a new CashMovement. Will validate only the attributes passed in values.
+ * Values is an object where the key is the attribute and its value is the attribute's value. On
+ * success, returns undefined, else returns an object with the error(s) for each attribute.
+ *
+ * @param {Object} values
+ * @return {Object|undefined}
+ */
 CashMovement.validate = (values) => {
 	const appliedConstraints = utils.getConstraintsFor(constraints, values);
 	return validate(values, appliedConstraints);
