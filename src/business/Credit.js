@@ -1,5 +1,23 @@
 import { serializable, date, identifier } from 'serializr';
+import validate from '../Validator';
 import { decimal } from '../vendor/serializr/propSchemas';
+import utils from '../utils';
+
+/**
+ * Constraints for validation.
+ *
+ * @type {Object}
+ */
+const constraints = {
+	note: {
+		presence: true,
+		typeOf: 'string',
+	},
+	amount: {
+		presence: true,
+		decimal: { gt: 0 },
+	},
+};
 
 /**
  * A Credit represents an amount of money a customer has already paid outside of the system. It is
@@ -42,5 +60,18 @@ class Credit {
 		this.note = note;
 	}
 }
+
+/**
+ * Validates the values for a new Credit. Will validate only the attributes passed in values. Values
+ * is an object where the key is the attribute and its value is the attribute's value. On success,
+ * returns undefined, else returns an object with the error(s) for each attribute.
+ *
+ * @param {Object} values
+ * @return {Object|undefined}
+ */
+Credit.validate = (values) => {
+	const appliedConstraints = utils.getConstraintsFor(constraints, values);
+	return validate(values, appliedConstraints);
+};
 
 export default Credit;

@@ -84,3 +84,24 @@ describe('deserializing', () => {
 		expect(credit.amount).toBeInstanceOf(Decimal);
 	});
 });
+
+describe('validate()', () => {
+	test('rejects invalid note', () => {
+		const invalidValues = [undefined, null, 12, ''];
+		invalidValues.forEach((value) => {
+			expect(Credit.validate({ note: value })).not.toBeUndefined();
+		});
+	});
+
+	test('rejects invalid amount', () => {
+		const invalidValues = [undefined, null, 12, '12', new Decimal(-1), new Decimal(0)];
+		invalidValues.forEach((value) => {
+			expect(Credit.validate({ amount: value })).not.toBeUndefined();
+		});
+	});
+
+	test('validates valid data', () => {
+		const values = { amount: new Decimal(12), note: 'Test' };
+		expect(Credit.validate(values)).toBeUndefined();
+	});
+});
