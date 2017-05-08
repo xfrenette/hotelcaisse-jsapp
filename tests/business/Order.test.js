@@ -233,58 +233,6 @@ describe('removeItem', () => {
 	});
 });
 
-describe('addCredit()', () => {
-	const credit1 = new Credit();
-	const credit2 = new Credit();
-
-	test('adds to credits array', () => {
-		order = new Order();
-		order.addCredit(credit1);
-		expect(order.credits.slice()).toEqual([credit1]);
-		order.addCredit(credit2);
-		expect(order.credits.slice()).toEqual([credit1, credit2]);
-	});
-
-	test('publishes message', (done) => {
-		order = new Order();
-		subscription = channel.subscribe(
-			TOPICS.order.credit.added,
-			(data) => {
-				expect(data.credit).toBe(credit1);
-				expect(data.order).toBe(order);
-				done();
-			},
-		);
-		order.addCredit(credit1);
-	});
-});
-
-describe('addTransaction()', () => {
-	const transaction1 = new Transaction();
-	const transaction2 = new Transaction();
-
-	test('adds to transactions array', () => {
-		order = new Order();
-		order.addTransaction(transaction1);
-		expect(order.transactions.slice()).toEqual([transaction1]);
-		order.addTransaction(transaction2);
-		expect(order.transactions.slice()).toEqual([transaction1, transaction2]);
-	});
-
-	test('publishes message', (done) => {
-		order = new Order();
-		subscription = channel.subscribe(
-			TOPICS.order.transaction.added,
-			(data) => {
-				expect(data.transaction).toBe(transaction1);
-				expect(data.order).toBe(order);
-				done();
-			},
-		);
-		order.addTransaction(transaction1);
-	});
-});
-
 describe('restoreFrom()', () => {
 	const newCustomer = new Customer();
 	newCustomer.name = 'new-customer-name';
@@ -411,8 +359,8 @@ describe('getChanges()', () => {
 		test('transactions', () => {
 			const newTransaction1 = new Transaction();
 			const newTransaction2 = new Transaction();
-			order.addTransaction(newTransaction1);
-			order.addTransaction(newTransaction2);
+			order.transactions.push(newTransaction1);
+			order.transactions.push(newTransaction2);
 			const res = order.getChanges();
 			expect(res.transactions).toEqual([newTransaction1, newTransaction2]);
 		});
@@ -420,8 +368,8 @@ describe('getChanges()', () => {
 		test('credits', () => {
 			const newCredit1 = new Credit();
 			const newCredit2 = new Credit();
-			order.addCredit(newCredit1);
-			order.addCredit(newCredit2);
+			order.credits.push(newCredit1);
+			order.credits.push(newCredit2);
 			const res = order.getChanges();
 			expect(res.credits).toEqual([newCredit1, newCredit2]);
 		});
@@ -497,7 +445,7 @@ describe('createRestorationData()', () => {
 		const res = order.createRestorationData();
 		expect(res.credits).not.toBe(order.credits);
 		expect(res.credits).toEqual(order.credits.slice());
-		order.addCredit(new Credit());
+		order.credits.push(new Credit());
 		expect(res.credits.length).toBe(order.credits.length - 1);
 	});
 
@@ -505,7 +453,7 @@ describe('createRestorationData()', () => {
 		const res = order.createRestorationData();
 		expect(res.transactions).not.toBe(order.transactions);
 		expect(res.transactions).toEqual(order.transactions.slice());
-		order.addTransaction(new Transaction());
+		order.transactions.push(new Transaction());
 		expect(res.transactions.length).toBe(order.transactions.length - 1);
 	});
 

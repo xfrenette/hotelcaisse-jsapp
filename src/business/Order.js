@@ -229,34 +229,6 @@ class Order {
 	}
 
 	/**
-	 * Adds a Credit to the array and publishes a message.
-	 *
-	 * @param {Credit} credit
-	 */
-	addCredit(credit) {
-		this.credits.push(credit);
-
-		channel.publish(TOPICS.order.credit.added, {
-			credit,
-			order: this,
-		});
-	}
-
-	/**
-	 * Adds a Transaction to the array and publishes a message.
-	 *
-	 * @param {Transaction} transaction
-	 */
-	addTransaction(transaction) {
-		this.transactions.push(transaction);
-
-		channel.publish(TOPICS.order.transaction.added, {
-			transaction,
-			order: this,
-		});
-	}
-
-	/**
 	 * Starts recording all changes to the Order.
 	 */
 	recordChanges() {
