@@ -193,6 +193,16 @@ describe('creditsTotal', () => {
 		expect(order.creditsTotal).toEqual(sum);
 	});
 
+	test('ignores credit if amount is null', () => {
+		order.credits.clear();
+		order.credits.push(new Credit('c1'));
+
+		expect(order.creditsTotal.toNumber()).toBe(0);
+
+		order.credits.push(new Credit('c1', new Decimal(12)));
+		expect(order.creditsTotal.toNumber()).toBe(12);
+	});
+
 	test('is observable', () => {
 		expect(isObservable(order, 'creditsTotal')).toBe(true);
 	});

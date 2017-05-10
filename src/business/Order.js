@@ -188,7 +188,9 @@ class Order {
 	@computed
 	get creditsTotal() {
 		return this.credits.reduce(
-			(prevSum, credit) => prevSum.add(credit.amount),
+			(prevSum, credit) => (
+				credit.amount === null ? prevSum : prevSum.add(credit.amount)
+			),
 			new Decimal(0)
 		);
 	}
