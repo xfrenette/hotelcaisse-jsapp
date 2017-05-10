@@ -219,13 +219,35 @@ class Order {
 	}
 
 	/**
-	 * Removes an item using its uuid
+	 * Removes an item using its uuid.
 	 *
 	 * @param {Item} item
 	 */
 	removeItem(item) {
 		const filteredItems = this.items.filter(currItem => currItem.uuid !== item.uuid);
 		this.items.replace(filteredItems);
+	}
+
+	/**
+	 * Removes a credit using its uuid.
+	 *
+	 * @param {Credit} credit
+	 */
+	removeCredit(credit) {
+		const filteredCredits = this.credits.filter(currCredit => currCredit.uuid !== credit.uuid);
+		this.credits.replace(filteredCredits);
+	}
+
+	/**
+	 * Removes a transaction using its uuid.
+	 *
+	 * @param {Transaction} transaction
+	 */
+	removeTransaction(transaction) {
+		const filteredTransactions = this.transactions.filter(
+			currTransaction => currTransaction.uuid !== transaction.uuid
+		);
+		this.transactions.replace(filteredTransactions);
 	}
 
 	/**

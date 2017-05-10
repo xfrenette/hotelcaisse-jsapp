@@ -14,6 +14,10 @@ import postal from 'postal';
 let order;
 let item1;
 let item2;
+let credit1;
+let credit2;
+let transaction1;
+let transaction2;
 const channel = postal.channel(CHANNELS.order);
 let subscription;
 
@@ -51,11 +55,11 @@ beforeEach(() => {
 	item2.product = product2;
 	item2.quantity = quantities[1];
 
-	const transaction1 = new Transaction('transaction1', new Decimal(12.43));
-	const transaction2 = new Transaction('transaction2', new Decimal(-5.23));
+	transaction1 = new Transaction('transaction1', new Decimal(12.43));
+	transaction2 = new Transaction('transaction2', new Decimal(-5.23));
 
-	const credit1 = new Credit('credit1', new Decimal(1.21));
-	const credit2 = new Credit('credit2', new Decimal(0.24));
+	credit1 = new Credit('credit1', new Decimal(1.21));
+	credit2 = new Credit('credit2', new Decimal(0.24));
 
 	order = new Order('test-uuid');
 	order.note = 'test-note';
@@ -230,6 +234,22 @@ describe('removeItem', () => {
 		const itemCopy = new Item(item1.uuid);
 		order.removeItem(itemCopy);
 		expect(order.items.slice()).toEqual([item2]);
+	});
+});
+
+describe('removeCredit', () => {
+	test('removes based on uuid', () => {
+		const creditCopy = new Credit(credit1.uuid);
+		order.removeCredit(creditCopy);
+		expect(order.credits.slice()).toEqual([credit2]);
+	});
+});
+
+describe('removeTransaction', () => {
+	test('removes based on uuid', () => {
+		const transactionCopy = new Transaction(transaction1.uuid);
+		order.removeTransaction(transactionCopy);
+		expect(order.transactions.slice()).toEqual([transaction2]);
 	});
 });
 
