@@ -93,7 +93,7 @@ describe('deserializing', () => {
 	});
 });
 
-describe('validate()', () => {
+describe('static validate()', () => {
 	test('rejects invalid note', () => {
 		const invalidValues = [undefined, null, 12, ''];
 		invalidValues.forEach((value) => {

@@ -61,6 +61,18 @@ class Credit {
 		this.amount = amount;
 		this.note = note;
 	}
+
+	/**
+	 * Validates itself (note and amount)
+	 *
+	 * @return {Object}
+	 */
+	validate() {
+		return Credit.validate({
+			note: this.note,
+			amount: this.amount,
+		});
+	}
 }
 
 /**
