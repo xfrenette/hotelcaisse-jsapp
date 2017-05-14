@@ -1,12 +1,19 @@
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 
 let product;
 
 beforeEach(() => {
 	product = new Product();
 });
+
+describe('price', () => {
+	test('is observable', () => {
+		expect(isObservable(product, 'price')).toBe(true);
+	});
+})
 
 describe('hasVariants', () => {
 	test('returns true if has variants', () => {

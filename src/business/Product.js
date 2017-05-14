@@ -1,6 +1,7 @@
 import { serializable, identifier, list, object, getDefaultModelSchema, reference } from 'serializr';
 import Decimal from 'decimal.js';
 import { decimal, productTax } from '../vendor/serializr/propSchemas';
+import { observable } from 'mobx';
 
 /**
  * Represents a product sold by the business. Can represent an actual product (past or current) or
@@ -11,6 +12,8 @@ import { decimal, productTax } from '../vendor/serializr/propSchemas';
  * currently sold by the business. It can represent a product that was once sold, a custom product
  * or a product that was once a variant. It is only a class that represents a Product, no matter in
  * what context.
+ *
+ * For custom products, we can only set the price, we cannot set taxes.
  */
 class Product {
 	/**
@@ -36,11 +39,13 @@ class Product {
 	@serializable
 	description = '';
 	/**
-	 * Price of the product before taxes. If a variant, price before taxes of the variant.
+	 * Price of the product before taxes. If a variant, price before taxes of the variant. It is
+	 * observable since the price may change if it is a custom product.
 	 *
 	 * @type {Decimal}
 	 */
 	@serializable(decimal())
+	@observable
 	price = null;
 	/**
 	 * True if it represents a custom product.
