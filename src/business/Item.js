@@ -1,7 +1,24 @@
 import { observable, computed } from 'mobx';
 import { serializable, date, object, identifier } from 'serializr';
 import Decimal from 'decimal.js';
+import validate from '../Validator';
 import Product from './Product';
+import utils from '../utils';
+
+/**
+ * Constraints for validation.
+ *
+ * @type {Object}
+ */
+const constraints = {
+	quantity: {
+		presence: true,
+		numericality: {
+			onlyInteger: true,
+			greaterThan: 0,
+		},
+	},
+};
 
 /**
  * An Item, made to be used in Order, represents the combination of a Product with a quantity. If
@@ -143,5 +160,18 @@ class Item {
 		this.product.name = extendedName;
 	}
 }
+
+/**
+ * Validates the attributes of an Item. Will validate only the attributes passed in values. Values
+ * is an object where the key is the attribute and its value is the attribute's value. On success,
+ * returns undefined, else returns an object with the error(s) for each attribute.
+ *
+ * @param {Object} values
+ * @return {Object|undefined}
+ */
+Item.validate = (values) => {
+	const appliedConstraints = utils.getConstraintsFor(constraints, values);
+	return validate(values, appliedConstraints);
+};
 
 export default Item;

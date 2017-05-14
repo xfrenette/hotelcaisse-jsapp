@@ -190,6 +190,20 @@ describe('freezeProduct()', () => {
 	});
 });
 
+describe('static validate()', () => {
+	test('rejects invalid quantity', () => {
+		const invalidValues = [undefined, null, -1, 0.5, 0];
+		invalidValues.forEach((value) => {
+			expect(Item.validate({ quantity: value })).not.toBeUndefined();
+		});
+	});
+
+	test('validates valid data', () => {
+		const values = { quantity: 3 };
+		expect(Item.validate(values)).toBeUndefined();
+	});
+});
+
 describe('serializing', () => {
 	let data;
 
