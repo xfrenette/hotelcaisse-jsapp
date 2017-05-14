@@ -1,5 +1,6 @@
 import { observable, computed } from 'mobx';
 import { serializable, date, object, identifier } from 'serializr';
+import Decimal from 'decimal.js';
 import Product from './Product';
 
 /**
@@ -54,12 +55,22 @@ class Item {
 	}
 
 	/**
-	 * Returns the unit price of this item, before taxes.
+	 * Returns the unit price of this item, before taxes. If the product has no price (ex: we are
+	 * creating a custom product and we didn't give it a price yet), returns 0.
+	 *
+	 * It is observable since the price of a product is observable
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get unitPrice() {
-		return this.product.price;
+		const price = this.product.price;
+
+		if (price === null) {
+			return new Decimal(0);
+		}
+
+		return price;
 	}
 
 	/**
@@ -75,10 +86,12 @@ class Item {
 	}
 
 	/**
-	 * Returns the unit price of this item, including taxes.
+	 * Returns the unit price of this item, including taxes. It is observable since the product price
+	 * is observable.
 	 *
 	 * @return {Decimal}
 	 */
+	@computed
 	get unitFullPrice() {
 		return this.unitTaxes.reduce(
 			(prev, { amount }) => prev.add(amount),

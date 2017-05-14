@@ -60,6 +60,17 @@ describe('unitPrice', () => {
 		const expected = product.price;
 		expect(item.unitPrice.eq(expected)).toBe(true);
 	});
+
+	test('returns 0 if product has no price', () => {
+		const customProduct = new Product();
+		customProduct.price = null;
+		item.product = customProduct;
+		expect(item.unitPrice.toNumber()).toBe(0);
+	});
+
+	test('is observable', () => {
+		expect(isObservable(item, 'unitPrice')).toBe(true);
+	})
 });
 
 describe('name', () => {
@@ -135,6 +146,10 @@ describe('unitFullPrice', () => {
 		tmpProduct.price = new Decimal(1);
 		item.product = tmpProduct;
 		expect(item.unitFullPrice.eq(tmpProduct.price)).toBeTruthy();
+	});
+
+	test('is observable', () => {
+		expect(isObservable(item, 'unitFullPrice')).toBe(true);
 	});
 });
 
