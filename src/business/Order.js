@@ -373,6 +373,55 @@ class Order {
 
 		return foundChanges ? changes : null;
 	}
+
+	/**
+	 * Removes "empty" elements (empty items and empty credits)
+	 */
+	trim() {
+		this.trimItems();
+		this.trimCredits();
+	}
+
+	/**
+	 * Removes "empty" items : if their quantity is 0 or if their product is "empty" (no name and no
+	 * price)
+	 */
+	trimItems() {
+		const items = [...this.items];
+		items.forEach((item) => {
+			if (item.quantity === 0) {
+				this.removeItem(item);
+				return;
+			}
+
+			const product = item.product;
+			if (product.name === null && product.price === null) {
+				this.removeItem(item);
+			}
+		});
+	}
+
+	/**
+	 * Removes "empty" credits : if their amount is 0 or if they have no note and no amount.
+	 */
+	trimCredits() {
+		const credits = [...this.credits];
+		credits.forEach((credit) => {
+			let doRemove = false;
+
+			if (credit.amount === null || credit.amount.eq(0)) {
+				doRemove = true;
+			}
+
+			if (credit.note === null && credit.amount === null) {
+				doRemove = true;
+			}
+
+			if (doRemove) {
+				this.removeCredit(credit);
+			}
+		});
+	}
 }
 
 export default Order;

@@ -495,6 +495,40 @@ describe('createRestorationData()', () => {
 	});
 });
 
+describe.only('trim', () => {
+	test('removes items with quantity = 0', () => {
+		item2.quantity = 0;
+		order.trim();
+		expect(order.items.length).toBe(1);
+		expect(order.items[0].uuid).toBe(item1.uuid);
+	});
+
+	test('removes items with "empty" products', () => {
+		const emptyProduct = new Product();
+		emptyProduct.name = null;
+		emptyProduct.price = null;
+		item2.product = emptyProduct;
+		order.trim();
+		expect(order.items.length).toBe(1);
+		expect(order.items[0].uuid).toBe(item1.uuid);
+	});
+
+	test('removes credits with amount = 0', () => {
+		credit1.amount = new Decimal(0);
+		order.trim();
+		expect(order.credits.length).toBe(1);
+		expect(order.credits[0].uuid).toBe(credit2.uuid);
+	});
+
+	test('removes "empty" credits', () => {
+		credit1.note = null;
+		credit1.amount = null;
+		order.trim();
+		expect(order.credits.length).toBe(1);
+		expect(order.credits[0].uuid).toBe(credit2.uuid);
+	});
+});
+
 describe('serializing', () => {
 	let data;
 
