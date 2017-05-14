@@ -18,6 +18,12 @@ const constraints = {
 			greaterThan: 0,
 		},
 	},
+	product: {
+		presence: true,
+		instanceOf: {
+			class: Product,
+		},
+	},
 };
 
 /**
@@ -158,6 +164,25 @@ class Item {
 		const extendedName = this.product.extendedName;
 		this.product = this.product.clone();
 		this.product.name = extendedName;
+	}
+
+	/**
+	 * Validates its own properties (quantity) and its product
+	 *
+	 * @return {Object}
+	 */
+	validate() {
+		let res = Item.validate({
+			quantity: this.quantity,
+			product: this.product,
+		});
+
+		if (this.product && !!this.product.validate()) {
+			res = res || {};
+			res.product = ['The product is invalid'];
+		}
+
+		return res;
 	}
 }
 

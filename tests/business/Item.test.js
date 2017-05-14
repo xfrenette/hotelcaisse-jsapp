@@ -190,6 +190,31 @@ describe('freezeProduct()', () => {
 	});
 });
 
+describe('validate()', () => {
+	test('rejects invalid quantity', () => {
+		item.quantity = 0;
+		const res = item.validate();
+		expect(res).toEqual(expect.objectContaining({
+			quantity: expect.any(Array),
+		}));
+	});
+
+	test('rejects if a product is invalid', () => {
+		product.price = null;
+		item.product = product;
+
+		const res = item.validate();
+		expect(res).toEqual(expect.objectContaining({
+			product: expect.any(Array),
+		}));
+	});
+
+	test('validates if all valid', () => {
+		item.product = product;
+		expect(item.validate()).toBeUndefined();
+	});
+});
+
 describe('static validate()', () => {
 	test('rejects invalid quantity', () => {
 		const invalidValues = [undefined, null, -1, 0.5, 0];
@@ -198,8 +223,18 @@ describe('static validate()', () => {
 		});
 	});
 
+	test('rejects invalid product', () => {
+		const invalidValues = [undefined, null, new Item()];
+		invalidValues.forEach((value) => {
+			expect(Item.validate({ product: value })).not.toBeUndefined();
+		});
+	});
+
 	test('validates valid data', () => {
-		const values = { quantity: 3 };
+		const values = {
+			quantity: 3,
+			product
+		};
 		expect(Item.validate(values)).toBeUndefined();
 	});
 });
