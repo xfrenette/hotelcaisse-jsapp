@@ -182,6 +182,18 @@ class Product {
 
 		return clone;
 	}
+
+	/**
+	 * Validates itself (name and price)
+	 *
+	 * @return {Object}
+	 */
+	validate() {
+		return Product.validate({
+			name: this.name,
+			price: this.price,
+		});
+	}
 }
 
 /**

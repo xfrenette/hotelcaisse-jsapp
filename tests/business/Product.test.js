@@ -13,7 +13,7 @@ describe('price', () => {
 	test('is observable', () => {
 		expect(isObservable(product, 'price')).toBe(true);
 	});
-})
+});
 
 describe('hasVariants', () => {
 	test('returns true if has variants', () => {
@@ -209,6 +209,18 @@ describe('deserializing', () => {
 });
 
 describe('validate()', () => {
+	test('validates name and price', () => {
+		product.name = ' ';
+		product.price = new Decimal(0);
+		const res = product.validate();
+		expect(res).toEqual(expect.objectContaining({
+			name: expect.any(Array),
+			price: expect.any(Array),
+		}));
+	});
+});
+
+describe('static validate()', () => {
 	test('rejects invalid name', () => {
 		const invalidValues = [undefined, null, 12, '', ' '];
 		invalidValues.forEach((value) => {
