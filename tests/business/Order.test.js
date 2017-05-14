@@ -495,7 +495,7 @@ describe('createRestorationData()', () => {
 	});
 });
 
-describe.only('trim', () => {
+describe('trim', () => {
 	test('removes items with quantity = 0', () => {
 		item2.quantity = 0;
 		order.trim();
