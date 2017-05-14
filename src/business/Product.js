@@ -2,6 +2,24 @@ import { serializable, identifier, list, object, getDefaultModelSchema, referenc
 import Decimal from 'decimal.js';
 import { decimal, productTax } from '../vendor/serializr/propSchemas';
 import { observable } from 'mobx';
+import validate from '../Validator';
+import utils from '../utils';
+
+/**
+ * Constraints for validation.
+ *
+ * @type {Object}
+ */
+const constraints = {
+	name: {
+		presence: true,
+		typeOf: 'string',
+	},
+	price: {
+		presence: true,
+		decimal: { gt: 0 },
+	},
+};
 
 /**
  * Represents a product sold by the business. Can represent an actual product (past or current) or
@@ -165,5 +183,19 @@ class Product {
 		return clone;
 	}
 }
+
+/**
+ * Validates the values for a Product (will mainly be used when creating custom product). Will
+ * validate only the attributes passed in values. Values is an object where the key is the
+ * attribute and its value is the attribute's value. On success, returns undefined, else returns an
+ * object with the error(s) for each attribute.
+ *
+ * @param {Object} values
+ * @return {Object|undefined}
+ */
+Product.validate = (values) => {
+	const appliedConstraints = utils.getConstraintsFor(constraints, values);
+	return validate(values, appliedConstraints);
+};
 
 export default Product;

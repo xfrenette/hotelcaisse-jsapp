@@ -207,3 +207,24 @@ describe('deserializing', () => {
 		expect(variant.parent).toBe(product);
 	});
 });
+
+describe('validate()', () => {
+	test('rejects invalid name', () => {
+		const invalidValues = [undefined, null, 12, '', ' '];
+		invalidValues.forEach((value) => {
+			expect(Product.validate({ name: value })).not.toBeUndefined();
+		});
+	});
+
+	test('rejects invalid price', () => {
+		const invalidValues = [undefined, null, 12, '12', new Decimal(-1), new Decimal(0)];
+		invalidValues.forEach((value) => {
+			expect(Product.validate({ price: value })).not.toBeUndefined();
+		});
+	});
+
+	test('validates valid data', () => {
+		const values = { price: new Decimal(12), name: 'Test' };
+		expect(Product.validate(values)).toBeUndefined();
+	});
+});
