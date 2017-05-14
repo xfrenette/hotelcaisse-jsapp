@@ -1,4 +1,5 @@
 import { serializable, date, identifier } from 'serializr';
+import { observable } from 'mobx';
 import validate from '../Validator';
 import { decimal } from '../vendor/serializr/propSchemas';
 import utils from '../utils';
@@ -37,6 +38,7 @@ class Credit {
 	 * @type {Decimal}
 	 */
 	@serializable(decimal())
+	@observable
 	amount = null;
 	/**
 	 * Optional note for this credit.

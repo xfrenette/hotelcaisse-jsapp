@@ -1,4 +1,5 @@
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 import Credit from 'business/Credit';
 import Decimal from 'decimal.js';
 
@@ -33,6 +34,13 @@ describe('constructor()', () => {
 		const note = 'test-note';
 		credit = new Credit(null, null, note);
 		expect(credit.note).toBe(note);
+	});
+});
+
+describe('amount', () => {
+	test('is observable', () => {
+		const credit = new Credit();
+		expect(isObservable(credit, 'amount')).toBe(true);
 	});
 });
 
