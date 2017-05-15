@@ -422,6 +422,71 @@ class Order {
 			}
 		});
 	}
+
+	/**
+	 * Validates itself. Valid only if all items are valid and all credits are valid. If valid,
+	 * returns undefined, else returns an object where the keys are the invalid attributes.
+	 *
+	 * @return {Object}
+	 */
+	validate() {
+		let valid = true;
+		let res = {};
+		const resItems = this.validateItems();
+		const resCredits = this.validateCredits();
+
+		if (resItems) {
+			valid = false;
+			res = { ...res, ...resItems };
+		}
+
+		if (resCredits) {
+			valid = false;
+			res = { ...res, ...resCredits };
+		}
+
+		return valid ? undefined : res;
+	}
+
+	/**
+	 * Validates the items. See validate()
+	 *
+	 * @return {Object}
+	 */
+	validateItems() {
+		let res;
+
+		this.items.find((item) => {
+			if (item.validate()) {
+				res = { items: ['An item is invalid']};
+				return true;
+			}
+
+			return false;
+		});
+
+		return res;
+	}
+
+	/**
+	 * Validates the credits. See validate()
+	 *
+	 * @return {Object}
+	 */
+	validateCredits() {
+		let res;
+
+		this.credits.find((credit) => {
+			if (credit.validate()) {
+				res = { credits: ['A credit is invalid']};
+				return true;
+			}
+
+			return false;
+		});
+
+		return res;
+	}
 }
 
 export default Order;

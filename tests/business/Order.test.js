@@ -38,11 +38,13 @@ const taxesTotals = [
 
 beforeEach(() => {
 	const product1 = new Product();
+	product1.name = 'test-product-1';
 	product1.price = new Decimal(1.23);
 	product1.addTax('tax1', taxes.tax1);
 	product1.addTax('tax2', taxes.tax2_1);
 
 	const product2 = new Product();
+	product2.name = 'test-product-2';
 	product2.price = new Decimal(4.56);
 	product2.addTax('tax2', taxes.tax2_2);
 	product2.addTax('tax3', taxes.tax3);
@@ -58,8 +60,8 @@ beforeEach(() => {
 	transaction1 = new Transaction('transaction1', new Decimal(12.43));
 	transaction2 = new Transaction('transaction2', new Decimal(-5.23));
 
-	credit1 = new Credit('credit1', new Decimal(1.21));
-	credit2 = new Credit('credit2', new Decimal(0.24));
+	credit1 = new Credit('credit1', new Decimal(1.21), 'test-note-1');
+	credit2 = new Credit('credit2', new Decimal(0.24), 'test-note-2');
 
 	order = new Order('test-uuid');
 	order.note = 'test-note';
@@ -526,6 +528,28 @@ describe('trim', () => {
 		order.trim();
 		expect(order.credits.length).toBe(1);
 		expect(order.credits[0].uuid).toBe(credit2.uuid);
+	});
+});
+
+describe('validate()', () => {
+	test('rejects if an item is invalid', () => {
+		item1.quantity = 0;
+		const res = order.validate();
+		expect(res).toEqual(expect.objectContaining({
+			items: expect.any(Array),
+		}));
+	});
+
+	test('rejects if an credit is invalid', () => {
+		credit1.amount = null;
+		const res = order.validate();
+		expect(res).toEqual(expect.objectContaining({
+			credits: expect.any(Array),
+		}));
+	});
+
+	test('validates if all valid', () => {
+		expect(order.validate()).toBeUndefined();
 	});
 });
 
