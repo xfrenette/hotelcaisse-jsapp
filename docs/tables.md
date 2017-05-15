@@ -44,7 +44,7 @@ orders
 	business_id
 	created_at
 	note
-	room_selection
+	customer
 
 credits
 	id
@@ -122,15 +122,19 @@ authentications
 	code (4 chiffre)
 	business_id
 
+customer
+	id
+	name
+	email
+	(fields ?)
+
 room_selections
 	id
-
-room_selections_rooms
-	id
-	room_selection
+	order_id
 	room_id
 	checkin_date
 	checkout_date
+	(fields ?)
 
 rooms
 	id
