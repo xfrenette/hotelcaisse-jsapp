@@ -217,7 +217,7 @@ describe('validate()', () => {
 
 describe('static validate()', () => {
 	test('rejects invalid quantity', () => {
-		const invalidValues = [undefined, null, -1, 0.5, 0];
+		const invalidValues = [undefined, null, 0.5, 0];
 		invalidValues.forEach((value) => {
 			expect(Item.validate({ quantity: value })).not.toBeUndefined();
 		});

@@ -15,8 +15,8 @@ const constraints = {
 		presence: true,
 		numericality: {
 			onlyInteger: true,
-			greaterThan: 0,
 		},
+		exclusion: [0],
 	},
 	product: {
 		presence: true,
