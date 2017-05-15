@@ -44,6 +44,7 @@ orders
 	business_id
 	created_at
 	note
+	room_selection
 
 credits
 	id
@@ -120,3 +121,17 @@ authentications
 	expires_at (5 minutes)
 	code (4 chiffre)
 	business_id
+
+room_selections
+	id
+
+room_selections_rooms
+	id
+	room_selection
+	room_id
+	checkin_date
+	checkout_date
+
+rooms
+	id
+	name
