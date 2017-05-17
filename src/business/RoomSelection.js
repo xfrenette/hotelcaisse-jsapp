@@ -43,8 +43,18 @@ class RoomSelection {
 	@serializable(rawObject())
 	fields = {};
 
+	/**
+	 * Creates a copy of this RoomSelection. The fields are shallow copied (but if they are only 1
+	 * level primitives, there won't be any problem).
+	 *
+	 * @return {RoomSelection}
+	 */
 	clone() {
-		return Object.assign(Object.create(this), this);
+		const clone = Object.assign(Object.create(this), this);
+		clone.fields = {
+			...this.fields,
+		};
+		return clone;
 	}
 }
 

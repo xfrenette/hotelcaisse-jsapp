@@ -10,6 +10,7 @@ beforeEach(() => {
 	roomSelection.uuid = 'test-uuid';
 	roomSelection.startDate = new Date(1494883301000);
 	roomSelection.endDate = new Date(1495142500000);
+	roomSelection.fields = { a: 'b' };
 
 	room = new Room();
 	room.uuid = 'test-room-uuid';
@@ -36,6 +37,11 @@ describe('clone()', () => {
 		expect(clone.room).toBe(roomSelection.room);
 		expect(clone.startDate.getTime()).toBe(roomSelection.startDate.getTime());
 		expect(clone.endDate.getTime()).toBe(roomSelection.endDate.getTime());
+	});
+
+	test('copies fields', () => {
+		expect(clone.fields).toEqual(roomSelection.fields);
+		expect(clone.fields).not.toBe(roomSelection.fields);
 	});
 });
 
