@@ -11,10 +11,7 @@ class Customer {
 	 * @return {Customer}
 	 */
 	clone() {
-		const newCustomer = new Customer();
-		newCustomer.name = this.name;
-
-		return newCustomer;
+		return Object.assign(Object.create(this), this);
 	}
 
 	/**
