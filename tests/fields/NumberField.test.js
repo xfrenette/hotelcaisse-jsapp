@@ -17,11 +17,10 @@ beforeEach(() => {
 
 describe('validate()', () => {
 	test('uses constraints', () => {
-		field.value = 3.1;
 		field.constraints = {
 			onlyInteger: true,
 		};
-		expect(field.validate()).toEqual(expect.any(Array));
+		expect(field.validate(3.1)).toEqual(expect.any(Array));
 	});
 });
 

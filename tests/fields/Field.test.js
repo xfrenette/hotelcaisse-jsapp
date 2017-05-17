@@ -7,7 +7,6 @@ beforeEach(() => {
 	field = new Field();
 	field.uuid = 'test-uuid';
 	field.name = 'test-name';
-	field.value = 'test-value';
 });
 
 describe('serializing', () => {
@@ -22,7 +21,6 @@ describe('serializing', () => {
 		expect(data).toEqual({
 			uuid: field.uuid,
 			name: field.name,
-			value: field.value,
 			required: field.required,
 		});
 	});
@@ -32,7 +30,6 @@ describe('deserializing', () => {
 	const jsonObject = {
 		uuid: 'test-uuid-2',
 		name: 'test-name-2',
-		value: 'test-value-2',
 		required: true,
 	};
 
@@ -43,7 +40,6 @@ describe('deserializing', () => {
 	test('restores primitives', () => {
 		expect(field.uuid).toBe(jsonObject.uuid);
 		expect(field.name).toBe(jsonObject.name);
-		expect(field.value).toBe(jsonObject.value);
 		expect(field.required).toBe(jsonObject.required);
 	});
 });
@@ -53,29 +49,25 @@ describe('validate()', () => {
 		const values = [undefined, null, '', ' '];
 		field.required = true;
 		values.forEach((value) => {
-			field.value = value;
-			expect(field.validate()).toEqual(expect.any(Array));
+			expect(field.validate(value)).toEqual(expect.any(Array));
 		});
 	});
 
 	test('validates if required and value set', () => {
-		field.value = 'test';
 		field.required = true;
-		expect(field.validate()).toBeUndefined();
+		expect(field.validate('test')).toBeUndefined();
 	});
 
 	test('validates if not required', () => {
 		const values = [undefined, null, '', ' '];
 		field.required = false;
 		values.forEach((value) => {
-			field.value = value;
-			expect(field.validate()).toBeUndefined();
+			expect(field.validate(value)).toBeUndefined();
 		});
 	});
 
 	test('uses extra constraints', () => {
 		const extraConstraints = { numericality: true };
-		field.value = 'test';
-		expect(field.validate(extraConstraints)).toEqual(expect.any(Array));
+		expect(field.validate('test', extraConstraints)).toEqual(expect.any(Array));
 	});
 });

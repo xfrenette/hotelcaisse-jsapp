@@ -38,14 +38,15 @@ class SelectField extends Field {
 	/**
 	 * Validates the value.
 	 *
+	 * @param {String} value
 	 * @return {Array}
 	 */
-	validate() {
+	validate(value) {
 		const constraints = {
 			inclusion: this.getValues(),
 		};
 
-		return super.validate(constraints);
+		return super.validate(value, constraints);
 	}
 }
 

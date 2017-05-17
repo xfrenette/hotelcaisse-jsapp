@@ -12,18 +12,15 @@ beforeEach(() => {
 	field.uuid = 'test-uuid';
 	field.name = 'test-name';
 	field.values = values;
-	field.value = 'value1';
 });
 
 describe('validate()', () => {
 	test('rejects if value not in values', () => {
-		field.value = '__not-in-values';
-		expect(field.validate()).toEqual(expect.any(Array));
+		expect(field.validate('__not-in-values')).toEqual(expect.any(Array));
 	});
 
 	test('accepts if value in values', () => {
-		field.value = 'value1';
-		expect(field.validate()).toBeUndefined();
+		expect(field.validate('value1')).toBeUndefined();
 	});
 });
 

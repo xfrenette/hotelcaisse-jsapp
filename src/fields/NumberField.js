@@ -19,14 +19,15 @@ class NumberField extends Field {
 	/**
 	 * Validates the value.
 	 *
+	 * @param {Number} value
 	 * @return {Array}
 	 */
-	validate() {
+	validate(value) {
 		const constraints = {
 			numericality: this.constraints,
 		};
 
-		return super.validate(constraints);
+		return super.validate(value, constraints);
 	}
 }
 

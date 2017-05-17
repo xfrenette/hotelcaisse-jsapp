@@ -11,12 +11,10 @@ beforeEach(() => {
 
 describe('validate()', () => {
 	test('rejects invalid', () => {
-		field.value = 'invalid';
-		expect(field.validate()).toEqual(expect.any(Array));
+		expect(field.validate('invalid')).toEqual(expect.any(Array));
 	});
 
 	test('accepts valid', () => {
-		field.value = 'valid@bbb.com';
-		expect(field.validate()).toBeUndefined();
+		expect(field.validate('valid@bbb.com')).toBeUndefined();
 	});
 });

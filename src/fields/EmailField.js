@@ -7,14 +7,15 @@ class EmailField extends Field {
 	/**
 	 * Validates the value.
 	 *
+	 * @param {String} value
 	 * @return {Array}
 	 */
-	validate() {
+	validate(value) {
 		const constraints = {
 			email: true,
 		};
 
-		return super.validate(constraints);
+		return super.validate(value, constraints);
 	}
 }
 

@@ -22,13 +22,6 @@ class Field {
 	@serializable
 	name = null;
 	/**
-	 * Value of the field
-	 *
-	 * @type {String}
-	 */
-	@serializable
-	value = null;
-	/**
 	 * If true, the value is required and cannot be null.
 	 *
 	 * @type {Boolean}
@@ -37,12 +30,15 @@ class Field {
 	required = false;
 
 	/**
-	 * Validates the value. Returns undefined if valid, else returns an array of errors. A constraint
-	 * object can be passed that will be used with Validator.
+	 * Validates if a value is a valid value for this field, checking presence if required and
+	 * against constraints, if passed. Returns undefined if valid, else returns an array of error
+	 * messages.
 	 *
+	 * @param {mixed} value The value to validate
+	 * @param {Object} constraints Optional
 	 * @return {Array}
 	 */
-	validate(constraints) {
+	validate(value, constraints) {
 		let finalConstraints = {};
 
 		if (this.required) {
@@ -61,7 +57,7 @@ class Field {
 		}
 
 		const res = validate(
-			{ value: this.value },
+			{ value },
 			{ value: finalConstraints }
 		);
 
