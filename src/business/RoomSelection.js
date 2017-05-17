@@ -42,6 +42,10 @@ class RoomSelection {
 	 */
 	@serializable(rawObject())
 	fields = {};
+
+	clone() {
+		return Object.assign(Object.create(this), this);
+	}
 }
 
 export default RoomSelection;

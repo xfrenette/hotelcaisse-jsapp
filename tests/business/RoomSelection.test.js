@@ -16,6 +16,29 @@ beforeEach(() => {
 	roomSelection.room = room;
 });
 
+describe('clone()', () => {
+	let clone;
+
+	beforeEach(() => {
+		clone = roomSelection.clone();
+	});
+
+	test('is different object', () => {
+		expect(clone).not.toBe(roomSelection);
+	});
+
+	test('is RoomSelection', () => {
+		expect(clone).toBeInstanceOf(RoomSelection);
+	});
+
+	test('has same primitives', () => {
+		expect(clone.uuid).toBe(roomSelection.uuid);
+		expect(clone.room).toBe(roomSelection.room);
+		expect(clone.startDate.getTime()).toBe(roomSelection.startDate.getTime());
+		expect(clone.endDate.getTime()).toBe(roomSelection.endDate.getTime());
+	});
+});
+
 describe('serializing', () => {
 	let data;
 	const fields = {
