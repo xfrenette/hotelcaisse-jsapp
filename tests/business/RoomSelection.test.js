@@ -45,6 +45,49 @@ describe('clone()', () => {
 	});
 });
 
+describe.only('isEqualTo()', () => {
+	let copy;
+
+	beforeEach(() => {
+		copy = roomSelection.clone();
+	});
+
+	test('returns false if different uuid', () => {
+		copy.uuid = `${roomSelection.uuid}-copy`;
+		expect(roomSelection.isEqualTo(copy)).toBe(false);
+	});
+
+	test('returns false if different startDate', () => {
+		copy.startDate = new Date(roomSelection.startDate.getTime() + 1);
+		expect(roomSelection.isEqualTo(copy)).toBe(false);
+	});
+
+	test('returns false if different endDate', () => {
+		copy.endDate = new Date(roomSelection.endDate.getTime() + 1);
+		expect(roomSelection.isEqualTo(copy)).toBe(false);
+	});
+
+	test('returns false if different room', () => {
+		const newRoom = new Room();
+		newRoom.uuid = `${room.uuid}-copy`;
+		copy.room = newRoom;
+		expect(roomSelection.isEqualTo(copy)).toBe(false);
+	});
+
+	test('returns true if different room with same uuid', () => {
+		const newRoom = new Room();
+		newRoom.uuid = room.uuid;
+		copy.room = newRoom;
+		expect(roomSelection.isEqualTo(copy)).toBe(true);
+	});
+
+	test('works with default null values', () => {
+		roomSelection = new RoomSelection();
+		copy = roomSelection.clone();
+		expect(roomSelection.isEqualTo(copy)).toBe(true);
+	});
+});
+
 describe('serializing', () => {
 	let data;
 	const fields = {

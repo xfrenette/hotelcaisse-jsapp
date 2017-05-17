@@ -1,5 +1,7 @@
 import { serializable, identifier, date, reference } from 'serializr';
 import { rawObject } from '../vendor/serializr/propSchemas';
+import isEqual from 'lodash.isequal';
+import get from 'lodash.get';
 import Room from './Room';
 
 /**
@@ -55,6 +57,34 @@ class RoomSelection {
 			...this.fields,
 		};
 		return clone;
+	}
+
+	/**
+	 * Compares with another RoomSelection and returns true if they are equal.
+	 *
+	 * @param {RoomSelection} other
+	 * @return {Boolean}
+	 */
+	isEqualTo(other) {
+		let otherIsEqual = true;
+		const attributes = ['uuid', 'startDate', 'endDate', 'fields'];
+
+		attributes.find((attribute) => {
+			if (!isEqual(other[attribute], this[attribute])) {
+				otherIsEqual = false;
+				return true;
+			}
+
+			return false;
+		});
+
+		if (other.room === null && this.room !== null) {
+			otherIsEqual = false;
+		} else if (get(other.room, 'uuid') !== get(this.room, 'uuid')) {
+			otherIsEqual = false;
+		}
+
+		return otherIsEqual;
 	}
 }
 
