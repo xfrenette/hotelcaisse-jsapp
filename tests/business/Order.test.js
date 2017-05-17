@@ -4,6 +4,7 @@ import OrderChanges from 'business/OrderChanges';
 import Item from 'business/Item';
 import Product from 'business/Product';
 import Transaction from 'business/Transaction';
+import RoomSelection from 'business/RoomSelection';
 import Credit from 'business/Credit';
 import Customer from 'business/Customer';
 import Decimal from 'decimal.js';
@@ -18,6 +19,8 @@ let credit1;
 let credit2;
 let transaction1;
 let transaction2;
+let roomSelection1;
+let roomSelection2;
 const channel = postal.channel(CHANNELS.order);
 let subscription;
 
@@ -60,6 +63,11 @@ beforeEach(() => {
 	transaction1 = new Transaction('transaction1', new Decimal(12.43));
 	transaction2 = new Transaction('transaction2', new Decimal(-5.23));
 
+	roomSelection1 = new RoomSelection();
+	roomSelection1.uuid = 'room-selection-1';
+	roomSelection2 = new RoomSelection();
+	roomSelection2.uuid = 'room-selection-2';
+
 	credit1 = new Credit('credit1', new Decimal(1.21), 'test-note-1');
 	credit2 = new Credit('credit2', new Decimal(0.24), 'test-note-2');
 
@@ -71,6 +79,8 @@ beforeEach(() => {
 	order.transactions.push(transaction2);
 	order.credits.push(credit1);
 	order.credits.push(credit2);
+	order.roomSelections.push(roomSelection1);
+	order.roomSelections.push(roomSelection2);
 
 	order.customer.name = 'test-customer-name';
 });
@@ -109,6 +119,12 @@ describe('credits', () => {
 describe('transactions', () => {
 	test('is observable', () => {
 		expect(isObservable(order, 'transactions')).toBe(true);
+	});
+});
+
+describe('roomSelections', () => {
+	test('is observable', () => {
+		expect(isObservable(order, 'roomSelections')).toBe(true);
 	});
 });
 
@@ -265,6 +281,15 @@ describe('removeTransaction', () => {
 	});
 });
 
+describe('removeRoomSelection', () => {
+	test('removes based on uuid', () => {
+		const roomSelectionCopy = new RoomSelection();
+		roomSelectionCopy.uuid = roomSelection1.uuid;
+		order.removeRoomSelection(roomSelectionCopy);
+		expect(order.roomSelections.slice()).toEqual([roomSelection2]);
+	});
+});
+
 describe('restoreFrom()', () => {
 	const newCustomer = new Customer();
 	newCustomer.name = 'new-customer-name';
@@ -273,6 +298,7 @@ describe('restoreFrom()', () => {
 		items: [{ uuid: 'item1' }, { uuid: 'item2' }],
 		credits: ['c', 'd'],
 		transactions: ['e', 'f'],
+		roomSelections: ['g', 'h'],
 		customer: newCustomer,
 	};
 
@@ -302,6 +328,11 @@ describe('restoreFrom()', () => {
 	test('restores transactions', () => {
 		order.restoreFrom(restorationData);
 		expect(order.transactions.slice()).toEqual(restorationData.transactions);
+	});
+
+	test('restores roomSelections', () => {
+		order.restoreFrom(restorationData);
+		expect(order.roomSelections.slice()).toEqual(restorationData.roomSelections);
 	});
 
 	test('restores customer', () => {
@@ -495,6 +526,13 @@ describe('createRestorationData()', () => {
 		expect(res.customer).not.toBe(order.customer);
 		expect(order.customer.isEqualTo(res.customer)).toBe(true);
 	});
+
+	test('saves roomSelections as clones', () => {
+		const res = order.createRestorationData();
+		expect(res.roomSelections).not.toBe(order.roomSelections);
+		expect(res.roomSelections[0]).not.toBe(order.roomSelections[0]);
+		expect(res.roomSelections[0]).toBeInstanceOf(RoomSelection);
+	});
 });
 
 describe('trim', () => {
@@ -581,6 +619,11 @@ describe('serializing', () => {
 		expect(data.transactions.length).toBe(order.transactions.length);
 		expect(data.transactions[0].amount).toBe(order.transactions[0].amount.toString());
 	});
+
+	test('serializes roomSelections', () => {
+		expect(data.roomSelections.length).toBe(order.roomSelections.length);
+		expect(data.roomSelections[0].uuid).toBe(order.roomSelections[0].uuid);
+	});
 });
 
 describe('deserializing', () => {
@@ -600,6 +643,10 @@ describe('deserializing', () => {
 		transactions: [
 			{ note: 'transaction-1-note' },
 			{ note: 'transaction-2-note' },
+		],
+		roomSelections: [
+			{ uuid: 'uuid-room-selection-1' },
+			{ uuid: 'uuid-room-selection-2' },
 		],
 	};
 
@@ -629,5 +676,11 @@ describe('deserializing', () => {
 		expect(newOrder.transactions.length).toBe(data.transactions.length);
 		expect(newOrder.transactions[1]).toBeInstanceOf(Transaction);
 		expect(newOrder.transactions[1].note).toBe(data.transactions[1].note);
+	});
+
+	test('restores roomSelections', () => {
+		expect(newOrder.roomSelections.length).toBe(data.roomSelections.length);
+		expect(newOrder.roomSelections[1]).toBeInstanceOf(RoomSelection);
+		expect(newOrder.roomSelections[1].uuid).toBe(data.roomSelections[1].uuid);
 	});
 });

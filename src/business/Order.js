@@ -8,6 +8,7 @@ import OrderChanges from './OrderChanges';
 import Item from './Item';
 import Credit from './Credit';
 import Transaction from './Transaction';
+import RoomSelection from './RoomSelection';
 import Customer from './Customer';
 
 /**
@@ -68,6 +69,14 @@ class Order {
 	@observable
 	@serializable(list(object(Transaction)))
 	transactions = [];
+	/**
+	 * List of RoomSelection
+	 *
+	 * @type {Array<RoomSelection>}
+	 */
+	@observable
+	@serializable(list(object(RoomSelection)))
+	roomSelections = [];
 	/**
 	 * Optional note.
 	 *
@@ -253,6 +262,18 @@ class Order {
 	}
 
 	/**
+	 * Removes a RoomSelection using its uuid.
+	 *
+	 * @param {RoomSelection} roomSelection
+	 */
+	removeRoomSelection(roomSelection) {
+		const filteredRoomSelections = this.roomSelections.filter(
+			currRoomSelection => currRoomSelection.uuid !== roomSelection.uuid
+		);
+		this.roomSelections.replace(filteredRoomSelections);
+	}
+
+	/**
 	 * Starts recording all changes to the Order.
 	 */
 	recordChanges() {
@@ -306,7 +327,7 @@ class Order {
 			return;
 		}
 
-		const fields = ['note', 'items', 'credits', 'transactions'];
+		const fields = ['note', 'items', 'credits', 'transactions', 'roomSelections'];
 		fields.forEach((field) => {
 			if (restorationData[field]) {
 				if (isObservableArray(this[field])) {
@@ -325,6 +346,17 @@ class Order {
 	/**
 	 * Creates an object of restoration data of the current state of the Order.
 	 *
+	 * Once an Order is created, the following fields can have new elements, but their existing
+	 * elements cannot be changed or removed. This is why we only create a shallow copy :
+	 * - items
+	 * - transactions
+	 * - credit
+	 *
+	 * But the following fields can be changed, so we create a deep copy :
+	 * - note (string, so deep copy is not applicable)
+	 * - customer
+	 * - roomSelections
+	 *
 	 * @return {Object}
 	 */
 	createRestorationData() {
@@ -334,6 +366,7 @@ class Order {
 			transactions: this.transactions.slice(),
 			credits: this.credits.slice(),
 			customer: this.customer.clone(),
+			roomSelections: this.roomSelections.map(roomSelection => roomSelection.clone()),
 		};
 	}
 
