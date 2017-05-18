@@ -20,7 +20,7 @@ const channel = postal.channel(CHANNELS.order);
 
 /**
  * An Order, associated with a Customer, contains a list of Items sold (or reimbursed), a list of
- * Credits and a list of Transactions (payments or refunds).
+ * Credits, a list of Transactions (payments or refunds) and a list of RoomSelections.
  *
  * We wish the Order to send a message when it is modified. But since the desired new Order may
  * require multiple changes (ex: 2 new items, 1 new payment mode, 1 new credit, all done one at a
@@ -376,6 +376,12 @@ class Order {
 	 *
 	 * Note that for items, transactions and credits, only new elements are considered changes. We
 	 * do not track modification, reordering, suppression, ... since it is not allowed in an Order.
+	 *
+	 * For Customer, any change in its values is considered a whole customer change.
+	 *
+	 * For RoomSelection, any change (a new RoomChange, a modif in one, ...) is considered a change
+	 * for ALL the RoomSelection (any change in any RoomSelection will consider the whole list as
+	 * changed.)
 	 */
 	getChanges() {
 		if (this.restorationData === null || typeof this.restorationData !== 'object') {
@@ -400,11 +406,35 @@ class Order {
 		});
 
 		if (!this.customer.isEqualTo(old.customer)) {
-			changes.customer = this.customer;
+			changes.customer = this.customer.clone();
+			foundChanges = true;
+		}
+
+		if (this.didRoomSelectionsChanged(old)) {
+			changes.roomSelections = this.roomSelections.map(roomSelection => roomSelection.clone());
 			foundChanges = true;
 		}
 
 		return foundChanges ? changes : null;
+	}
+
+	/**
+	 * Compares the current roomSelections with the ones in 'old'. If any change is detected, returns
+	 * true.
+	 *
+	 * @param {RoomSelections} old
+	 * @return {Boolean}
+	 */
+	didRoomSelectionsChanged(old) {
+		if (old.roomSelections.length !== this.roomSelections.length) {
+			return true;
+		}
+
+		const changed = this.roomSelections.find(
+			(roomSelection, index) => !roomSelection.isEqualTo(old.roomSelections[index])
+		);
+
+		return !!changed;
 	}
 
 	/**

@@ -10,6 +10,7 @@ class OrderChanges {
 	items = [];
 	credits = [];
 	transactions = [];
+	roomSelections = [];
 }
 
 // OrderChanges uses the same serializing schema as Order

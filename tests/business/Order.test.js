@@ -441,6 +441,20 @@ describe('getChanges()', () => {
 			order.customer.name = `${order.customer.name} (modif)`;
 			const res = order.getChanges();
 			expect(res.customer.isEqualTo(order.customer)).toBe(true);
+			expect(res.customer).not.toBe(order.customer);
+		});
+
+		test('roomSelections (change attribute of one)', () => {
+			const roomSelection = order.roomSelections[0];
+			roomSelection.startDate = new Date(1);
+			const res = order.getChanges();
+			expect(res.roomSelections.length).toBe(order.roomSelections.length);
+		});
+
+		test('roomSelections (added roomSelection)', () => {
+			order.roomSelections.push(new RoomSelection());
+			const res = order.getChanges();
+			expect(res.roomSelections.length).toBe(order.roomSelections.length);
 		});
 	});
 
