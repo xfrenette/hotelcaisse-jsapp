@@ -7,6 +7,9 @@ import Field from './Field';
  * possible values.
  */
 class NumberField extends Field {
+	@serializable
+	type = 'NumberField';
+
 	@serializable(rawObject())
 	/**
 	 * Additional numericality constraints (see the "numericality" constraint). By default, set to

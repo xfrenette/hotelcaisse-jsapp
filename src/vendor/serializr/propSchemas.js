@@ -1,10 +1,12 @@
 import Decimal from 'decimal.js';
+import { serialize, deserialize } from 'serializr';
 
 /**
- * Custom PropSchemas that can be used with serializr to serializ:
+ * Custom PropSchemas that can be used with serializr to serialize:
  * - decimal: for decimal.js instances
  * - productTax: for tax objects in a Product
  * - rawObject: for used with literal objects that can be validly saved to JSON as is
+ * - field: for Field instances, that can be of different sub type (ex: EmailField, TextField, ...)
  *
  * @see https://github.com/mobxjs/serializr
  * @see https://mikemcl.github.io/decimal.js
@@ -12,9 +14,9 @@ import Decimal from 'decimal.js';
 
 const decimalPropSchema = {
 	/**
-	 * Serializer function that returns the value of toString() called on the
-	 * Decimal instance. Returns null (or undefined) if the value is null (or
-	 * undefined). Throws an Error if not a Decimal instance.
+	 * Serializer function that returns the value of toString() called on the Decimal instance.
+	 * Returns null (or undefined) if the value is null (or undefined). Throws an Error if not a
+	 * Decimal instance.
 	 *
 	 * @param {Decimal} value
 	 * @return {string|null|undefined}
@@ -32,9 +34,8 @@ const decimalPropSchema = {
 	},
 
 	/**
-	 * Deserializer function that calls callback with the Decimal instance created
-	 * from the jsonValue. If jsonValue is null (or undefined), returns null (or
-	 * undefined).
+	 * Deserializer function that calls callback with the Decimal instance created from the
+	 * jsonValue. If jsonValue is null (or undefined), returns null (or undefined).
 	 *
 	 * @param {string|null|undefined} jsonValue
 	 * @param {Function} callback
@@ -51,9 +52,9 @@ const decimalPropSchema = {
 
 const productTaxPropSchema = {
 	/**
-	 * Serializer function that returns an object with the tax data. Returns
-	 * null (or undefined) if the value is null (or undefined). Throws an Error
-	 * if the object doesn't have the required fields.
+	 * Serializer function that returns an object with the tax data. Returns null (or undefined) if
+	 * the value is null (or undefined). Throws an Error if the object doesn't have the required
+	 * fields.
 	 *
 	 * The object must have the following fields:
 	 * - name (string)
@@ -78,9 +79,8 @@ const productTaxPropSchema = {
 	},
 
 	/**
-	 * Deserializer function that calls callback with the product tax object
-	 * created from the jsonValue. If jsonValue is null (or undefined), returns
-	 * null (or undefined).
+	 * Deserializer function that calls callback with the product tax object created from the
+	 * jsonValue. If jsonValue is null (or undefined), returns null (or undefined).
 	 *
 	 * @param {object|null|undefined} jsonValue
 	 * @param {Function} callback
@@ -123,6 +123,51 @@ const rawObjectPropSchema = {
 	},
 };
 
+const fieldPropSchema = {
+	/**
+	 * The serializer function simply serializes the instance. The "magic" happens when
+	 * deserializing.
+	 *
+	 * @param {Field} value
+	 * @return {string|null|undefined}
+	 */
+	serializer(value) {
+		return serialize(value);
+	},
+
+	/**
+	 * Deserializer function that will create a correct instance of a Field based on its type
+	 * attribute.
+	 *
+	 * @param {Object|null|undefined} jsonValue
+	 * @param {Function} callback
+	 */
+	deserializer(jsonValue, callback) {
+		const fields = require('../../fields');
+
+		if (jsonValue === null || jsonValue === undefined) {
+			callback(null, jsonValue);
+			return;
+		}
+
+		const type = jsonValue.type;
+
+		if (!type) {
+			callback(null, null);
+			return;
+		}
+
+		if (fields[type]) {
+			const instance = deserialize(fields[type], jsonValue);
+			callback(null, instance);
+			return;
+		}
+
+		callback(null, null);
+	},
+};
+
 export const decimal = () => decimalPropSchema;
 export const productTax = () => productTaxPropSchema;
 export const rawObject = () => rawObjectPropSchema;
+export const field = () => fieldPropSchema;

@@ -1,9 +1,13 @@
+import { serializable } from 'serializr';
 import Field from './Field';
 
 /**
  * The EmailField is a field accepting only an email address.
  */
 class EmailField extends Field {
+	@serializable
+	type = 'EmailField';
+
 	/**
 	 * Validates the value.
 	 *

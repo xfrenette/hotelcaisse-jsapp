@@ -1,9 +1,13 @@
+import { serializable } from 'serializr';
 import Field from './Field';
 
 /**
  * The TextField is a field accepting strings.
  */
 class TextField extends Field {
+	@serializable
+	type = 'TextField';
+
 	/**
 	 * Validates the value.
 	 *

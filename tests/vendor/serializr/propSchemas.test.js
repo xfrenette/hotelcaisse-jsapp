@@ -1,5 +1,7 @@
 import Decimal from 'decimal.js';
-import { decimal, productTax, rawObject } from 'vendor/serializr/propSchemas';
+import { serialize } from 'serializr';
+import { decimal, productTax, rawObject, field } from 'vendor/serializr/propSchemas';
+import { EmailField } from 'fields';
 
 describe('decimal', () => {
 	const schema = decimal();
@@ -200,6 +202,54 @@ describe('rawObject', () => {
 		test('returns undefined if undefined', (done) => {
 			schema.deserializer(undefined, (err, val) => {
 				expect(val).toBeUndefined();
+				done();
+			});
+		});
+	});
+});
+
+describe('field', () => {
+	const schema = field();
+	const fieldInstance = new EmailField();
+	fieldInstance.uuid = 'email-field-1';
+
+	describe('serializer()', () => {
+		test('returns same object as serialize()', () => {
+			const expected = serialize(fieldInstance);
+			const data = schema.serializer(fieldInstance);
+			expect(data).toEqual(expected);
+		});
+	});
+
+	describe('deserializer', () => {
+		test('returns correct instance', (done) => {
+			const data = serialize(fieldInstance);
+			schema.deserializer(data, (err, val) => {
+				expect(val).toBeInstanceOf(EmailField);
+				expect(val.uuid).toBe(fieldInstance.uuid);
+				done();
+			});
+		});
+
+		test('returns null if null', (done) => {
+			schema.deserializer(null, (err, val) => {
+				expect(val).toBeNull();
+				done();
+			});
+		});
+
+		test('returns undefined if undefined', (done) => {
+			schema.deserializer(undefined, (err, val) => {
+				expect(val).toBeUndefined();
+				done();
+			});
+		});
+
+		test('returns null if inexistant field type', (done) => {
+			const data = serialize(fieldInstance);
+			data.type = '__non-existent__'
+			schema.deserializer(data, (err, val) => {
+				expect(val).toBeNull();
 				done();
 			});
 		});

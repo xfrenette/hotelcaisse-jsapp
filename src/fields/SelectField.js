@@ -7,6 +7,9 @@ import Field from './Field';
  * for each values.
  */
 class SelectField extends Field {
+	@serializable
+	type = 'SelectField';
+
 	/**
 	 * All possible values. An object where the key is the choice value and the value is the choice
 	 * label.

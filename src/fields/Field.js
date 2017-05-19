@@ -8,6 +8,19 @@ import validate from '../Validator';
  */
 class Field {
 	/**
+	 * Type of this field. It is used when deserializing an array of Fields (which can contain
+	 * multiple types), to create the correct instance. The value must be a valid key in
+	 * src/fields/index.js
+	 *
+	 * It must be redefined in each sub class. Also, each sub class must have a serializr
+	 * ModelSchema, else it will fallback to this class's ModelSchema. Trick: use at least one
+	 * @serializable (for example, on the type attribute) to have a ModelSchema generated.
+	 *
+	 * @type {String}
+	 */
+	@serializable
+	type = 'Field';
+	/**
 	 * Unique id of this field
 	 *
 	 * @type {String}

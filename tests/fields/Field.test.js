@@ -19,6 +19,7 @@ describe('serializing', () => {
 
 	test('saves primitives', () => {
 		expect(data).toEqual({
+			type: field.type,
 			uuid: field.uuid,
 			name: field.name,
 			required: field.required,
