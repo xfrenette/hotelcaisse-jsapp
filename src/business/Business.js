@@ -127,6 +127,7 @@ class Business {
 			'rootProductCategory',
 			'transactionModes',
 			'orders',
+			'customerFields',
 		].forEach((attribute) => {
 			this[attribute] = newBusiness[attribute];
 		});

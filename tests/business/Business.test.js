@@ -226,6 +226,7 @@ describe('update()', () => {
 			rootProductCategory: new ProductCategory(),
 			transactionModes: [],
 			orders: [],
+			customerFields: {},
 		};
 		const newBusiness = new Business();
 		Object.keys(attributes).forEach((attribute) => {
