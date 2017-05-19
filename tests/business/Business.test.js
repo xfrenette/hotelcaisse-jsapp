@@ -8,6 +8,7 @@ import Product from 'business/Product';
 import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
+import { TextField, EmailField } from 'fields/';
 
 let business;
 const channel = postal.channel(CHANNELS.business);
@@ -71,10 +72,19 @@ describe('addOrder()', () => {
 
 describe('serializing', () => {
 	let data;
+	const textField = new TextField();
+	textField.uuid = 'text-field';
+	const emailField = new EmailField();
+	emailField.uuid = 'email-field';
 
 	beforeEach(() => {
 		business.uuid = 'test-uuid';
 		business.deviceRegister.employee = 'test-employee';
+		business.customerFields = {
+			fields: [textField, emailField],
+			labels: { a: 'b' },
+			essentials: { c: 'd' },
+		};
 		data = serialize(business);
 	});
 
@@ -104,6 +114,19 @@ describe('serializing', () => {
 		expect(data.orders.length).toBe(business.orders.length);
 		expect(data.orders[1].createdAt).toEqual(expect.any(Number));
 	});
+
+	test('serializes customerFields : fields', () => {
+		expect(data.customerFields.fields.length).toBe(business.customerFields.fields.length);
+		expect(data.customerFields.fields[1].uuid).toBe(business.customerFields.fields[1].uuid);
+	});
+
+	test('serializes customerFields : labels', () => {
+		expect(data.customerFields.labels).toEqual(business.customerFields.labels);
+	});
+
+	test('serializes customerFields : essentials', () => {
+		expect(data.customerFields.essentials).toEqual(business.customerFields.essentials);
+	});
 });
 
 describe('deserializing', () => {
@@ -129,6 +152,14 @@ describe('deserializing', () => {
 			{ createdAt: (new Date()).getTime() },
 			{ createdAt: (new Date()).getTime() },
 		],
+		customerFields: {
+			fields: [
+				{ uuid: 'field-1', type: 'TextField' },
+				{ uuid: 'field-2', type: 'EmailField' },
+			],
+			labels: { a: 'b' },
+			essentials: { c: 'd' },
+		},
 	};
 
 	beforeEach(() => {
@@ -169,6 +200,20 @@ describe('deserializing', () => {
 		expect(newBusiness.orders.length).toBe(data.orders.length);
 		expect(newBusiness.orders[1]).toBeInstanceOf(Order);
 		expect(newBusiness.orders[1].createdAt).toBeInstanceOf(Date);
+	});
+
+	test('restores customerFields : fields', () => {
+		expect(newBusiness.customerFields.fields.length).toBe(data.customerFields.fields.length);
+		expect(newBusiness.customerFields.fields[1]).toBeInstanceOf(EmailField);
+		expect(newBusiness.customerFields.fields[1].uuid).toBe(data.customerFields.fields[1].uuid);
+	});
+
+	test('restores customerFields : labels', () => {
+		expect(newBusiness.customerFields.labels).toEqual(data.customerFields.labels);
+	});
+
+	test('restores customerFields : essentials', () => {
+		expect(newBusiness.customerFields.essentials).toEqual(data.customerFields.essentials);
 	});
 });
 

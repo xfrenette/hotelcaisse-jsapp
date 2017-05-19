@@ -7,6 +7,7 @@ import Product from './Product';
 import ProductCategory from './ProductCategory';
 import TransactionMode from './TransactionMode';
 import Order from './Order';
+import { rawObject, field } from '../vendor/serializr/propSchemas';
 
 /**
  * All messages by this class are published on the same channel.
@@ -14,6 +15,20 @@ import Order from './Order';
  * @type {ChannelDefinition}
  */
 const channel = postal.channel(CHANNELS.business);
+
+/**
+ * serializr ModelSchema used to de/serialize the fields attributes
+ *
+ * @type {Object}
+ */
+const fieldsModelSchema = {
+	factory: () => ({}),
+	props: {
+		fields: list(field()),
+		labels: rawObject(),
+		essentials: rawObject(),
+	},
+};
 
 /**
  * Class that represents the business currently on this device and all its business related data.
@@ -70,6 +85,20 @@ class Business {
 	 */
 	@serializable(list(object(Order)))
 	orders = [];
+	/**
+	 * The Customer fields. This object contains the list of the Field instances, the label of each
+	 * field (key is the Field's uuid) and which Field represent the essential fields (name, email,
+	 * ...) where the key is the name of the essential field (ex: 'name') and the value is the Field
+	 * uuid.
+	 *
+	 * @type {Object}
+	 */
+	@serializable(object(fieldsModelSchema))
+	customerFields = {
+		fields: [],
+		labels: {},
+		essentials: {},
+	};
 
 	/**
 	 * Add an Order to the order list. Publishes a message.
