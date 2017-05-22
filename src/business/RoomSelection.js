@@ -86,6 +86,14 @@ class RoomSelection {
 
 		return otherIsEqual;
 	}
+
+	/**
+	 * Replaces the room property with a copy of it. This way, this RoomSelection will keep the
+	 * reference to the Room as it was, even if the room is later modified or removed.
+	 */
+	freezeRoom() {
+		this.room = this.room.clone();
+	}
 }
 
 export default RoomSelection;

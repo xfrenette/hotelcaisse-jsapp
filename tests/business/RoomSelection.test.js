@@ -45,7 +45,7 @@ describe('clone()', () => {
 	});
 });
 
-describe.only('isEqualTo()', () => {
+describe('isEqualTo()', () => {
 	let copy;
 
 	beforeEach(() => {
@@ -85,6 +85,25 @@ describe.only('isEqualTo()', () => {
 		roomSelection = new RoomSelection();
 		copy = roomSelection.clone();
 		expect(roomSelection.isEqualTo(copy)).toBe(true);
+	});
+});
+
+describe('freezeRoom()', () => {
+	beforeEach(() => {
+		roomSelection.freezeRoom();
+	});
+
+	test('room is still Room instance', () => {
+		expect(roomSelection.room).toBeInstanceOf(Room);
+	});
+
+	test('is not same object', () => {
+		expect(roomSelection.room).not.toBe(room);
+	});
+
+	test('has same values', () => {
+		expect(roomSelection.room.uuid).toBe(room.uuid);
+		expect(roomSelection.room.name).toBe(room.name);
 	});
 });
 
