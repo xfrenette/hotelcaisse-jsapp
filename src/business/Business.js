@@ -7,6 +7,7 @@ import Product from './Product';
 import ProductCategory from './ProductCategory';
 import TransactionMode from './TransactionMode';
 import Order from './Order';
+import Room from './Room';
 import { rawObject, field } from '../vendor/serializr/propSchemas';
 
 /**
@@ -99,6 +100,13 @@ class Business {
 		labels: {},
 		essentials: {},
 	};
+	/**
+	 * All the rooms
+	 *
+	 * @type {Array<Room>}
+	 */
+	@serializable(list(object(Room)))
+	rooms = [];
 
 	/**
 	 * Add an Order to the order list. Publishes a message.

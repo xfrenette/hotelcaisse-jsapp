@@ -8,6 +8,7 @@ import Product from 'business/Product';
 import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
+import Room from 'business/Room';
 import { TextField, EmailField } from 'fields/';
 
 let business;
@@ -39,6 +40,14 @@ beforeEach(() => {
 
 	business.orders.push(new Order());
 	business.orders.push(new Order());
+
+	const room1 = new Room();
+	room1.uuid = 'room1';
+	const room2 = new Room();
+	room2.uuid = 'room2';
+
+	business.rooms.push(room1);
+	business.rooms.push(room2);
 });
 
 afterEach(() => {
@@ -127,6 +136,11 @@ describe('serializing', () => {
 	test('serializes customerFields : essentials', () => {
 		expect(data.customerFields.essentials).toEqual(business.customerFields.essentials);
 	});
+
+	test('serializes rooms', () => {
+		expect(data.rooms.length).toBe(business.rooms.length);
+		expect(data.rooms[1].uuid).toBe(business.rooms[1].uuid);
+	});
 });
 
 describe('deserializing', () => {
@@ -160,6 +174,10 @@ describe('deserializing', () => {
 			labels: { a: 'b' },
 			essentials: { c: 'd' },
 		},
+		rooms: [
+			{ uuid: 'room1' },
+			{ uuid: 'room2' },
+		],
 	};
 
 	beforeEach(() => {
@@ -214,6 +232,12 @@ describe('deserializing', () => {
 
 	test('restores customerFields : essentials', () => {
 		expect(newBusiness.customerFields.essentials).toEqual(data.customerFields.essentials);
+	});
+
+	test('restores rooms', () => {
+		expect(newBusiness.rooms.length).toBe(data.rooms.length);
+		expect(newBusiness.rooms[1]).toBeInstanceOf(Room);
+		expect(newBusiness.rooms[1].uuid).toBe(data.rooms[1].uuid);
 	});
 });
 
