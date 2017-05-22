@@ -9,6 +9,21 @@ beforeEach(() => {
 	room.name = 'test-name';
 });
 
+describe('clone()', () => {
+	let clone;
+
+	beforeEach(() => {
+		clone = room.clone();
+	});
+
+	test('same primitive attributes', () => {
+		const attrs = ['name', 'uuid'];
+		attrs.forEach((attr) => {
+			expect(clone[attr]).toEqual(room[attr]);
+		});
+	});
+});
+
 describe('serializing', () => {
 	let data;
 
