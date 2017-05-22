@@ -94,6 +94,10 @@ describe('serializing', () => {
 			labels: { a: 'b' },
 			essentials: { c: 'd' },
 		};
+		business.roomSelectionFields = {
+			fields: [textField, emailField],
+			labels: { a: 'b' },
+		};
 		data = serialize(business);
 	});
 
@@ -137,6 +141,15 @@ describe('serializing', () => {
 		expect(data.customerFields.essentials).toEqual(business.customerFields.essentials);
 	});
 
+	test('serializes roomSelectionFields : fields', () => {
+		expect(data.roomSelectionFields.fields.length).toBe(business.roomSelectionFields.fields.length);
+		expect(data.roomSelectionFields.fields[1].uuid).toBe(business.roomSelectionFields.fields[1].uuid);
+	});
+
+	test('serializes roomSelectionFields : labels', () => {
+		expect(data.roomSelectionFields.labels).toEqual(business.roomSelectionFields.labels);
+	});
+
 	test('serializes rooms', () => {
 		expect(data.rooms.length).toBe(business.rooms.length);
 		expect(data.rooms[1].uuid).toBe(business.rooms[1].uuid);
@@ -173,6 +186,13 @@ describe('deserializing', () => {
 			],
 			labels: { a: 'b' },
 			essentials: { c: 'd' },
+		},
+		roomSelectionFields: {
+			fields: [
+				{ uuid: 'field-3', type: 'TextField' },
+				{ uuid: 'field-4', type: 'EmailField' },
+			],
+			labels: { a: 'b' },
 		},
 		rooms: [
 			{ uuid: 'room1' },
@@ -234,6 +254,16 @@ describe('deserializing', () => {
 		expect(newBusiness.customerFields.essentials).toEqual(data.customerFields.essentials);
 	});
 
+	test('restores roomSelectionFields : fields', () => {
+		expect(newBusiness.roomSelectionFields.fields.length).toBe(data.roomSelectionFields.fields.length);
+		expect(newBusiness.roomSelectionFields.fields[1]).toBeInstanceOf(EmailField);
+		expect(newBusiness.roomSelectionFields.fields[1].uuid).toBe(data.roomSelectionFields.fields[1].uuid);
+	});
+
+	test('restores roomSelectionFields : labels', () => {
+		expect(newBusiness.roomSelectionFields.labels).toEqual(data.roomSelectionFields.labels);
+	});
+
 	test('restores rooms', () => {
 		expect(newBusiness.rooms.length).toBe(data.rooms.length);
 		expect(newBusiness.rooms[1]).toBeInstanceOf(Room);
@@ -251,6 +281,7 @@ describe('update()', () => {
 			transactionModes: [],
 			orders: [],
 			customerFields: {},
+			roomSelectionFields: {},
 		};
 		const newBusiness = new Business();
 		Object.keys(attributes).forEach((attribute) => {

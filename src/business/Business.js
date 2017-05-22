@@ -87,7 +87,7 @@ class Business {
 	@serializable(list(object(Order)))
 	orders = [];
 	/**
-	 * The Customer fields. This object contains the list of the Field instances, the label of each
+	 * The Customer fields. This object contains the list of the Field instances, the label for each
 	 * field (key is the Field's uuid) and which Field represent the essential fields (name, email,
 	 * ...) where the key is the name of the essential field (ex: 'name') and the value is the Field
 	 * uuid.
@@ -99,6 +99,17 @@ class Business {
 		fields: [],
 		labels: {},
 		essentials: {},
+	};
+	/**
+	 * The RoomSelection fields. This object contains the list of the Field instances, and the label
+	 * for each field (key is the Field's uuid).
+	 *
+	 * @type {Object}
+	 */
+	@serializable(object(fieldsModelSchema))
+	roomSelectionFields = {
+		fields: [],
+		labels: {},
 	};
 	/**
 	 * All the rooms
@@ -136,6 +147,7 @@ class Business {
 			'transactionModes',
 			'orders',
 			'customerFields',
+			'roomSelectionFields',
 		].forEach((attribute) => {
 			this[attribute] = newBusiness[attribute];
 		});
