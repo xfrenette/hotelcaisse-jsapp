@@ -3,6 +3,7 @@ import EmailField from './EmailField';
 import TextField from './TextField';
 import NumberField from './NumberField';
 import SelectField from './SelectField';
+import PhoneField from './PhoneField';
 
 export {
 	Field,
@@ -10,4 +11,5 @@ export {
 	TextField,
 	NumberField,
 	SelectField,
+	PhoneField,
 };
