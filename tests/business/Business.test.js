@@ -282,6 +282,7 @@ describe('update()', () => {
 			orders: [],
 			customerFields: {},
 			roomSelectionFields: {},
+			rooms: [],
 		};
 		const newBusiness = new Business();
 		Object.keys(attributes).forEach((attribute) => {

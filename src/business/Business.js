@@ -148,6 +148,7 @@ class Business {
 			'orders',
 			'customerFields',
 			'roomSelectionFields',
+			'rooms',
 		].forEach((attribute) => {
 			this[attribute] = newBusiness[attribute];
 		});
