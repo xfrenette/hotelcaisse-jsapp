@@ -86,7 +86,7 @@ describe('CashMovement.validate()', () => {
 	});
 
 	test('rejects invalid note', () => {
-		const invalidValues = [true, new Date()];
+		const invalidValues = ['', ' ', null, true, new Date()];
 		invalidValues.forEach((value) => {
 			expect(CashMovement.validate({ note: value })).not.toBeUndefined();
 		});
@@ -95,12 +95,5 @@ describe('CashMovement.validate()', () => {
 	test('validates valid data', () => {
 		const values = { amount: new Decimal(12), note: 'Test' };
 		expect(CashMovement.validate(values)).toBeUndefined();
-	});
-
-	test('validates empty note', () => {
-		const validValues = [undefined, null, '', ' '];
-		validValues.forEach((value) => {
-			expect(CashMovement.validate({ note: value })).toBeUndefined();
-		});
 	});
 });

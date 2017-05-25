@@ -14,6 +14,7 @@ const constraints = {
 		decimal: true,
 	},
 	note: {
+		presence: true,
 		typeOf: 'string',
 	},
 };
