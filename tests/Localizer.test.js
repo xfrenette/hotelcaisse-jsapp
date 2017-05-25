@@ -60,6 +60,16 @@ describe('formatCurrency()', () => {
 	});
 });
 
+describe('formatDate()', () => {
+	test('uses locale and skeleton', () => {
+		const date = new Date(2017, 4, 25, 18, 59);
+		const skeleton = 'yMMMd';
+		const expected = '25 mai 2017';
+		const res = localizer.formatDate(date, { skeleton });
+		expect(res).toBe(expected);
+	});
+});
+
 describe('roundForCurrency()', () => {
 	test('rounds when applicable', () => {
 		let res = localizer.roundForCurrency(3.52);

@@ -2,20 +2,39 @@
 import Globalize from 'globalize';
 import get from 'lodash.get';
 import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
+import metaZones from 'cldr-data/supplemental/metaZones.json';
+import timeData from 'cldr-data/supplemental/timeData.json';
+import weekData from 'cldr-data/supplemental/weekData.json';
 import numberingSystems from 'cldr-data/supplemental/numberingSystems.json';
+
+import frCAcaGregorian from 'cldr-data/main/fr-CA/ca-gregorian.json';
+import enCaGregorian from 'cldr-data/main/en/ca-gregorian.json';
+
+import frCAtimeZoneNames from 'cldr-data/main/fr-CA/timeZoneNames.json';
+import enTimeZoneNames from 'cldr-data/main/en/timeZoneNames.json';
+
 import frCAnumbers from 'cldr-data/main/fr-CA/numbers.json';
 import enNumbers from 'cldr-data/main/en/numbers.json';
+
 import frCAcurrencies from 'cldr-data/main/fr-CA/currencies.json';
 import enCurrencies from 'cldr-data/main/en/currencies.json';
+
 import currencyData from 'cldr-data/supplemental/currencyData.json';
 import plurals from 'cldr-data/supplemental/plurals.json';
 import ordinals from 'cldr-data/supplemental/ordinals.json';
 
 const jsonFiles = [
 	likelySubtags,
+	metaZones,
+	timeData,
+	weekData,
 	numberingSystems,
 	frCAnumbers,
 	enNumbers,
+	frCAcaGregorian,
+	enCaGregorian,
+	frCAtimeZoneNames,
+	enTimeZoneNames,
 	frCAcurrencies,
 	enCurrencies,
 	currencyData,
@@ -138,6 +157,21 @@ class Localizer {
 	 */
 	formatCurrency(value, options) {
 		return this.globalize.formatCurrency(value, this.currency, options);
+	}
+
+	/**
+	 * Formats a Date instance using the locale. Generally, the options will contain a 'skeleton'
+	 * string attribute for the formatting.
+	 *
+	 * @see  http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table
+	 * @see  https://github.com/globalizejs/globalize/blob/master/doc/api/date/date-formatter.md
+	 *
+	 * @param {Date} date
+	 * @param {Object} options
+	 * @return {String}
+	 */
+	formatDate(date, options = {}) {
+		return this.globalize.formatDate(date, options);
 	}
 
 	/**
