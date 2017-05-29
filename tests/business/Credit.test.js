@@ -3,14 +3,19 @@ import { isObservable } from 'mobx';
 import Credit from 'business/Credit';
 import Decimal from 'decimal.js';
 
+let credit;
+
+beforeEach(() => {
+	credit = new Credit('credit');
+});
+
 describe('constructor()', () => {
 	test('sets createdAt time', () => {
-		const credit = new Credit();
 		expect(credit.createdAt).toBeInstanceOf(Date);
 	});
 
 	test('sets amount if present', () => {
-		let credit = new Credit();
+		credit = new Credit();
 		expect(credit.amount).toBeNull();
 
 		const decimal = new Decimal(10);
@@ -19,7 +24,7 @@ describe('constructor()', () => {
 	});
 
 	test('sets uuid if present', () => {
-		let credit = new Credit();
+		credit = new Credit();
 		expect(credit.uuid).toBeNull();
 
 		const uuid = 'test-uuid';
@@ -28,7 +33,7 @@ describe('constructor()', () => {
 	});
 
 	test('sets note if present', () => {
-		let credit = new Credit();
+		credit = new Credit();
 		expect(credit.note).toBeNull();
 
 		const note = 'test-note';
@@ -39,14 +44,18 @@ describe('constructor()', () => {
 
 describe('amount', () => {
 	test('is observable', () => {
-		const credit = new Credit();
 		expect(isObservable(credit, 'amount')).toBe(true);
+	});
+});
+
+describe('note', () => {
+	test('is observable', () => {
+		expect(isObservable(credit, 'note')).toBe(true);
 	});
 });
 
 describe('serializing', () => {
 	let data;
-	let credit;
 
 	beforeEach(() => {
 		credit = new Credit('test-uuid', new Decimal(12.56), 'test-note');
@@ -67,7 +76,6 @@ describe('serializing', () => {
 });
 
 describe('deserializing', () => {
-	let credit;
 	const jsonObject = {
 		uuid: 'test-uuid',
 		amount: '-1.23',

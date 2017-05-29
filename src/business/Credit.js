@@ -46,6 +46,7 @@ class Credit {
 	 * @type {String}
 	 */
 	@serializable
+	@observable
 	note = '';
 	/**
 	 * Creation date time.
