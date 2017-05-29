@@ -82,6 +82,7 @@ class Order {
 	 *
 	 * @type {String}
 	 */
+	@observable
 	@serializable
 	note = '';
 	/**

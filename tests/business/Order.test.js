@@ -128,6 +128,12 @@ describe('roomSelections', () => {
 	});
 });
 
+describe('note', () => {
+	test('is observable', () => {
+		expect(isObservable(order, 'note')).toBe(true);
+	});
+});
+
 describe('itemsSubtotal', () => {
 	test('returns Decimal', () => {
 		expect(order.itemsSubtotal).toBeInstanceOf(Decimal);
