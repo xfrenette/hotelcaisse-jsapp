@@ -18,20 +18,6 @@ import { rawObject, field } from '../vendor/serializr/propSchemas';
 const channel = postal.channel(CHANNELS.business);
 
 /**
- * serializr ModelSchema used to de/serialize the fields attributes
- *
- * @type {Object}
- */
-const fieldsModelSchema = {
-	factory: () => ({}),
-	props: {
-		fields: list(field()),
-		labels: rawObject(),
-		essentials: rawObject(),
-	},
-};
-
-/**
  * Class that represents the business currently on this device and all its business related data.
  * Examples:
  * - Products and product categories
@@ -87,30 +73,19 @@ class Business {
 	@serializable(list(object(Order)))
 	orders = [];
 	/**
-	 * The Customer fields. This object contains the list of the Field instances, the label for each
-	 * field (key is the Field's uuid) and which Field represent the essential fields (name, email,
-	 * ...) where the key is the name of the essential field (ex: 'name') and the value is the Field
-	 * uuid.
+	 * List of Field for the Customer fields.
 	 *
-	 * @type {Object}
+	 * @type {Array<Field>}
 	 */
-	@serializable(object(fieldsModelSchema))
-	customerFields = {
-		fields: [],
-		labels: {},
-		essentials: {},
-	};
+	@serializable(list(field()))
+	customerFields = [];
 	/**
-	 * The RoomSelection fields. This object contains the list of the Field instances, and the label
-	 * for each field (key is the Field's uuid).
+	 * List of Field for the RoomSelection fields.
 	 *
-	 * @type {Object}
+	 * @type {Array<Field>}
 	 */
-	@serializable(object(fieldsModelSchema))
-	roomSelectionFields = {
-		fields: [],
-		labels: {},
-	};
+	@serializable(list(field()))
+	roomSelectionFields = [];
 	/**
 	 * All the rooms
 	 *

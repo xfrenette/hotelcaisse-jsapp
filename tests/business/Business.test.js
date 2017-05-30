@@ -89,15 +89,8 @@ describe('serializing', () => {
 	beforeEach(() => {
 		business.uuid = 'test-uuid';
 		business.deviceRegister.employee = 'test-employee';
-		business.customerFields = {
-			fields: [textField, emailField],
-			labels: { a: 'b' },
-			essentials: { c: 'd' },
-		};
-		business.roomSelectionFields = {
-			fields: [textField, emailField],
-			labels: { a: 'b' },
-		};
+		business.customerFields = [textField, emailField];
+		business.roomSelectionFields = [textField, emailField];
 		data = serialize(business);
 	});
 
@@ -128,26 +121,14 @@ describe('serializing', () => {
 		expect(data.orders[1].createdAt).toEqual(expect.any(Number));
 	});
 
-	test('serializes customerFields : fields', () => {
-		expect(data.customerFields.fields.length).toBe(business.customerFields.fields.length);
-		expect(data.customerFields.fields[1].uuid).toBe(business.customerFields.fields[1].uuid);
+	test('serializes customerFields', () => {
+		expect(data.customerFields.length).toBe(business.customerFields.length);
+		expect(data.customerFields[1].uuid).toBe(business.customerFields[1].uuid);
 	});
 
-	test('serializes customerFields : labels', () => {
-		expect(data.customerFields.labels).toEqual(business.customerFields.labels);
-	});
-
-	test('serializes customerFields : essentials', () => {
-		expect(data.customerFields.essentials).toEqual(business.customerFields.essentials);
-	});
-
-	test('serializes roomSelectionFields : fields', () => {
-		expect(data.roomSelectionFields.fields.length).toBe(business.roomSelectionFields.fields.length);
-		expect(data.roomSelectionFields.fields[1].uuid).toBe(business.roomSelectionFields.fields[1].uuid);
-	});
-
-	test('serializes roomSelectionFields : labels', () => {
-		expect(data.roomSelectionFields.labels).toEqual(business.roomSelectionFields.labels);
+	test('serializes roomSelectionFields', () => {
+		expect(data.roomSelectionFields.length).toBe(business.roomSelectionFields.length);
+		expect(data.roomSelectionFields[1].uuid).toBe(business.roomSelectionFields[1].uuid);
 	});
 
 	test('serializes rooms', () => {
@@ -179,21 +160,14 @@ describe('deserializing', () => {
 			{ createdAt: (new Date()).getTime() },
 			{ createdAt: (new Date()).getTime() },
 		],
-		customerFields: {
-			fields: [
-				{ uuid: 'field-1', type: 'TextField' },
-				{ uuid: 'field-2', type: 'EmailField' },
-			],
-			labels: { a: 'b' },
-			essentials: { c: 'd' },
-		},
-		roomSelectionFields: {
-			fields: [
-				{ uuid: 'field-3', type: 'TextField' },
-				{ uuid: 'field-4', type: 'EmailField' },
-			],
-			labels: { a: 'b' },
-		},
+		customerFields: [
+			{ uuid: 'field-1', type: 'TextField' },
+			{ uuid: 'field-2', type: 'EmailField' },
+		],
+		roomSelectionFields: [
+			{ uuid: 'field-3', type: 'TextField' },
+			{ uuid: 'field-4', type: 'EmailField' },
+		],
 		rooms: [
 			{ uuid: 'room1' },
 			{ uuid: 'room2' },
@@ -240,28 +214,16 @@ describe('deserializing', () => {
 		expect(newBusiness.orders[1].createdAt).toBeInstanceOf(Date);
 	});
 
-	test('restores customerFields : fields', () => {
-		expect(newBusiness.customerFields.fields.length).toBe(data.customerFields.fields.length);
-		expect(newBusiness.customerFields.fields[1]).toBeInstanceOf(EmailField);
-		expect(newBusiness.customerFields.fields[1].uuid).toBe(data.customerFields.fields[1].uuid);
+	test('restores customerFields', () => {
+		expect(newBusiness.customerFields.length).toBe(data.customerFields.length);
+		expect(newBusiness.customerFields[1]).toBeInstanceOf(EmailField);
+		expect(newBusiness.customerFields[1].uuid).toBe(data.customerFields[1].uuid);
 	});
 
-	test('restores customerFields : labels', () => {
-		expect(newBusiness.customerFields.labels).toEqual(data.customerFields.labels);
-	});
-
-	test('restores customerFields : essentials', () => {
-		expect(newBusiness.customerFields.essentials).toEqual(data.customerFields.essentials);
-	});
-
-	test('restores roomSelectionFields : fields', () => {
-		expect(newBusiness.roomSelectionFields.fields.length).toBe(data.roomSelectionFields.fields.length);
-		expect(newBusiness.roomSelectionFields.fields[1]).toBeInstanceOf(EmailField);
-		expect(newBusiness.roomSelectionFields.fields[1].uuid).toBe(data.roomSelectionFields.fields[1].uuid);
-	});
-
-	test('restores roomSelectionFields : labels', () => {
-		expect(newBusiness.roomSelectionFields.labels).toEqual(data.roomSelectionFields.labels);
+	test('restores roomSelectionFields', () => {
+		expect(newBusiness.roomSelectionFields.length).toBe(data.roomSelectionFields.length);
+		expect(newBusiness.roomSelectionFields[1]).toBeInstanceOf(EmailField);
+		expect(newBusiness.roomSelectionFields[1].uuid).toBe(data.roomSelectionFields[1].uuid);
 	});
 
 	test('restores rooms', () => {
