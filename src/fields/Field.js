@@ -28,12 +28,12 @@ class Field {
 	@serializable(identifier())
 	uuid = null;
 	/**
-	 * Name of this field
+	 * Label of this field
 	 *
 	 * @type {String}
 	 */
 	@serializable
-	name = null;
+	label = null;
 	/**
 	 * If true, the value is required and cannot be null.
 	 *

@@ -6,7 +6,7 @@ let field;
 beforeEach(() => {
 	field = new Field();
 	field.uuid = 'test-uuid';
-	field.name = 'test-name';
+	field.label = 'test-label';
 });
 
 describe('serializing', () => {
@@ -21,7 +21,7 @@ describe('serializing', () => {
 		expect(data).toEqual({
 			type: field.type,
 			uuid: field.uuid,
-			name: field.name,
+			label: field.label,
 			required: field.required,
 		});
 	});
@@ -30,7 +30,7 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	const jsonObject = {
 		uuid: 'test-uuid-2',
-		name: 'test-name-2',
+		label: 'test-label-2',
 		required: true,
 	};
 
@@ -40,7 +40,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(field.uuid).toBe(jsonObject.uuid);
-		expect(field.name).toBe(jsonObject.name);
+		expect(field.label).toBe(jsonObject.label);
 		expect(field.required).toBe(jsonObject.required);
 	});
 });
