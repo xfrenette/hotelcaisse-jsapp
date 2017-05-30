@@ -35,6 +35,16 @@ class Field {
 	@serializable
 	label = null;
 	/**
+	 * Role of this field. The Field was created to support an unknown number of values in some
+	 * objects, but some objects may want to assign specific information to some Field (ex: a
+	 * customer name or email address). The role can thus be set (by the server, for example) to mark
+	 * some fields as representing those information.
+	 *
+	 * @type {String}
+	 */
+	@serializable
+	role = null;
+	/**
 	 * If true, the value is required and cannot be null.
 	 *
 	 * @type {Boolean}

@@ -7,6 +7,7 @@ beforeEach(() => {
 	field = new Field();
 	field.uuid = 'test-uuid';
 	field.label = 'test-label';
+	field.role = 'test-role';
 });
 
 describe('serializing', () => {
@@ -22,6 +23,7 @@ describe('serializing', () => {
 			type: field.type,
 			uuid: field.uuid,
 			label: field.label,
+			role: field.role,
 			required: field.required,
 		});
 	});
@@ -31,6 +33,7 @@ describe('deserializing', () => {
 	const jsonObject = {
 		uuid: 'test-uuid-2',
 		label: 'test-label-2',
+		role: 'test-role-2',
 		required: true,
 	};
 
