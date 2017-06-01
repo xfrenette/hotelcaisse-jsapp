@@ -1,6 +1,6 @@
 import { serializable, identifier } from 'serializr';
 import isEqual from 'lodash.isequal';
-import { rawObject } from 'vendor/serializr/propSchemas';
+import { rawObject } from '../vendor/serializr/propSchemas';
 
 /**
  * Represents a customer and all its information.
