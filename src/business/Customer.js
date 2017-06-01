@@ -1,6 +1,5 @@
-import { serializable, identifier } from 'serializr';
+import { serializable, identifier, map } from 'serializr';
 import isEqual from 'lodash.isequal';
-import { rawObject } from '../vendor/serializr/propSchemas';
 
 /**
  * Represents a customer and all its information.
@@ -18,8 +17,8 @@ class Customer {
 	 *
 	 * @type {Object}
 	 */
-	@serializable(rawObject())
-	fieldValues = {};
+	@serializable(map())
+	fieldValues = new Map();
 	/**
 	 * References to Field object for which we store values in fieldValues. Setting this attribute is
 	 * optionnal, but required if we want to use get(). This attribute is not serialized.
@@ -39,8 +38,8 @@ class Customer {
 	 * @return {mixed}
 	 */
 	getFieldValue(field) {
-		if (this.fieldValues[field.uuid] !== undefined) {
-			return this.fieldValues[field.uuid];
+		if (this.fieldValues.has(field.uuid)) {
+			return this.fieldValues.get(field.uuid);
 		}
 
 		return null;
@@ -75,9 +74,7 @@ class Customer {
 	 */
 	clone() {
 		const clone = Object.assign(Object.create(this), this);
-		clone.fieldValues = {
-			...this.fieldValues,
-		};
+		clone.fieldValues = new Map(this.fieldValues.entries());
 		return clone;
 	}
 

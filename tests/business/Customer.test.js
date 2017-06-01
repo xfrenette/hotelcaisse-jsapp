@@ -10,10 +10,8 @@ beforeEach(() => {
 	field.uuid = 'field-uuid';
 
 	customer = new Customer('customer-uuid');
-	customer.fieldValues = {
-		[field.uuid]: 'two',
-		three: 4,
-	};
+	customer.fieldValues.set(field.uuid, 'two');
+	customer.fieldValues.set('three', 4);
 });
 
 describe('construct', () => {
@@ -32,12 +30,12 @@ describe('getFieldValue()', () => {
 	});
 
 	test('returns value if field exists', () => {
-		customer.fieldValues[field.uuid] = false;
+		customer.fieldValues.set(field.uuid, false);
 		expect(customer.getFieldValue(field)).toBe(false);
 	});
 });
 
-describe.only('get()', () => {
+describe('get()', () => {
 	test('returns null if role is unknown', () => {
 		expect(customer.get('test.nonexisting')).toBeNull();
 	});
@@ -72,9 +70,9 @@ describe('isEqualTo()', () => {
 	let other;
 
 	beforeEach(() => {
-		customer.fieldValues = {
-			a: 'b',
-		};
+		customer.fieldValues = new Map([
+			['a', 'b'],
+		]);
 		other = customer.clone();
 	});
 
@@ -89,7 +87,7 @@ describe('isEqualTo()', () => {
 		});
 
 		test('different fieldValues', () => {
-			other.fieldValues.a = `${customer.fieldValues.a} (other)`;
+			other.fieldValues.set('a', `${customer.fieldValues.a} (other)`);
 			expect(customer.isEqualTo(other)).toBe(false);
 		});
 	});
@@ -100,16 +98,21 @@ describe('serializing', () => {
 
 	beforeEach(() => {
 		customer = new Customer('customer-uuid');
-		customer.fieldValues = {
-			a: 'b',
-			c: 2,
-		};
+		customer.fieldValues = new Map([
+			['a', 'b'],
+			['c', 2],
+		]);
 		data = serialize(customer);
 	});
 
 	test('saves primitives', () => {
 		expect(data.uuid).toBe(customer.uuid);
-		expect(data.fieldValues).toEqual(customer.fieldValues);
+	});
+
+	test('saves fieldValues', () => {
+		const expected = {};
+		customer.fieldValues.forEach((value, key) => { expected[key] = value; });
+		expect(data.fieldValues).toEqual(expected);
 	});
 });
 
@@ -129,6 +132,11 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(restoredCustomer.uuid).toBe(data.uuid);
-		expect(restoredCustomer.fieldValues).toEqual(data.fieldValues);
+	});
+
+	test('restores fieldValues', () => {
+		const received = {};
+		restoredCustomer.fieldValues.forEach((value, key) => { received[key] = value; });
+		expect(received).toEqual(data.fieldValues);
 	});
 });
