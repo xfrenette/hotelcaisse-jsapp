@@ -444,7 +444,7 @@ describe('getChanges()', () => {
 		});
 
 		test('customer', () => {
-			order.customer.name = `${order.customer.name} (modif)`;
+			order.customer.fieldValues = { modif: true };
 			const res = order.getChanges();
 			expect(res.customer.isEqualTo(order.customer)).toBe(true);
 			expect(res.customer).not.toBe(order.customer);
