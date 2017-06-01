@@ -233,7 +233,7 @@ describe('static validate()', () => {
 	test('validates valid data', () => {
 		const values = {
 			quantity: 3,
-			product
+			product,
 		};
 		expect(Item.validate(values)).toBeUndefined();
 	});
@@ -246,7 +246,7 @@ describe('serializing', () => {
 		product.name = 'test-name';
 		item.product = product;
 		item.quantity = 2;
-		item.uuid = 'test-uuid',
+		item.uuid = 'test-uuid';
 		data = serialize(item);
 	});
 
