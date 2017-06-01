@@ -1,4 +1,5 @@
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 import Customer from 'business/Customer';
 import { TextField } from 'fields';
 
@@ -19,6 +20,12 @@ describe('construct', () => {
 		const uuid = 'test-uuid';
 		customer = new Customer(uuid);
 		expect(customer.uuid).toBe(uuid);
+	});
+});
+
+describe('fieldValues', () => {
+	test('is observable', () => {
+		expect(isObservable(customer, 'fieldValues')).toBe(true);
 	});
 });
 
@@ -70,9 +77,7 @@ describe('isEqualTo()', () => {
 	let other;
 
 	beforeEach(() => {
-		customer.fieldValues = new Map([
-			['a', 'b'],
-		]);
+		customer.fieldValues.replace({ a: 'b' });
 		other = customer.clone();
 	});
 
@@ -95,13 +100,14 @@ describe('isEqualTo()', () => {
 
 describe('serializing', () => {
 	let data;
+	const fieldValues = {
+		a: 'b',
+		c: 2,
+	};
 
 	beforeEach(() => {
 		customer = new Customer('customer-uuid');
-		customer.fieldValues = new Map([
-			['a', 'b'],
-			['c', 2],
-		]);
+		customer.fieldValues.replace(fieldValues);
 		data = serialize(customer);
 	});
 
@@ -110,9 +116,7 @@ describe('serializing', () => {
 	});
 
 	test('saves fieldValues', () => {
-		const expected = {};
-		customer.fieldValues.forEach((value, key) => { expected[key] = value; });
-		expect(data.fieldValues).toEqual(expected);
+		expect(data.fieldValues).toEqual(fieldValues);
 	});
 });
 
@@ -135,8 +139,6 @@ describe('deserializing', () => {
 	});
 
 	test('restores fieldValues', () => {
-		const received = {};
-		restoredCustomer.fieldValues.forEach((value, key) => { received[key] = value; });
-		expect(received).toEqual(data.fieldValues);
+		expect(restoredCustomer.fieldValues.toJS()).toEqual(data.fieldValues);
 	});
 });

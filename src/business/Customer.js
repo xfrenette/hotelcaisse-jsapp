@@ -1,4 +1,5 @@
 import { serializable, identifier, map } from 'serializr';
+import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
 
 /**
@@ -18,6 +19,7 @@ class Customer {
 	 * @type {Object}
 	 */
 	@serializable(map())
+	@observable
 	fieldValues = new Map();
 	/**
 	 * References to Field object for which we store values in fieldValues. Setting this attribute is
@@ -73,8 +75,9 @@ class Customer {
 	 * @return {Customer}
 	 */
 	clone() {
-		const clone = Object.assign(Object.create(this), this);
-		clone.fieldValues = new Map(this.fieldValues.entries());
+		const clone = new Customer();
+		clone.uuid = this.uuid;
+		clone.fieldValues.replace(this.fieldValues);
 		return clone;
 	}
 
@@ -89,7 +92,7 @@ class Customer {
 			return false;
 		}
 
-		return isEqual(this.fieldValues, other.fieldValues);
+		return isEqual(this.fieldValues.toJS(), other.fieldValues.toJS());
 	}
 }
 
