@@ -51,6 +51,13 @@ class Field {
 	 */
 	@serializable
 	required = false;
+	/**
+	 * Value by default when the field is shown. Set to null for no default value.
+	 *
+	 * @type {mixed}
+	 */
+	@serializable
+	defaultValue = null;
 
 	/**
 	 * Validates if a value is a valid value for this field, checking presence if required and

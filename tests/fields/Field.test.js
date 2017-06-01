@@ -8,6 +8,7 @@ beforeEach(() => {
 	field.uuid = 'test-uuid';
 	field.label = 'test-label';
 	field.role = 'test-role';
+	field.defaultValue = 'test-defaultValue';
 });
 
 describe('serializing', () => {
@@ -25,6 +26,7 @@ describe('serializing', () => {
 			label: field.label,
 			role: field.role,
 			required: field.required,
+			defaultValue: field.defaultValue,
 		});
 	});
 });
@@ -35,6 +37,7 @@ describe('deserializing', () => {
 		label: 'test-label-2',
 		role: 'test-role-2',
 		required: true,
+		defaultValue: 'default-test',
 	};
 
 	beforeEach(() => {
@@ -45,6 +48,7 @@ describe('deserializing', () => {
 		expect(field.uuid).toBe(jsonObject.uuid);
 		expect(field.label).toBe(jsonObject.label);
 		expect(field.required).toBe(jsonObject.required);
+		expect(field.defaultValue).toBe(jsonObject.defaultValue);
 	});
 });
 
