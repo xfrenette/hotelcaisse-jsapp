@@ -48,6 +48,16 @@ class Customer {
 	}
 
 	/**
+	 * Sets the value for the field. The value must be a primitive.
+	 *
+	 * @param {Field} field
+	 * @param {mixed} value
+	 */
+	setFieldValue(field, value) {
+		this.fieldValues.set(field.uuid, value);
+	}
+
+	/**
 	 * Returns the value saved for the Field with the specified role. The fields attribute must be
 	 * set with the Fields to search before we can return the value saved for this field. Returns
 	 * null if no value found.

@@ -42,6 +42,14 @@ describe('getFieldValue()', () => {
 	});
 });
 
+describe('setFieldValue()', () => {
+	test('sets the field value', () => {
+		const value = 'test-value';
+		customer.setFieldValue(field, value);
+		expect(customer.getFieldValue(field)).toBe(value);
+	});
+});
+
 describe('get()', () => {
 	test('returns null if role is unknown', () => {
 		expect(customer.get('test.nonexisting')).toBeNull();
