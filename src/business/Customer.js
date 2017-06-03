@@ -16,7 +16,7 @@ class Customer {
 	/**
 	 * Values for each of the fields. Key is field uuid and the value is a primitive.
 	 *
-	 * @type {Object}
+	 * @type {Map}
 	 */
 	@serializable(map())
 	@observable
