@@ -1,7 +1,6 @@
-import { serializable, identifier, date, reference } from 'serializr';
-import { rawObject } from '../vendor/serializr/propSchemas';
+import { serializable, identifier, date, reference, map } from 'serializr';
+import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
-import get from 'lodash.get';
 import Room from './Room';
 
 /**
@@ -38,12 +37,41 @@ class RoomSelection {
 	@serializable(date())
 	endDate = null;
 	/**
-	 * Fields values
+	 * Values for each of the fields. Key is field uuid and the value is a primitive.
 	 *
-	 * @type {Object}
+	 * @type {Map}
 	 */
-	@serializable(rawObject())
-	fields = {};
+	@serializable(map())
+	@observable
+	fieldValues = new Map();
+
+	constructor(uuid = null) {
+		this.uuid = uuid;
+	}
+
+	/**
+	 * Returns the value saved for the specified Field. Returns null if no value is found.
+	 *
+	 * @param {Field} field
+	 * @return {mixed}
+	 */
+	getFieldValue(field) {
+		if (this.fieldValues.has(field.uuid)) {
+			return this.fieldValues.get(field.uuid);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Sets the value for the field. The value must be a primitive.
+	 *
+	 * @param {Field} field
+	 * @param {mixed} value
+	 */
+	setFieldValue(field, value) {
+		this.fieldValues.set(field.uuid, value);
+	}
 
 	/**
 	 * Creates a copy of this RoomSelection. The fields are shallow copied (but if they are only 1
@@ -52,10 +80,13 @@ class RoomSelection {
 	 * @return {RoomSelection}
 	 */
 	clone() {
-		const clone = Object.assign(Object.create(this), this);
-		clone.fields = {
-			...this.fields,
-		};
+		const clone = new RoomSelection();
+		clone.uuid = this.uuid;
+		clone.room = this.room;
+		clone.startDate = new Date(this.startDate.getTime());
+		clone.endDate = new Date(this.endDate.getTime());
+		clone.fieldValues.replace(this.fieldValues);
+
 		return clone;
 	}
 
@@ -67,7 +98,7 @@ class RoomSelection {
 	 */
 	isEqualTo(other) {
 		let otherIsEqual = true;
-		const attributes = ['uuid', 'startDate', 'endDate', 'fields'];
+		const attributes = ['uuid', 'startDate', 'endDate', 'room'];
 
 		attributes.find((attribute) => {
 			if (!isEqual(other[attribute], this[attribute])) {
@@ -78,9 +109,7 @@ class RoomSelection {
 			return false;
 		});
 
-		if (other.room === null && this.room !== null) {
-			otherIsEqual = false;
-		} else if (get(other.room, 'uuid') !== get(this.room, 'uuid')) {
+		if (!isEqual(this.fieldValues.toJS(), other.fieldValues.toJS())) {
 			otherIsEqual = false;
 		}
 

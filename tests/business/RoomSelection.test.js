@@ -1,20 +1,62 @@
 import { serialize, deserialize } from 'serializr';
+import { isObservable } from 'mobx';
 import RoomSelection from 'business/RoomSelection';
 import Room from 'business/Room';
+import { TextField } from 'fields';
 
 let roomSelection;
 let room;
+let field;
 
 beforeEach(() => {
+	field = new TextField();
+	field.uuid = 'field-uuid';
+
 	roomSelection = new RoomSelection();
 	roomSelection.uuid = 'test-uuid';
 	roomSelection.startDate = new Date(1494883301000);
 	roomSelection.endDate = new Date(1495142500000);
-	roomSelection.fields = { a: 'b' };
+	roomSelection.fieldValues.set(field.uuid, 'two');
+	roomSelection.fieldValues.set('three', 4);
 
 	room = new Room();
 	room.uuid = 'test-room-uuid';
 	roomSelection.room = room;
+});
+
+describe('construct', () => {
+	test('sets uuid', () => {
+		const uuid = 'test-uuid';
+		roomSelection = new RoomSelection(uuid);
+		expect(roomSelection.uuid).toBe(uuid);
+	});
+});
+
+describe('fieldValues', () => {
+	test('is observable', () => {
+		expect(isObservable(roomSelection, 'fieldValues')).toBe(true);
+	});
+});
+
+describe('getFieldValue()', () => {
+	test('returns null if field is unknown', () => {
+		const newField = new TextField();
+		newField.uuid = 'test-new-field';
+		expect(roomSelection.getFieldValue(newField)).toBeNull();
+	});
+
+	test('returns value if field exists', () => {
+		roomSelection.fieldValues.set(field.uuid, false);
+		expect(roomSelection.getFieldValue(field)).toBe(false);
+	});
+});
+
+describe('setFieldValue()', () => {
+	test('sets the field value', () => {
+		const value = 'test-value';
+		roomSelection.setFieldValue(field, value);
+		expect(roomSelection.getFieldValue(field)).toBe(value);
+	});
 });
 
 describe('clone()', () => {
@@ -39,9 +81,14 @@ describe('clone()', () => {
 		expect(clone.endDate.getTime()).toBe(roomSelection.endDate.getTime());
 	});
 
-	test('copies fields', () => {
-		expect(clone.fields).toEqual(roomSelection.fields);
-		expect(clone.fields).not.toBe(roomSelection.fields);
+	test('copies fieldValues', () => {
+		expect(clone.fieldValues.toJS()).toEqual(roomSelection.fieldValues.toJS());
+		expect(clone.fieldValues).not.toBe(roomSelection.fieldValues);
+	});
+
+	test('dates are copies, not references', () => {
+		expect(clone.startDate).not.toBe(roomSelection.startDate);
+		expect(clone.endDate).not.toBe(roomSelection.endDate);
 	});
 });
 
@@ -74,16 +121,15 @@ describe('isEqualTo()', () => {
 		expect(roomSelection.isEqualTo(copy)).toBe(false);
 	});
 
+	test('returns false if different fieldValue', () => {
+		copy.setFieldValue(field, 'two (copy)');
+		expect(roomSelection.isEqualTo(copy)).toBe(false);
+	});
+
 	test('returns true if different room with same uuid', () => {
 		const newRoom = new Room();
 		newRoom.uuid = room.uuid;
 		copy.room = newRoom;
-		expect(roomSelection.isEqualTo(copy)).toBe(true);
-	});
-
-	test('works with default null values', () => {
-		roomSelection = new RoomSelection();
-		copy = roomSelection.clone();
 		expect(roomSelection.isEqualTo(copy)).toBe(true);
 	});
 });
@@ -109,14 +155,14 @@ describe('freezeRoom()', () => {
 
 describe('serializing', () => {
 	let data;
-	const fields = {
+	const fieldValues = {
 		a: 'b',
 		c: true,
 		d: 2,
 	};
 
 	beforeEach(() => {
-		roomSelection.fields = fields;
+		roomSelection.fieldValues.replace(fieldValues);
 		data = serialize(roomSelection);
 	});
 
@@ -132,8 +178,8 @@ describe('serializing', () => {
 		expect(data.room).toBe(room.uuid);
 	});
 
-	test('saves fields', () => {
-		expect(data.fields).toEqual(fields);
+	test('saves fieldValues', () => {
+		expect(data.fieldValues).toEqual(fieldValues);
 	});
 });
 
@@ -142,7 +188,7 @@ describe('deserializing', () => {
 		uuid: 'test-uuid',
 		startDate: 1494883301000,
 		endDate: 1495142500000,
-		fields: { a: 'b' },
+		fieldValues: { a: 'b' },
 	};
 
 	beforeEach(() => {
@@ -157,5 +203,9 @@ describe('deserializing', () => {
 	test('restores dates', () => {
 		expect(roomSelection.startDate).toBeInstanceOf(Date);
 		expect(roomSelection.endDate).toBeInstanceOf(Date);
+	});
+
+	test('restores fieldValues', () => {
+		expect(roomSelection.fieldValues.toJS()).toEqual(jsonObject.fieldValues);
 	});
 });
