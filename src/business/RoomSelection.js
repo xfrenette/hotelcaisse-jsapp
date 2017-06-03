@@ -83,8 +83,11 @@ class RoomSelection {
 		const clone = new RoomSelection();
 		clone.uuid = this.uuid;
 		clone.room = this.room;
-		clone.startDate = new Date(this.startDate.getTime());
-		clone.endDate = new Date(this.endDate.getTime());
+		['startDate', 'endDate'].forEach((attr) => {
+			if (this[attr] instanceof Date) {
+				clone[attr] = new Date(this[attr].getTime());
+			}
+		})
 		clone.fieldValues.replace(this.fieldValues);
 
 		return clone;
