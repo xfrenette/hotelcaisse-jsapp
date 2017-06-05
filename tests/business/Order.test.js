@@ -263,6 +263,92 @@ describe('balance', () => {
 	});
 });
 
+describe('earliestCheckInDate', () => {
+	beforeEach(() => {
+		order.roomSelections.clear();
+	});
+
+	test('returns null if no roomSelection', () => {
+		expect(order.earliestCheckInDate).toBeNull();
+	});
+
+	test('returns null if roomSelection has no startDate', () => {
+		roomSelection1.startDate = null;
+		order.roomSelections.push(roomSelection1);
+		expect(order.earliestCheckInDate).toBeNull();
+	});
+
+	test('returns earliest startDate of roomSelections', () => {
+		const latest = new Date();
+		const earliest = new Date(latest.getTime() - 10000);
+
+		roomSelection1.startDate = latest;
+		order.roomSelections.push(roomSelection1);
+		roomSelection2.startDate = earliest;
+		order.roomSelections.push(roomSelection2);
+
+		expect(order.earliestCheckInDate.getTime()).toEqual(earliest.getTime());
+	});
+
+	test('works with roomSelection with null startDate', () => {
+		const date = new Date();
+
+		roomSelection1.startDate = null;
+		order.roomSelections.push(roomSelection1);
+		roomSelection2.startDate = date;
+		order.roomSelections.push(roomSelection2);
+
+		expect(order.earliestCheckInDate.getTime()).toEqual(date.getTime());
+	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'earliestCheckInDate')).toBe(true);
+	});
+});
+
+describe('latestCheckOutDate', () => {
+	beforeEach(() => {
+		order.roomSelections.clear();
+	});
+
+	test('returns null if no roomSelection', () => {
+		expect(order.latestCheckOutDate).toBeNull();
+	});
+
+	test('returns null if roomSelection has no endDate', () => {
+		roomSelection1.endDate = null;
+		order.roomSelections.push(roomSelection1);
+		expect(order.latestCheckOutDate).toBeNull();
+	});
+
+	test('returns latest endDate of roomSelections', () => {
+		const latest = new Date();
+		const earliest = new Date(latest.getTime() - 10000);
+
+		roomSelection1.endDate = earliest;
+		order.roomSelections.push(roomSelection1);
+		roomSelection2.endDate = latest;
+		order.roomSelections.push(roomSelection2);
+
+		expect(order.latestCheckOutDate.getTime()).toEqual(latest.getTime());
+	});
+
+	test('works with roomSelection with null endDate', () => {
+		const date = new Date();
+
+		roomSelection1.endDate = null;
+		order.roomSelections.push(roomSelection1);
+		roomSelection2.endDate = date;
+		order.roomSelections.push(roomSelection2);
+
+		expect(order.latestCheckOutDate.getTime()).toEqual(date.getTime());
+	});
+
+	test('is observable', () => {
+		expect(isObservable(order, 'latestCheckOutDate')).toBe(true);
+	});
+});
+
 describe('removeItem', () => {
 	test('removes based on uuid', () => {
 		const itemCopy = new Item(item1.uuid);

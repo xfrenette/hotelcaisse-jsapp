@@ -231,6 +231,62 @@ class Order {
 	}
 
 	/**
+	 * Returns, in the roomSelections, the earliest "check in" date (which correspond to the earliest
+	 * startDate of all the roomSelections). If no roomSelections, or if their startDate is not set,
+	 * returns null.
+	 *
+	 * @return {Date}
+	 */
+	@computed
+	get earliestCheckInDate() {
+		return this.roomSelections.reduce((earliest, roomSelection) => {
+			const startDate = roomSelection.startDate;
+
+			if (startDate === null) {
+				return earliest;
+			}
+
+			if (earliest === null) {
+				return startDate;
+			}
+
+			if (startDate.getTime() < earliest.getTime()) {
+				return startDate;
+			}
+
+			return earliest;
+		}, null);
+	}
+
+	/**
+	 * Returns, in the roomSelections, the latest "check out" date (which correspond to the latest
+	 * endDate of all the roomSelections). If no roomSelections, or if their endDate is not set,
+	 * returns null.
+	 *
+	 * @return {Date}
+	 */
+	@computed
+	get latestCheckOutDate() {
+		return this.roomSelections.reduce((latest, roomSelection) => {
+			const endDate = roomSelection.endDate;
+
+			if (endDate === null) {
+				return latest;
+			}
+
+			if (latest === null) {
+				return endDate;
+			}
+
+			if (endDate.getTime() > latest.getTime()) {
+				return endDate;
+			}
+
+			return latest;
+		}, null);
+	}
+
+	/**
 	 * Removes an item using its uuid.
 	 *
 	 * @param {Item} item
