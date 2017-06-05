@@ -21,6 +21,7 @@ class RoomSelection {
 	 * @type {Room}
 	 */
 	@serializable(reference(Room))
+	@observable
 	room = null;
 	/**
 	 * The date the selection starts (inclusive)
@@ -28,6 +29,7 @@ class RoomSelection {
 	 * @type {Date}
 	 */
 	@serializable(date())
+	@observable
 	startDate = null;
 	/**
 	 * The date the selection ends (exclusive)
@@ -35,6 +37,7 @@ class RoomSelection {
 	 * @type {Date}
 	 */
 	@serializable(date())
+	@observable
 	endDate = null;
 	/**
 	 * Values for each of the fields. Key is field uuid and the value is a primitive.

@@ -38,6 +38,24 @@ describe('fieldValues', () => {
 	});
 });
 
+describe('room', () => {
+	test('is observable', () => {
+		expect(isObservable(roomSelection, 'room')).toBe(true);
+	});
+});
+
+describe('startDate', () => {
+	test('is observable', () => {
+		expect(isObservable(roomSelection, 'startDate')).toBe(true);
+	});
+});
+
+describe('endDate', () => {
+	test('is observable', () => {
+		expect(isObservable(roomSelection, 'endDate')).toBe(true);
+	});
+});
+
 describe('getFieldValue()', () => {
 	test('returns null if field is unknown', () => {
 		const newField = new TextField();
