@@ -544,25 +544,35 @@ class Order {
 	}
 
 	/**
-	 * Validates itself. Valid only if all items are valid and all credits are valid. If valid,
-	 * returns undefined, else returns an object where the keys are the invalid attributes.
+	 * The Order validates its own attributes, as specified in the attributes property. If all
+	 * are attributes valid, returns undefined, else returns an object where the keys are the invalid
+	 * attributes.
 	 *
+	 * The following attributes can be validates :
+	 * - items (validates that all items are themselves valid)
+	 * - credits (validates that all credits are themselves valid)
+	 *
+	 * @param {Array} attributes
 	 * @return {Object}
 	 */
-	validate() {
+	validate(attributes = ['items', 'credits']) {
 		let valid = true;
 		let res = {};
-		const resItems = this.validateItems();
-		const resCredits = this.validateCredits();
 
-		if (resItems) {
-			valid = false;
-			res = { ...res, ...resItems };
+		if (attributes.indexOf('items') !== -1) {
+			const resItems = this.validateItems();
+			if (resItems) {
+				valid = false;
+				res = { ...res, ...resItems };
+			}
 		}
 
-		if (resCredits) {
-			valid = false;
-			res = { ...res, ...resCredits };
+		if (attributes.indexOf('credits') !== -1) {
+			const resCredits = this.validateCredits();
+			if (resCredits) {
+				valid = false;
+				res = { ...res, ...resCredits };
+			}
 		}
 
 		return valid ? undefined : res;
@@ -578,7 +588,7 @@ class Order {
 
 		this.items.find((item) => {
 			if (item.validate()) {
-				res = { items: ['An item is invalid']};
+				res = { items: ['An item is invalid'] };
 				return true;
 			}
 

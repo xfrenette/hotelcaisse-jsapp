@@ -676,24 +676,41 @@ describe('trim', () => {
 });
 
 describe('validate()', () => {
-	test('rejects if an item is invalid', () => {
+	test('only validates specified attributes', () => {
+		// Make only items invalid
 		item1.quantity = 0;
-		const res = order.validate();
-		expect(res).toEqual(expect.objectContaining({
-			items: expect.any(Array),
-		}));
+		// The credits defined in the beforeEach are already valid
+		expect(order.validate(['credits'])).toBeUndefined();
 	});
 
-	test('rejects if an credit is invalid', () => {
-		credit1.amount = null;
-		const res = order.validate();
-		expect(res).toEqual(expect.objectContaining({
-			credits: expect.any(Array),
-		}));
-	});
+	describe('items', () => {
+		test('rejects if an item is invalid', () => {
+			item1.quantity = 0;
+			const res = order.validate(['items']);
+			expect(res).toEqual(expect.objectContaining({
+				items: expect.any(Array),
+			}));
+		});
 
-	test('validates if all valid', () => {
-		expect(order.validate()).toBeUndefined();
+		test('validates if all valid', () => {
+			// The items defined in the beforeEach are already valid
+			expect(order.validate(['items'])).toBeUndefined();
+		});
+	})
+
+	describe('credits', () => {
+		test('rejects if a credit is invalid', () => {
+			credit1.amount = null;
+			const res = order.validate(['credits']);
+			expect(res).toEqual(expect.objectContaining({
+				credits: expect.any(Array),
+			}));
+		});
+
+		test('validates if all valid', () => {
+			// The credits defined in the beforeEach are already valid
+			expect(order.validate(['credits'])).toBeUndefined();
+		});
 	});
 });
 
