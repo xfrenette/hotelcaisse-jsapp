@@ -22,8 +22,9 @@ class Customer {
 	@observable
 	fieldValues = new Map();
 	/**
-	 * References to Field object for which we store values in fieldValues. Setting this attribute is
-	 * optionnal, but required if we want to use get(). This attribute is not serialized.
+	 * References to Field object for which we store values in fieldValues. Setting this attribute
+	 * is optionnal, but required if we want to use get() or validate(). This attribute is not
+	 * serialized.
 	 *
 	 * @type {Array<Field>}
 	 */
@@ -103,6 +104,29 @@ class Customer {
 		}
 
 		return isEqual(this.fieldValues.toJS(), other.fieldValues.toJS());
+	}
+
+	/**
+	 * Validate itself by validating all its fields. Returns undefined if valid, else returns an
+	 * object where the key is the UUID of the field in error and its value an array of errors. Note
+	 * the fields attribute must be set with the Fields for the validation to work, else returns
+	 * undefined.
+	 *
+	 * @return {undefined|Object}
+	 */
+	validate() {
+		const res = {};
+		let valid = true;
+
+		this.fields.forEach((field) => {
+			const fieldValidation = field.validate(this.getFieldValue(field));
+			if (fieldValidation) {
+				res[field.uuid] = fieldValidation;
+				valid = false;
+			}
+		});
+
+		return valid ? undefined : res;
 	}
 }
 

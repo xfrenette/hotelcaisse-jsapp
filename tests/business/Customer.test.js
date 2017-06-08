@@ -106,6 +106,32 @@ describe('isEqualTo()', () => {
 	});
 });
 
+describe('validate()', () => {
+	beforeEach(() => {
+		field.required = true;
+		customer.fields = [field];
+	});
+
+	test('returns undefined if fields is not set', () => {
+		customer.fields = [];
+		expect(customer.validate()).toBeUndefined();
+	});
+
+	test('returns an object if a field is in error', () => {
+		customer.setFieldValue(field, '');
+		const res = customer.validate();
+		expect(res).toEqual({
+			[field.uuid]: expect.any(Array),
+		});
+	});
+
+	test('returns undefined if all valid', () => {
+		customer.setFieldValue(field, 'valid value');
+		const res = customer.validate();
+		expect(res).toBeUndefined();
+	});
+});
+
 describe('serializing', () => {
 	let data;
 	const fieldValues = {
