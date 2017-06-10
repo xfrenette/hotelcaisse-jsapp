@@ -555,25 +555,28 @@ class Order {
 	 * @param {Array} attributes
 	 * @return {Object}
 	 */
-	validate(attributes = ['items', 'credits']) {
+	validate(rawAttributes = null) {
 		let valid = true;
 		let res = {};
+		const attributesValidationMethods = {
+			items: () => this.validateItems(),
+			credits: () => this.validateCredits(),
+			customer: () => this.validateCustomer(),
+			roomSelections: () => this.validateRoomSelections(),
+		};
+		const attributes = rawAttributes || Object.keys(attributesValidationMethods);
 
-		if (attributes.indexOf('items') !== -1) {
-			const resItems = this.validateItems();
-			if (resItems) {
-				valid = false;
-				res = { ...res, ...resItems };
+		attributes.forEach((attribute) => {
+			const validationMethod = attributesValidationMethods[attribute];
+			if (!validationMethod) {
+				return;
 			}
-		}
-
-		if (attributes.indexOf('credits') !== -1) {
-			const resCredits = this.validateCredits();
-			if (resCredits) {
+			const attributeRes = validationMethod();
+			if (attributeRes) {
 				valid = false;
-				res = { ...res, ...resCredits };
+				res = { ...res, ...attributeRes };
 			}
-		}
+		});
 
 		return valid ? undefined : res;
 	}
@@ -608,7 +611,7 @@ class Order {
 
 		this.credits.find((credit) => {
 			if (credit.validate()) {
-				res = { credits: ['A credit is invalid']};
+				res = { credits: ['A credit is invalid'] };
 				return true;
 			}
 
@@ -616,6 +619,47 @@ class Order {
 		});
 
 		return res;
+	}
+
+	/**
+	 * Validates the Customer (a Customer must be present and valid). See validate()
+	 *
+	 * @return {Object}
+	 */
+	validateCustomer() {
+		if (!this.customer) {
+			return { customer: ['A Customer is required'] };
+		}
+
+		const res = this.customer.validate();
+
+		if (res) {
+			return { customer: ['A Customer field is in error'] };
+		}
+
+		return undefined;
+	}
+
+	/**
+	 * Validates the roomSelections (each must be valid). See validate()
+	 *
+	 * @return {Object}
+	 */
+	validateRoomSelections() {
+		let valid = true;
+		const res = {};
+
+		this.roomSelections.find((roomSelection) => {
+			if (roomSelection.validate()) {
+				valid = false;
+				res.roomSelections = ['A roomSelection is not valid'];
+				return true;
+			}
+
+			return false;
+		});
+
+		return valid ? undefined : res;
 	}
 }
 

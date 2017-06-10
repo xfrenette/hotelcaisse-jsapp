@@ -5,9 +5,11 @@ import Item from 'business/Item';
 import Product from 'business/Product';
 import Transaction from 'business/Transaction';
 import RoomSelection from 'business/RoomSelection';
+import Room from 'business/Room';
 import Credit from 'business/Credit';
 import Customer from 'business/Customer';
 import Decimal from 'decimal.js';
+import { TextField } from 'fields';
 import { serialize, deserialize } from 'serializr';
 import { isObservable } from 'mobx';
 import postal from 'postal';
@@ -23,6 +25,7 @@ let roomSelection1;
 let roomSelection2;
 const channel = postal.channel(CHANNELS.order);
 let subscription;
+let customerField;
 
 const taxes = {
 	tax1: new Decimal(0.38),
@@ -65,8 +68,10 @@ beforeEach(() => {
 
 	roomSelection1 = new RoomSelection();
 	roomSelection1.uuid = 'room-selection-1';
+	roomSelection1.room = new Room();
 	roomSelection2 = new RoomSelection();
 	roomSelection2.uuid = 'room-selection-2';
+	roomSelection2.room = new Room();
 
 	credit1 = new Credit('credit1', new Decimal(1.21), 'test-note-1');
 	credit2 = new Credit('credit2', new Decimal(0.24), 'test-note-2');
@@ -82,7 +87,10 @@ beforeEach(() => {
 	order.roomSelections.push(roomSelection1);
 	order.roomSelections.push(roomSelection2);
 
-	order.customer.name = 'test-customer-name';
+	customerField = new TextField();
+	customerField.uuid = 'test-customer-field';
+
+	order.customer.setFieldValue(customerField, 'test-value');
 });
 
 afterEach(() => {
@@ -696,7 +704,7 @@ describe('validate()', () => {
 			// The items defined in the beforeEach are already valid
 			expect(order.validate(['items'])).toBeUndefined();
 		});
-	})
+	});
 
 	describe('credits', () => {
 		test('rejects if a credit is invalid', () => {
@@ -710,6 +718,49 @@ describe('validate()', () => {
 		test('validates if all valid', () => {
 			// The credits defined in the beforeEach are already valid
 			expect(order.validate(['credits'])).toBeUndefined();
+		});
+	});
+
+	describe('customer', () => {
+		test('rejects if no customer', () => {
+			order.customer = null;
+			const res = order.validate(['customer']);
+			expect(res).toEqual(expect.objectContaining({
+				customer: expect.any(Array),
+			}));
+		});
+
+		test('rejects if the customer is in error', () => {
+			customerField.required = true;
+			order.customer.fields = [customerField];
+			order.customer.setFieldValue(customerField, '');
+			const res = order.validate(['customer']);
+			expect(res).toEqual(expect.objectContaining({
+				customer: expect.any(Array),
+			}));
+		});
+
+		test('validates if all valid', () => {
+			expect(order.validate(['customer'])).toBeUndefined();
+		});
+	});
+
+	describe('roomSelections', () => {
+		test('valid if no roomSelections', () => {
+			order.roomSelections.clear();
+			expect(order.validate(['roomSelections'])).toBeUndefined();
+		});
+
+		test('rejects if a roomSelection is in error', () => {
+			roomSelection2.room = null;
+			const res = order.validate(['roomSelections']);
+			expect(res).toEqual(expect.objectContaining({
+				roomSelections: expect.any(Array),
+			}));
+		});
+
+		test('validates if all valid', () => {
+			expect(order.validate(['roomSelections'])).toBeUndefined();
 		});
 	});
 });
