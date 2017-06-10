@@ -171,6 +171,35 @@ describe('freezeRoom()', () => {
 	});
 });
 
+describe('validate()', () => {
+	beforeEach(() => {
+		field.required = true;
+		roomSelection.fields = [field];
+	});
+
+	test('returns undefined if otherwise valid and field is undefined', () => {
+		roomSelection.fields = [];
+		const res = roomSelection.validate();
+		expect(res).toBeUndefined();
+	});
+
+	test('invalid if room is not set', () => {
+		roomSelection.room = null;
+		const res = roomSelection.validate();
+		expect(res).toEqual({
+			room: expect.any(Array),
+		});
+	});
+
+	test('returns an object if a field is in error', () => {
+		roomSelection.setFieldValue(field, '');
+		const res = roomSelection.validate();
+		expect(res).toEqual({
+			[field.uuid]: expect.any(Array),
+		});
+	});
+});
+
 describe('serializing', () => {
 	let data;
 	const fieldValues = {
@@ -215,7 +244,6 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(roomSelection.uuid).toBe(jsonObject.uuid);
-		expect(roomSelection.fields).toEqual(jsonObject.fields);
 	});
 
 	test('restores dates', () => {

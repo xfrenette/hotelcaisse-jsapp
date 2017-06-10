@@ -47,6 +47,13 @@ class RoomSelection {
 	@serializable(map())
 	@observable
 	fieldValues = new Map();
+	/**
+	 * References to Field object for which we store values in fieldValues. Setting this attribute
+	 * is optionnal, but required if we want to use validate(). This attribute is not serialized.
+	 *
+	 * @type {Array<Field>}
+	 */
+	fields = [];
 
 	constructor(uuid = null) {
 		this.uuid = uuid;
@@ -128,6 +135,36 @@ class RoomSelection {
 	 */
 	freezeRoom() {
 		this.room = this.room.clone();
+	}
+
+	/**
+	 * Validate itself by validating it has a room and that all its fields are valid. Returns
+	 * undefined if valid, else returns an object where the key is the attribute or field (UUID) in
+	 * error and its value an array of errors. Note the fields attribute must be set with the Fields
+	 * for the validation of fields to work.
+	 *
+	 * @return {undefined|Object}
+	 */
+	validate() {
+		const res = {};
+		let valid = true;
+
+		// Validate the room
+		if (!this.room) {
+			res.room = ['A room must be set'];
+			valid = false;
+		}
+
+		// Validate the fields
+		this.fields.forEach((field) => {
+			const fieldValidation = field.validate(this.getFieldValue(field));
+			if (fieldValidation) {
+				res[field.uuid] = fieldValidation;
+				valid = false;
+			}
+		});
+
+		return valid ? undefined : res;
 	}
 }
 
