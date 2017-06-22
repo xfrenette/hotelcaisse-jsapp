@@ -5,14 +5,14 @@
  */
 class Server {
 	/**
-	 * Returns [quantity] Orders following the [from] Order. It is the Server that determines the order
-	 * of the Orders. Returns an Promise that resolves with an array of Order.
+	 * Returns the next [quantity] Orders following the [from] Order. It is the Server that
+	 * determines the order of the Orders. Returns an Promise that resolves with an array of Order.
 	 *
 	 * @param {Order} from
 	 * @param {Number} quantity
 	 * @return {Promise}
 	 */
-	getOrders(from, quantity) {
+	nextOrders(from, quantity) {
 		return Promise.resolve([]);
 	}
 }
