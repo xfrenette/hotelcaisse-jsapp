@@ -20,6 +20,21 @@ export default {
 	},
 
 	/**
+	 * Returns the minimum Date object between 2 dates.
+	 *
+	 * @param {Date} date1
+	 * @param {Date} date2
+	 * @return {Date}
+	 */
+	dateMin(date1, date2) {
+		if (date1.getTime() <= date2.getTime()) {
+			return date1;
+		}
+
+		return date2;
+	},
+
+	/**
 	 * Does variable interpolation in the string. Every %{<key>} will be replaced by the value of
 	 * <key> in the variables object.
 	 *
