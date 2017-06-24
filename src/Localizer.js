@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import utils from './utils';
 import Globalize from 'globalize';
 import get from 'lodash.get';
 import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
@@ -253,12 +254,14 @@ class Localizer {
 
 	/**
 	 * Returns the string specified by the path in the current locale. If the string is not found,
-	 * returns the path.
+	 * returns the path. If a [variables] object is passed, it is used for variables interpolation.
+	 * Variables in the string must be declared as %{var_name}, ex: 'Hello %{name}'
 	 *
 	 * @param {String} path
+	 * @param {Object} variables
 	 * @return {String}
 	 */
-	t(path) {
+	t(path, variables = null) {
 		if (!this.locale) {
 			return path;
 		}
@@ -267,7 +270,13 @@ class Localizer {
 			return path;
 		}
 
-		return get(this.strings[this.locale], path, path);
+		let string = get(this.strings[this.locale], path, path);
+
+		if (variables) {
+			string = utils.stringInterpolation(string, variables);
+		}
+
+		return string;
 	}
 }
 

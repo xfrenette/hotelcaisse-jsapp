@@ -9,6 +9,7 @@ const strings = {
 			string: 'test-group-group-string',
 		},
 	},
+	withVariables: 'test %{a} %{b} %{c} %{a}',
 };
 
 beforeEach(() => {
@@ -115,7 +116,7 @@ describe('t()', () => {
 		[
 			'nonExisting',
 			'group.nonExisting',
-			'group.string.nonExisting'
+			'group.string.nonExisting',
 		].forEach((path) => {
 			expect(localizer.t(path)).toBe(path);
 		});
@@ -146,6 +147,12 @@ describe('t()', () => {
 	test('doesn\'t crash if no locale', () => {
 		localizer = new Localizer();
 		expect(localizer.t('group.string')).toBe('group.string');
+	});
+
+	test('replaces variables', () => {
+		const variables = { c: 'C', a: 'A' };
+		const expected = 'test A %{b} C A';
+		expect(localizer.t('withVariables', variables)).toBe(expected);
 	});
 });
 
