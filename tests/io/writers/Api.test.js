@@ -2,7 +2,7 @@ import postal from 'postal';
 import { CHANNELS, TOPICS } from 'const/message-bus';
 import Api, { ERRORS } from 'io/writers/Api';
 import { Response } from 'node-fetch';
-import TestAuth from '../../auth/TestAuth';
+import TestAuth from '../../mock/TestAuth';
 
 let api;
 let auth;
