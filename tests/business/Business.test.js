@@ -5,6 +5,7 @@ import { CHANNELS, TOPICS } from 'const/message-bus';
 import Business from 'business/Business';
 import Register from 'business/Register';
 import Product from 'business/Product';
+import CashMovement from 'business/CashMovement';
 import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
@@ -92,6 +93,25 @@ describe('emits registerClose', () => {
 		});
 		business.deviceRegister.close();
 	});
+});
+
+test('emits cashMovementAdd', (done) => {
+	const cashMovement = new CashMovement();
+	business.on('cashMovementAdd', (cm) => {
+		expect(cm).toBe(cashMovement);
+		done();
+	});
+	business.deviceRegister.addCashMovement(cashMovement);
+});
+
+test('emits cashMovementRemove', (done) => {
+	const cashMovement = new CashMovement();
+	business.on('cashMovementRemove', (cm) => {
+		expect(cm).toBe(cashMovement);
+		done();
+	});
+	business.deviceRegister.addCashMovement(cashMovement);
+	business.deviceRegister.removeCashMovement(cashMovement);
 });
 
 describe('addOrder()', () => {

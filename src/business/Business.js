@@ -147,6 +147,8 @@ class Business extends EventEmitter {
 
 		listeners.open = () => { this.onRegisterOpen(); };
 		listeners.close = () => { this.onRegisterClose(); };
+		listeners.cashMovementAdd = (cm) => { this.onCashMovementAdd(cm); };
+		listeners.cashMovementRemove = (cm) => { this.onCashMovementRemove(cm); };
 
 		Object.entries(listeners).forEach(([event, listener]) => {
 			this.deviceRegister[event] = listener;
@@ -166,6 +168,26 @@ class Business extends EventEmitter {
 	 */
 	onRegisterClose() {
 		this.emit('registerClose');
+	}
+
+	/**
+	 * When a CashMovement is added to the Register, emits 'cashMovementAdd' with the
+	 * CashMovement.
+	 *
+	 * @param {CashMovement} cm The CashMovement that was added
+	 */
+	onCashMovementAdd(cm) {
+		this.emit('cashMovementAdd', cm);
+	}
+
+	/**
+	 * When a CashMovement is removed from the Register, emits 'cashMovementRemove' with the
+	 * CashMovement
+	 *
+	 * @param {CashMovement} cm The CashMovement that was removed.
+	 */
+	onCashMovementRemove(cm) {
+		this.emit('cashMovementRemove', cm);
 	}
 
 	/**
