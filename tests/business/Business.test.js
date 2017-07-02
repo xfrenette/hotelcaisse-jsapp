@@ -114,12 +114,56 @@ test('emits cashMovementRemove', (done) => {
 	business.deviceRegister.removeCashMovement(cashMovement);
 });
 
+describe('emits orderChange', () => {
+	const changes = { a: 'b' };
+	let order;
+
+	beforeEach(() => {
+		order = new Order();
+		order.getChanges = jest.fn().mockImplementation(() => changes);
+	});
+
+	test('with order added by addOrder', (done) => {
+		business.on('orderChange', (o, c) => {
+			expect(o).toBe(order);
+			expect(c).toEqual(changes);
+			done();
+		});
+		business.addOrder(order);
+		order.commitChanges();
+	});
+
+	test('with order added directly on orders', (done) => {
+		business.on('orderChange', (o, c) => {
+			expect(o).toBe(order);
+			expect(c).toEqual(changes);
+			done();
+		});
+		business.orders.push(order);
+		order.commitChanges();
+	});
+
+	test('does not trigger event when order is removed', () => {
+		business.on('orderChange', () => {
+			expect(false).toBe(true);
+		});
+
+		business.orders.push(order);
+		business.orders.clear();
+		order.commitChanges();
+
+		business.orders.push(order);
+		business.orders.replace([]);
+		order.commitChanges();
+	});
+});
+
 describe('addOrder()', () => {
 	test('adds to orders array', () => {
 		business = new Business();
 		const order = new Order();
 		business.addOrder(order);
-		expect(business.orders).toEqual([order]);
+		expect(business.orders.slice()).toEqual([order]);
 	});
 
 	test('emits newOrder', (done) => {
@@ -314,13 +358,21 @@ describe('update()', () => {
 		};
 		const newBusiness = new Business();
 		Object.keys(attributes).forEach((attribute) => {
-			newBusiness[attribute] = attributes[attribute];
+			if (attribute === 'orders') {
+				newBusiness.orders.replace(attributes.orders);
+			} else {
+				newBusiness[attribute] = attributes[attribute];
+			}
 		});
 
 		business.update(newBusiness);
 
 		Object.keys(attributes).forEach((attribute) => {
-			expect(business[attribute]).toBe(attributes[attribute]);
+			if (attribute === 'orders') {
+				expect(business.orders.slice()).toEqual(attributes.orders);
+			} else {
+				expect(business[attribute]).toBe(attributes[attribute]);
+			}
 		});
 	});
 });

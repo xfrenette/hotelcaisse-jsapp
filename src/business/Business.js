@@ -72,6 +72,7 @@ class Business extends EventEmitter {
 	 * @type {Array<Order>}
 	 */
 	@serializable(list(object(Order)))
+	@observable
 	orders = [];
 	/**
 	 * List of Field for the Customer fields.
@@ -105,6 +106,17 @@ class Business extends EventEmitter {
 	constructor() {
 		super();
 		this.listenWhenRegisterChange();
+		this.listenToOrders();
+
+		/*
+		 * We create a special register function for the order change since we want to be able to
+		 * easily remove it if the order is removed.
+		 */
+		const business = this;
+		this.orderChangeListener = function (changes) {
+			const order = this;
+			business.onOrderChange.call(business, order, changes);
+		};
 	}
 
 	/**
@@ -115,6 +127,45 @@ class Business extends EventEmitter {
 			this.clearRegisterListeners(oldValue);
 			this.listenToRegister();
 		});
+	}
+
+	/**
+	 * Any time an Order is added or removed, we add or remove listeners on it.
+	 */
+	listenToOrders() {
+		observe(this.orders, ({ type, added, removed }) => {
+			// We don't allow replacing of orders, only adding or removing, so we only check for the
+			// 'splice' type, and not the 'update' type
+			if (type !== 'splice') {
+				return;
+			}
+
+			if (Array.isArray(added)) {
+				added.forEach(newOrder => this.listenToOrder(newOrder));
+			}
+
+			if (Array.isArray(removed)) {
+				removed.forEach(oldOrder => this.clearOrderListeners(oldOrder));
+			}
+		});
+	}
+
+	/**
+	 * Adds listeners to the order
+	 *
+	 * @param {Order} order
+	 */
+	listenToOrder(order) {
+		order.on('change', this.orderChangeListener);
+	}
+
+	/**
+	 * Removes listeners on the Order
+	 *
+	 * @param {Order} order
+	 */
+	clearOrderListeners(order) {
+		order.removeListener('change', this.orderChangeListener);
 	}
 
 	/**
@@ -191,6 +242,16 @@ class Business extends EventEmitter {
 	}
 
 	/**
+	 * When an Order changes, emit the 'orderChange' event with the Order and its changes.
+	 *
+	 * @param {Order} order
+	 * @param {OrderChanges} changes
+	 */
+	onOrderChange(order, changes) {
+		this.emit('orderChange', order, changes);
+	}
+
+	/**
 	 * Add an Order to the order list. Emits a newOrder event.
 	 *
 	 * @param {Order} order
@@ -218,13 +279,17 @@ class Business extends EventEmitter {
 			'products',
 			'rootProductCategory',
 			'transactionModes',
-			'orders',
 			'customerFields',
 			'roomSelectionFields',
 			'rooms',
 		].forEach((attribute) => {
 			this[attribute] = newBusiness[attribute];
 		});
+
+		// Special case for the orders, since they are observable
+		if (newBusiness.orders) {
+			this.orders.replace(newBusiness.orders);
+		}
 	}
 }
 
