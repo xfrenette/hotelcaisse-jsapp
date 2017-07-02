@@ -69,6 +69,14 @@ describe('addCashMovement()', () => {
 		expect(register.cashMovements[0]).toBe(cashMovement);
 	});
 
+	test('emits cashMovementAdd', (done) => {
+		register.on('cashMovementAdd', (cm) => {
+			expect(cm).toBe(cashMovement);
+			done();
+		});
+		register.addCashMovement(cashMovement);
+	});
+
 	test('publishes message', (done) => {
 		subscription = channel.subscribe(
 			TOPICS.register.cashMovement.added,
@@ -112,6 +120,14 @@ describe('removeCashMovement()', () => {
 		cashMovement1.register = register;
 		register.removeCashMovement(cashMovement1);
 		expect(cashMovement1.register).toBeNull();
+	});
+
+	test('emits cashMovementRemove', (done) => {
+		register.on('cashMovementRemove', (cm) => {
+			expect(cm).toBe(cashMovement1);
+			done();
+		});
+		register.removeCashMovement(cashMovement1);
 	});
 
 	test('publishes message', (done) => {

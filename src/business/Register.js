@@ -200,7 +200,8 @@ class Register extends EventEmiter {
 	}
 
 	/**
-	 * Adds the CashMovement and sets its Register property.
+	 * Adds the CashMovement and sets its Register property. Emits a 'cashMovementAdd' event with the
+	 * CashMovement.
 	 *
 	 * @param {CashMovement} cashMovement
 	 */
@@ -208,18 +209,29 @@ class Register extends EventEmiter {
 		this.cashMovements.push(cashMovement);
 		cashMovement.register = this;
 
+		this.emit('cashMovementAdd', cashMovement);
+
 		channel.publish(TOPICS.register.cashMovement.added, {
 			cashMovement,
 			register: this,
 		});
 	}
 
+	/**
+	 * Removes the CashMovement and clear its Register property. Emits a 'cashMovementRemove' event
+	 * with the CashMovement. Note that the event will be emitted even if the CashMovement was not
+	 * in the Register.
+	 *
+	 * @param {CashMovement} cashMovement
+	 */
 	removeCashMovement(cashMovement) {
 		this.cashMovements = this.cashMovements.filter(
 			element => element !== cashMovement
 		);
 
 		cashMovement.register = null;
+
+		this.emit('cashMovementRemove', cashMovement);
 
 		channel.publish(TOPICS.register.cashMovement.removed, {
 			cashMovement,
