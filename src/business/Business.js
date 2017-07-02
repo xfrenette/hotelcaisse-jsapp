@@ -191,12 +191,14 @@ class Business extends EventEmitter {
 	}
 
 	/**
-	 * Add an Order to the order list. Publishes a message.
+	 * Add an Order to the order list. Emits a newOrder event.
 	 *
 	 * @param {Order} order
 	 */
 	addOrder(order) {
 		this.orders.push(order);
+
+		this.emit('newOrder', order);
 
 		channel.publish(TOPICS.business.order.added, {
 			order,

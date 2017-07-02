@@ -122,6 +122,15 @@ describe('addOrder()', () => {
 		expect(business.orders).toEqual([order]);
 	});
 
+	test('emits newOrder', (done) => {
+		const order = new Order();
+		business.on('newOrder', (o) => {
+			expect(o).toBe(order);
+			done();
+		});
+		business.addOrder(order);
+	})
+
 	test('publishes message', (done) => {
 		const order = new Order();
 		subscription = channel.subscribe(
