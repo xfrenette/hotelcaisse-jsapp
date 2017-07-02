@@ -21,14 +21,28 @@ class Server {
 	 *
 	 * @param {Register} register
 	 */
-	registerOpened(register) {	}
+	registerOpened(register) { }
 
 	/**
 	 * When the register was closed
 	 *
 	 * @param {Register} register
 	 */
-	registerClosed(register) {	}
+	registerClosed(register) { }
+
+	/**
+	 * When a CashMovement is added to the Register
+	 *
+	 * @param {cashMovement} cashMovement
+	 */
+	cashMovementAdded(cashMovement) { }
+
+	/**
+	 * When a CashMovement is removed from the Register
+	 *
+	 * @param {cashMovement} cashMovement
+	 */
+	cashMovementRemoved(cashMovement) { }
 }
 
 export default Server;

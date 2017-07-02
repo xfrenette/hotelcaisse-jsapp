@@ -24,14 +24,16 @@ class ToServer extends Plugin {
 	 * Registers all the listeners
 	 */
 	registerListeners() {
-		this.listenOnRegisterOpened();
-		this.listenOnRegisterClosed();
+		this.listenOnRegisterOpen();
+		this.listenOnRegisterClose();
+		this.listenOnCashMovementAdd();
+		this.listenOnCashMovementRemove();
 	}
 
 	/**
 	 * When the business.deviceRegister is opened, call server.registerOpened
 	 */
-	listenOnRegisterOpened() {
+	listenOnRegisterOpen() {
 		this.application.business.on('registerOpen', () => {
 			this.server.registerOpened(this.application.business.deviceRegister);
 		});
@@ -40,9 +42,27 @@ class ToServer extends Plugin {
 	/**
 	 * When the business.deviceRegister is closed, call server.registerClosed
 	 */
-	listenOnRegisterClosed() {
+	listenOnRegisterClose() {
 		this.application.business.on('registerClose', () => {
 			this.server.registerClosed(this.application.business.deviceRegister);
+		});
+	}
+
+	/**
+	 * When a CashMovement is added to the Register.
+	 */
+	listenOnCashMovementAdd() {
+		this.application.business.on('cashMovementAdd', (cm) => {
+			this.server.cashMovementAdded(cm);
+		});
+	}
+
+	/**
+	 * When a CashMovement is removed from the Register.
+	 */
+	listenOnCashMovementRemove() {
+		this.application.business.on('cashMovementRemove', (cm) => {
+			this.server.cashMovementRemoved(cm);
 		});
 	}
 }
