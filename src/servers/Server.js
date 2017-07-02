@@ -15,6 +15,20 @@ class Server {
 	nextOrders(from, quantity) {
 		return Promise.resolve([]);
 	}
+
+	/**
+	 * When the register was opened
+	 *
+	 * @param {Register} register
+	 */
+	registerOpened(register) {	}
+
+	/**
+	 * When the register was closed
+	 *
+	 * @param {Register} register
+	 */
+	registerClosed(register) {	}
 }
 
 export default Server;
