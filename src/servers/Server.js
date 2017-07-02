@@ -43,6 +43,13 @@ class Server {
 	 * @param {cashMovement} cashMovement
 	 */
 	cashMovementRemoved(cashMovement) { }
+
+	/**
+	 * When a new Order is created
+	 *
+	 * @param {Order} order
+	 */
+	orderCreated(order) { }
 }
 
 export default Server;
