@@ -2,6 +2,7 @@ import ToServer from 'plugins/autosave/business/ToServer';
 import Application from 'Application';
 import Business from 'business/Business';
 import CashMovement from 'business/CashMovement';
+import Order from 'business/Order';
 import Register, { STATES as REGISTER_STATES } from 'business/Register';
 
 let toServer;
@@ -48,4 +49,11 @@ test('CashMovement removed', () => {
 	register.addCashMovement(cashMovement);
 	register.removeCashMovement(cashMovement);
 	expect(testServer.cashMovementRemoved).toHaveBeenCalledWith(cashMovement);
+});
+
+test('new Order', () => {
+	testServer.orderCreated = jest.fn();
+	const order = new Order();
+	business.addOrder(order);
+	expect(testServer.orderCreated).toHaveBeenCalledWith(order);
 });

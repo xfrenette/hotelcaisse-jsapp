@@ -28,6 +28,7 @@ class ToServer extends Plugin {
 		this.listenOnRegisterClose();
 		this.listenOnCashMovementAdd();
 		this.listenOnCashMovementRemove();
+		this.listenOnNewOrder();
 	}
 
 	/**
@@ -63,6 +64,15 @@ class ToServer extends Plugin {
 	listenOnCashMovementRemove() {
 		this.application.business.on('cashMovementRemove', (cm) => {
 			this.server.cashMovementRemoved(cm);
+		});
+	}
+
+	/**
+	 * When a new Order is created.
+	 */
+	listenOnNewOrder() {
+		this.application.business.on('newOrder', (order) => {
+			this.server.orderCreated(order);
 		});
 	}
 }
