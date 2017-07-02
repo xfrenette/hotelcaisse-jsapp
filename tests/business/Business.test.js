@@ -129,7 +129,7 @@ describe('addOrder()', () => {
 			done();
 		});
 		business.addOrder(order);
-	})
+	});
 
 	test('publishes message', (done) => {
 		const order = new Order();
