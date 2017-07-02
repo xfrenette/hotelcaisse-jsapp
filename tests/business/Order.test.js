@@ -585,6 +585,16 @@ describe('commitChanges()', () => {
 		expect(order.stopRecordChanges).toHaveBeenCalled();
 	});
 
+	test('emits "change" event with changes', (done) => {
+		const changes = { a: 'b' };
+		order.on('change', (c) => {
+			expect(c).toEqual(changes);
+			done();
+		});
+		order.getChanges = jest.fn().mockImplementation(() => changes);
+		order.commitChanges();
+	});
+
 	test('publishes message with result from getChanges()', (done) => {
 		const changes = { a: 'b' };
 		order.getChanges = jest.fn().mockImplementation(() => changes);

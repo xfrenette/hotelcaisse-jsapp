@@ -1,6 +1,7 @@
 import { serializable, list, date, object, identifier } from 'serializr';
 import { observable, computed, isObservableArray } from 'mobx';
 import postal from 'postal';
+import EventEmitter from 'events';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
 import { CHANNELS, TOPICS } from '../const/message-bus';
@@ -30,7 +31,7 @@ const channel = postal.channel(CHANNELS.order);
  * when finished. This will publish a 'commit' message containing only the changes that were made.
  * This system also allows for a revert() method that can cancel all the modifications.
  */
-class Order {
+class Order extends EventEmitter {
 	/**
 	 * UUID of the register
 	 *
@@ -106,6 +107,7 @@ class Order {
 	restorationData = null;
 
 	constructor(uuid = null) {
+		super();
 		this.createdAt = new Date();
 		this.uuid = uuid;
 	}
@@ -350,6 +352,8 @@ class Order {
 		this.stopRecordChanges();
 
 		if (changes !== null) {
+			this.emit('change', changes);
+
 			channel.publish(TOPICS.order.modified, {
 				changes,
 				order: this,
