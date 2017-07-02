@@ -151,6 +151,13 @@ describe('open()', () => {
 		expect(register.openedAt).toBeInstanceOf(Date);
 	});
 
+	test('emits open message', (done) => {
+		register.on('open', () => {
+			done();
+		});
+		register.open('test', new Decimal(1));
+	});
+
 	test('publishes message', (done) => {
 		subscription = channel.subscribe(
 			TOPICS.register.opened,
@@ -197,6 +204,13 @@ describe('close()', () => {
 	test('sets closing datetime', () => {
 		register.close(new Decimal(1), 'test', new Decimal(1));
 		expect(register.closedAt).toBeInstanceOf(Date);
+	});
+
+	test('emits close message', (done) => {
+		register.on('close', () => {
+			done();
+		});
+		register.close(new Decimal(1), 'test', new Decimal(1));
 	});
 
 	test('publishes message', (done) => {

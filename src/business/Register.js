@@ -1,4 +1,5 @@
 import { serializable, list, object, date, identifier } from 'serializr';
+import EventEmiter from 'events';
 import postal from 'postal';
 import { observable } from 'mobx';
 import { CHANNELS, TOPICS } from '../const/message-bus';
@@ -57,7 +58,7 @@ const closeConstraints = {
  * not keep them, see the implementation of addTransaction()
  * - POST = Point Of Sale Terminal (credit/debit cards terminal)
  */
-class Register {
+class Register extends EventEmiter {
 	/**
 	 * UUID of the register
 	 *
@@ -133,7 +134,8 @@ class Register {
 
 	/**
 	 * Opens the Register and saves opening data. The data will be validated before opening, but it
-	 * will fail silently if validation fails, so do validation before with validateOpen().
+	 * will fail silently if validation fails, so do validation before with validateOpen(). Emits a
+	 * 'open' message when successfully opened.
 	 *
 	 * @param {String} employee Employee's name
 	 * @param {Decimal} cashAmount
@@ -150,6 +152,8 @@ class Register {
 		this.employee = employee;
 		this.state = STATES.OPENED;
 
+		this.emit('open');
+
 		channel.publish(TOPICS.register.opened, {
 			register: this,
 		});
@@ -158,7 +162,7 @@ class Register {
 	/**
 	 * Sets the Register as closed and saves closing data. The data will be validated before
 	 * closing, but it will fail silently if validation fails, so do validation before with
-	 * validateClose().
+	 * validateClose(). Emits a 'close' message when successfully closed.
 	 *
 	 * @param {Decimal} cashAmount
 	 * @param {String} POSTRef POST batch reference number
@@ -176,6 +180,8 @@ class Register {
 		this.closingCash = cashAmount;
 		this.closedAt = new Date();
 		this.state = STATES.CLOSED;
+
+		this.emit('close');
 
 		channel.publish(TOPICS.register.closed, {
 			register: this,
