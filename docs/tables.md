@@ -6,7 +6,14 @@ businesses
 	name
 	locale
 	active_register_id (donc tous les devices ont le même registre; si un jour besoin de plusieurs registres, on pourra faire une table active_registers)
-	data_version (à chaque modification des données de la business -- nouveau produit, nouveau prix, register qui se ferme, ... -- ce chiffre est incrémenté. Quand un device fait une requête, il passe le dernier data_version reçu et s'ils sont différents, le serveur renvoie toutes les données, sinon il ne retourne rien)
+
+(à chaque modification des données de la business -- nouveau produit, nouveau prix, register qui se ferme, ... -- une entrée est créée. Quand un device fait une requête, il passe le dernier number qu'il possède. Avec le business_id, on va récupérer la liste de tous les champs modifiés de Business (modified_fields, ex: rooms, customerFields, ...) et on retourne les données à jour de ces fields.
+data_versions
+	id
+	business_id
+	number
+	created_at
+	modified_fields
 
 products
 	id
