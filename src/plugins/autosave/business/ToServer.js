@@ -6,6 +6,11 @@ import Plugin from '../../Plugin';
  */
 class ToServer extends Plugin {
 	id = 'autosave.business.toServer';
+	/**
+	 * Server instance
+	 *
+	 * @type {Server}
+	 */
 	server = null;
 
 	constructor(server) {
@@ -29,6 +34,7 @@ class ToServer extends Plugin {
 		this.listenOnCashMovementAdd();
 		this.listenOnCashMovementRemove();
 		this.listenOnNewOrder();
+		this.listenOnOrderChange();
 	}
 
 	/**
@@ -73,6 +79,15 @@ class ToServer extends Plugin {
 	listenOnNewOrder() {
 		this.application.business.on('newOrder', (order) => {
 			this.server.orderCreated(order);
+		});
+	}
+
+	/**
+	 * When an Order is changed.
+	 */
+	listenOnOrderChange() {
+		this.application.business.on('orderChange', (order, changes) => {
+			this.server.orderChanged(order, changes);
 		});
 	}
 }

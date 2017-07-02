@@ -50,6 +50,14 @@ class Server {
 	 * @param {Order} order
 	 */
 	orderCreated(order) { }
+
+	/**
+	 * When an Order was changed.
+	 *
+	 * @param {Order} order
+	 * @param {OrderChanges} changes
+	 */
+	orderChanged(order, changes) { }
 }
 
 export default Server;

@@ -57,3 +57,13 @@ test('new Order', () => {
 	business.addOrder(order);
 	expect(testServer.orderCreated).toHaveBeenCalledWith(order);
 });
+
+test('order change', () => {
+	testServer.orderChanged = jest.fn();
+	const changes = { a: 'b' };
+	const order = new Order();
+	order.getChanges = jest.fn().mockImplementation(() => changes);
+	business.orders.push(order);
+	order.commitChanges();
+	expect(testServer.orderChanged).toHaveBeenCalledWith(order, changes);
+});
