@@ -1,5 +1,6 @@
 import { serializable, object, list, identifier } from 'serializr';
-import { observable } from 'mobx';
+import { observable, observe } from 'mobx';
+import EventEmitter from 'events';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import Register from './Register';
@@ -8,7 +9,7 @@ import ProductCategory from './ProductCategory';
 import TransactionMode from './TransactionMode';
 import Order from './Order';
 import Room from './Room';
-import { rawObject, field } from '../vendor/serializr/propSchemas';
+import { field } from '../vendor/serializr/propSchemas';
 
 /**
  * All messages by this class are published on the same channel.
@@ -25,7 +26,7 @@ const channel = postal.channel(CHANNELS.business);
  * - Accepted transaction modes
  * - ...
  */
-class Business {
+class Business extends EventEmitter {
 	/**
 	 * UUID of the Business. The app cannot create new Business, so the UUID will either be null (not
 	 * yet associated with the server) or a UUID returned by the server.
@@ -93,6 +94,79 @@ class Business {
 	 */
 	@serializable(list(object(Room)))
 	rooms = [];
+	/**
+	 * Listeners currently on the deviceRegister. Since the deviceRegister may change, we keep here
+	 * the listeners we put on it to remove them when it changes.
+	 *
+	 * @type {Object}
+	 */
+	registerListeners = {};
+
+	constructor() {
+		super();
+		this.listenWhenRegisterChange();
+	}
+
+	/**
+	 * When the deviceRegister is changed, adds listeners on it.
+	 */
+	listenWhenRegisterChange() {
+		observe(this, 'deviceRegister', ({ oldValue }) => {
+			this.clearRegisterListeners(oldValue);
+			this.listenToRegister();
+		});
+	}
+
+	/**
+	 * Removes listeners on an old deviceRegister. When this method is called, the deviceRegister was
+	 * already changed, that is why it is passed the old Register.
+	 *
+	 * @param {Register} register
+	 */
+	clearRegisterListeners(register) {
+		if (!register) {
+			return;
+		}
+
+		Object.entries(this.registerListeners).forEach(([event, listener]) => {
+			register.removeListener(event, listener);
+		});
+
+		this.registerListeners = {};
+	}
+
+	/**
+	 * Adds listeners to the current deviceRegister
+	 */
+	listenToRegister() {
+		if (!this.deviceRegister) {
+			return;
+		}
+
+		const listeners = {};
+
+		listeners.open = () => { this.onRegisterOpen(); };
+		listeners.close = () => { this.onRegisterClose(); };
+
+		Object.entries(listeners).forEach(([event, listener]) => {
+			this.deviceRegister[event] = listener;
+			this.deviceRegister.on(event, listener);
+		});
+	}
+
+	/**
+	 * When the Register opens, emits 'registerOpen'
+	 */
+	onRegisterOpen() {
+		this.emit('registerOpen');
+	}
+
+	/**
+	 * When the Register closes, emits 'registerClose'
+	 */
+	onRegisterClose() {
+		this.emit('registerClose');
+	}
 
 	/**
 	 * Add an Order to the order list. Publishes a message.

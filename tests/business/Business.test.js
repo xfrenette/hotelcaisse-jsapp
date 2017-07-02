@@ -9,6 +9,7 @@ import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
 import Room from 'business/Room';
+import Decimal from 'decimal.js';
 import { TextField, EmailField } from 'fields/';
 
 let business;
@@ -55,6 +56,42 @@ afterEach(() => {
 		subscription.unsubscribe();
 		subscription = null;
 	}
+});
+
+describe('emits registerOpen', () => {
+	test('with new deviceRegister', (done) => {
+		business.on('registerOpen', () => {
+			done();
+		});
+		const register = new Register();
+		business.deviceRegister = register;
+		register.open('test', new Decimal(1));
+	});
+
+	test('current deviceRegister changes state', (done) => {
+		business.on('registerOpen', () => {
+			done();
+		});
+		business.deviceRegister.open('test', new Decimal(1));
+	});
+});
+
+describe('emits registerClose', () => {
+	test('with new deviceRegister', (done) => {
+		business.on('registerClose', () => {
+			done();
+		});
+		const register = new Register();
+		business.deviceRegister = register;
+		register.close();
+	});
+
+	test('current deviceRegister changes state', (done) => {
+		business.on('registerClose', () => {
+			done();
+		});
+		business.deviceRegister.close();
+	});
 });
 
 describe('addOrder()', () => {
