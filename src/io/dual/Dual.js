@@ -9,6 +9,7 @@ class Dual {
 	read() {
 		return Promise.resolve(null);
 	}
+
 	/**
 	 * @see io/writers/Writer
 	 * @return {Promise}
