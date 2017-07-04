@@ -5,8 +5,17 @@
  */
 class Server {
 	/**
-	 * Returns the next [quantity] Orders following the [from] Order. It is the Server that
-	 * determines the order of the Orders. Returns an Promise that resolves with an array of Order.
+	 * Returns a Promise that resolves with the Business instance that is currently on the server.
+	 *
+	 * @return {Promise}
+	 */
+	getBusiness() {
+		return Promise.resolve(null);
+	}
+
+	/**
+	 * Returns a Promise that resolves with (an array of Order) the next [quantity] Orders following
+	 * the [from] Order. It is the Server that determines the order of the Orders.
 	 *
 	 * @param {Order} from
 	 * @param {Number} quantity
