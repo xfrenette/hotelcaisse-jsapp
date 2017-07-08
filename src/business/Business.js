@@ -105,7 +105,7 @@ class Business extends EventEmitter {
 
 	constructor() {
 		super();
-		this.listenWhenRegisterChange();
+		this.listenWhenRegisterChanges();
 		this.listenToOrders();
 
 		/*
@@ -122,7 +122,7 @@ class Business extends EventEmitter {
 	/**
 	 * When the deviceRegister is changed, adds listeners on it.
 	 */
-	listenWhenRegisterChange() {
+	listenWhenRegisterChanges() {
 		observe(this, 'deviceRegister', ({ oldValue }) => {
 			this.clearRegisterListeners(oldValue);
 			this.listenToRegister();
@@ -202,9 +202,10 @@ class Business extends EventEmitter {
 		listeners.cashMovementRemove = (cm) => { this.onCashMovementRemove(cm); };
 
 		Object.entries(listeners).forEach(([event, listener]) => {
-			this.deviceRegister[event] = listener;
 			this.deviceRegister.on(event, listener);
 		});
+
+		this.registerListeners = listeners;
 	}
 
 	/**
