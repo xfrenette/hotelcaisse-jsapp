@@ -6,6 +6,7 @@ import Plugin from '../../Plugin';
  * instance.
  */
 class ToWriter extends Plugin {
+	id = 'autosave.business.toWriter';
 	/**
 	 * Writer where to write the Business instance
 	 *
