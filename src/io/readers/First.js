@@ -1,4 +1,4 @@
-import Reader from './reader';
+import Reader from './Reader';
 
 /**
  * The First reader has an ordered list of Readers. Its read() function will itself sequentially
