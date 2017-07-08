@@ -84,14 +84,14 @@ describe('emits registerClose', () => {
 		});
 		const register = new Register();
 		business.deviceRegister = register;
-		register.close();
+		register.close(new Decimal(1), 'test', new Decimal(1));
 	});
 
 	test('current deviceRegister changes state', (done) => {
 		business.on('registerClose', () => {
 			done();
 		});
-		business.deviceRegister.close();
+		business.deviceRegister.close(new Decimal(1), 'test', new Decimal(1));
 	});
 });
 

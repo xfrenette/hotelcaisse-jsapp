@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js';
 import ToWriter from 'plugins/autosave/business/ToWriter';
 import Application from 'Application';
 import Business from 'business/Business';
@@ -26,12 +27,12 @@ beforeEach(() => {
 });
 
 test('register opens', () => {
-	register.open('test');
+	register.open('test', new Decimal(1));
 	expect(writer.write).toHaveBeenCalledWith(business);
 });
 
 test('register closes', () => {
-	register.close('test');
+	register.close(new Decimal(1), 'test', new Decimal(1));
 	expect(writer.write).toHaveBeenCalledWith(business);
 });
 

@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js';
 import ToServer from 'plugins/autosave/business/ToServer';
 import Application from 'Application';
 import Business from 'business/Business';
@@ -25,13 +26,13 @@ beforeEach(() => {
 
 test('register opens', () => {
 	testServer.registerOpened = jest.fn();
-	register.open('test');
+	register.open('test', new Decimal(1));
 	expect(testServer.registerOpened).toHaveBeenCalledWith(register);
 });
 
 test('register closes', () => {
 	testServer.registerClosed = jest.fn();
-	register.close('test');
+	register.close(new Decimal(1), 'test', new Decimal(1));
 	expect(testServer.registerClosed).toHaveBeenCalledWith(register);
 });
 
