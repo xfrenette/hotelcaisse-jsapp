@@ -268,7 +268,7 @@ Register.validateClose = (values) => {
 
 export default Register;
 export const STATES = {
-	NEW: 0,
-	OPENED: 1,
-	CLOSED: 2,
+	OPENED: 0,
+	CLOSED: 1,
+	NEW: 2,
 };
