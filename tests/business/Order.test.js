@@ -10,7 +10,7 @@ import Credit from 'business/Credit';
 import Customer from 'business/Customer';
 import Decimal from 'decimal.js';
 import { TextField } from 'fields';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 import postal from 'postal';
 
@@ -331,9 +331,8 @@ describe('latestCheckOutDate', () => {
 
 	test('returns latest endDate of roomSelections', () => {
 		const latest = new Date();
-		const earliest = new Date(latest.getTime() - 10000);
 
-		roomSelection1.endDate = earliest;
+		roomSelection1.endDate = new Date(latest.getTime() - 10000);
 		order.roomSelections.push(roomSelection1);
 		roomSelection2.endDate = latest;
 		order.roomSelections.push(roomSelection2);
@@ -786,7 +785,7 @@ describe('serializing', () => {
 	test('serializes primitives', () => {
 		expect(data.uuid).toBe(order.uuid);
 		expect(data.note).toBe(order.note);
-		expect(data.createdAt).toEqual(expect.any(Number));
+		expect(data.createdAt).toEqual(Math.round(order.createdAt.getTime() / 1000));
 	});
 
 	test('serializes items', () => {
@@ -814,7 +813,7 @@ describe('deserializing', () => {
 	let newOrder;
 	const data = {
 		uuid: 'test-uuid',
-		createdAt: (new Date()).getTime(),
+		createdAt: Math.round((new Date()).getTime() / 1000),
 		note: 'order-note',
 		items: [
 			{ quantity: 2 },

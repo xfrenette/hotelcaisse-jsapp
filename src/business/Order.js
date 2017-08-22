@@ -1,9 +1,10 @@
-import { serializable, list, date, object, identifier } from 'serializr';
-import { observable, computed, isObservableArray } from 'mobx';
+import { identifier, list, object, serializable } from 'serializr';
+import { computed, isObservableArray, observable } from 'mobx';
 import postal from 'postal';
 import EventEmitter from 'events';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
+import { timestamp } from '../vendor/serializr/propSchemas';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import OrderChanges from './OrderChanges';
 import Item from './Item';
@@ -44,7 +45,7 @@ class Order extends EventEmitter {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	createdAt = null;
 	/**
 	 * List of Items.
@@ -144,11 +145,9 @@ class Order extends EventEmitter {
 		const totals = this.items.reduce(
 			(prevTotal, item) => {
 				item.taxesTotals.forEach((tax) => {
-					const amount = prevTotal[tax.name]
+					prevTotal[tax.name] = prevTotal[tax.name]
 						? prevTotal[tax.name].add(tax.amount)
 						: tax.amount;
-
-					prevTotal[tax.name] = amount;
 				});
 
 				return prevTotal;
@@ -483,7 +482,7 @@ class Order extends EventEmitter {
 	 * Compares the current roomSelections with the ones in 'old'. If any change is detected, returns
 	 * true.
 	 *
-	 * @param {RoomSelections} old
+	 * @param {RoomSelection} old
 	 * @return {Boolean}
 	 */
 	didRoomSelectionsChanged(old) {
@@ -556,7 +555,7 @@ class Order extends EventEmitter {
 	 * - items (validates that all items are themselves valid)
 	 * - credits (validates that all credits are themselves valid)
 	 *
-	 * @param {Array} attributes
+	 * @param {Array} rawAttributes
 	 * @return {Object}
 	 */
 	validate(rawAttributes = null) {
@@ -602,6 +601,7 @@ class Order extends EventEmitter {
 			return false;
 		});
 
+		// noinspection JSUnusedAssignment
 		return res;
 	}
 
@@ -622,6 +622,7 @@ class Order extends EventEmitter {
 			return false;
 		});
 
+		// noinspection JSUnusedAssignment
 		return res;
 	}
 
