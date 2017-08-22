@@ -92,6 +92,7 @@ class Order extends EventEmitter {
 	 *
 	 * @type {Customer}
 	 */
+	@serializable(object(Customer))
 	customer = new Customer();
 	/**
 	 * Flag indicating if currently recording changes.

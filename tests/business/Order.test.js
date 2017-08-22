@@ -788,6 +788,10 @@ describe('serializing', () => {
 		expect(data.createdAt).toEqual(Math.round(order.createdAt.getTime() / 1000));
 	});
 
+	test('serializes customer', () => {
+		expect(data.customer).toEqual(serialize(order.customer));
+	});
+
 	test('serializes items', () => {
 		expect(data.items.length).toBe(order.items.length);
 		expect(data.items[0].quantity).toBe(order.items[0].quantity);
