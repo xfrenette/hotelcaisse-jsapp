@@ -143,6 +143,7 @@ const fieldPropSchema = {
 	 * @param {Function} callback
 	 */
 	deserializer(jsonValue, callback) {
+		// eslint-disable-next-line global-require
 		const fields = require('../../fields');
 
 		if (jsonValue === null || jsonValue === undefined) {
@@ -167,7 +168,39 @@ const fieldPropSchema = {
 	},
 };
 
+const timestampPropSchema = {
+	/**
+	 * Serializer function that returns the literal object as is.
+	 *
+	 * @param {Date} value
+	 * @return {Integer|null|undefined}
+	 */
+	serializer(value) {
+		if (value === null || value === undefined) {
+			return value;
+		}
+
+		return Math.round(value.getTime() / 1000);
+	},
+
+	/**
+	 * Deserializer function that calls callback with the jsonValue object as is.
+	 *
+	 * @param {Number|null|undefined} jsonValue
+	 * @param {Function} callback
+	 */
+	deserializer(jsonValue, callback) {
+		if (jsonValue === null || jsonValue === undefined) {
+			callback(null, jsonValue);
+			return;
+		}
+
+		callback(null, new Date(jsonValue * 1000));
+	},
+};
+
 export const decimal = () => decimalPropSchema;
 export const productTax = () => productTaxPropSchema;
 export const rawObject = () => rawObjectPropSchema;
 export const field = () => fieldPropSchema;
+export const timestamp = () => timestampPropSchema;

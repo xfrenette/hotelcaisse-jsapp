@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 import { serialize } from 'serializr';
-import { decimal, productTax, rawObject, field } from 'vendor/serializr/propSchemas';
+import { decimal, productTax, rawObject, field, timestamp } from 'vendor/serializr/propSchemas';
 import { EmailField } from 'fields';
 
 describe('decimal', () => {
@@ -247,9 +247,72 @@ describe('field', () => {
 
 		test('returns null if inexistant field type', (done) => {
 			const data = serialize(fieldInstance);
-			data.type = '__non-existent__'
+			data.type = '__non-existent__';
 			schema.deserializer(data, (err, val) => {
 				expect(val).toBeNull();
+				done();
+			});
+		});
+	});
+});
+
+describe('timestamp', () => {
+	const schema = timestamp();
+
+	describe('serializer()', () => {
+		test('saves timestamp', () => {
+			const expected = 123456789;
+			const date = new Date((123456789 * 1000) + 456);
+			const data = schema.serializer(date);
+			expect(data).toBe(expected);
+		});
+
+		test('returns null if null', () => {
+			const data = schema.serializer(null);
+			expect(data).toBeNull();
+		});
+
+		test('returns undefined if undefined', () => {
+			const data = schema.serializer();
+			expect(data).toBeUndefined();
+		});
+
+		test('throws error if not Date', () => {
+			expect(() => {
+				schema.serializer('test');
+			}).toThrow();
+		});
+	});
+
+	describe('deserializer', () => {
+		test('returns Date instance', (done) => {
+			const data = 123456789;
+			schema.deserializer(data, (err, val) => {
+				expect(val).toBeInstanceOf(Date);
+				done();
+			});
+		});
+
+		test('returns correct date value', (done) => {
+			const data = 12345678;
+			const expected = new Date(data * 1000);
+
+			schema.deserializer(data, (err, val) => {
+				expect(val.getTime()).toEqual(expected.getTime());
+				done();
+			});
+		});
+
+		test('returns null if null', (done) => {
+			schema.deserializer(null, (err, val) => {
+				expect(val).toBeNull();
+				done();
+			});
+		});
+
+		test('returns undefined if undefined', (done) => {
+			schema.deserializer(undefined, (err, val) => {
+				expect(val).toBeUndefined();
 				done();
 			});
 		});
