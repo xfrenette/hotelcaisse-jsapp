@@ -66,13 +66,6 @@ class Product {
 	@observable
 	price = null;
 	/**
-	 * True if it represents a custom product.
-	 *
-	 * @type {Boolean}
-	 */
-	@serializable
-	isCustom = false;
-	/**
 	 * List of taxes. Each element is an object:
 	 * {
 	 * 	name: <String>
@@ -175,7 +168,6 @@ class Product {
 		clone.name = this.name;
 		clone.description = this.description;
 		clone.taxes = [...this.taxes];
-		clone.isCustom = this.isCustom;
 
 		if (this.price) {
 			clone.price = new Decimal(this.price);
