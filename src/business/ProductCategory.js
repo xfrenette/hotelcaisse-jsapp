@@ -17,12 +17,14 @@ class ProductCategory {
 	 *
 	 * @type {String}
 	 */
+	// @serializable see below
 	uuid = null;
 	/**
 	 * Name of the category.
 	 *
 	 * @type {String}
 	 */
+	// @serializable see below
 	name = null;
 	/**
 	 * List of Product.
@@ -33,6 +35,7 @@ class ProductCategory {
 	 *
 	 * @type {Array<Product>}
 	 */
+	// @serializable see below
 	products = [];
 	/**
 	 * List of sub-categories (also ProductCategory). It is guaranteed that a ProductCategory will
@@ -40,6 +43,7 @@ class ProductCategory {
 	 *
 	 * @type {Array<ProductCategory>}
 	 */
+	// @serializable see below
 	categories = [];
 }
 
