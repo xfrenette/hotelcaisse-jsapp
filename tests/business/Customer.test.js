@@ -1,7 +1,8 @@
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 import Customer from 'business/Customer';
 import { TextField } from 'fields';
+import { fieldValues as fieldValuesSerializer } from 'vendor/serializr/propSchemas';
 
 let customer;
 let field;
@@ -150,7 +151,8 @@ describe('serializing', () => {
 	});
 
 	test('saves fieldValues', () => {
-		expect(data.fieldValues).toEqual(fieldValues);
+		const expected = fieldValuesSerializer().serializer(customer.fieldValues);
+		expect(data.fieldValues).toEqual(expected);
 	});
 });
 
@@ -158,10 +160,10 @@ describe('deserializing', () => {
 	let restoredCustomer;
 	const data = {
 		uuid: 'test-uuid',
-		fieldValues: {
-			d: 'e',
-			f: 4,
-		},
+		fieldValues: [
+			{ fieldId: 'd', value: 'e' },
+			{ fieldId: 'f', value: 4 },
+		],
 	};
 
 	beforeEach(() => {
@@ -173,6 +175,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores fieldValues', () => {
-		expect(restoredCustomer.fieldValues.toJS()).toEqual(data.fieldValues);
+		expect(Array.from(restoredCustomer.fieldValues.keys())).toEqual(['d', 'f']);
+		expect(Array.from(restoredCustomer.fieldValues.values())).toEqual(['e', 4]);
 	});
 });

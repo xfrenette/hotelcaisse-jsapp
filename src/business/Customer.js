@@ -1,6 +1,7 @@
-import { serializable, identifier, map } from 'serializr';
+import { identifier, serializable } from 'serializr';
 import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
+import { fieldValues } from '../vendor/serializr/propSchemas';
 
 /**
  * Represents a customer and all its information.
@@ -18,7 +19,7 @@ class Customer {
 	 *
 	 * @type {Map}
 	 */
-	@serializable(map())
+	@serializable(fieldValues())
 	@observable
 	fieldValues = new Map();
 	/**

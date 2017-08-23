@@ -1,8 +1,9 @@
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 import RoomSelection from 'business/RoomSelection';
 import Room from 'business/Room';
 import { TextField } from 'fields';
+import { fieldValues as fieldValuesSerializer } from 'vendor/serializr/propSchemas';
 
 let roomSelection;
 let room;
@@ -226,7 +227,8 @@ describe('serializing', () => {
 	});
 
 	test('saves fieldValues', () => {
-		expect(data.fieldValues).toEqual(fieldValues);
+		const expected = fieldValuesSerializer().serializer(roomSelection.fieldValues);
+		expect(data.fieldValues).toEqual(expected);
 	});
 });
 
@@ -235,7 +237,7 @@ describe('deserializing', () => {
 		uuid: 'test-uuid',
 		startDate: 1494883301000,
 		endDate: 1495142500000,
-		fieldValues: { a: 'b' },
+		fieldValues: [{ fieldId: 'a', value: 'b' }],
 	};
 
 	beforeEach(() => {
@@ -252,6 +254,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores fieldValues', () => {
-		expect(roomSelection.fieldValues.toJS()).toEqual(jsonObject.fieldValues);
+		expect(Array.from(roomSelection.fieldValues.keys())).toEqual(['a']);
+		expect(Array.from(roomSelection.fieldValues.values())).toEqual(['b']);
 	});
 });

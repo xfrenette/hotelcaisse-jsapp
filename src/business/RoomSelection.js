@@ -1,6 +1,7 @@
-import { serializable, identifier, date, reference, map } from 'serializr';
+import { date, identifier, reference, serializable } from 'serializr';
 import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
+import { fieldValues } from '../vendor/serializr/propSchemas';
 import Room from './Room';
 
 /**
@@ -44,7 +45,7 @@ class RoomSelection {
 	 *
 	 * @type {Map}
 	 */
-	@serializable(map())
+	@serializable(fieldValues())
 	@observable
 	fieldValues = new Map();
 	/**
@@ -97,7 +98,7 @@ class RoomSelection {
 			if (this[attr] instanceof Date) {
 				clone[attr] = new Date(this[attr].getTime());
 			}
-		})
+		});
 		clone.fieldValues.replace(this.fieldValues);
 
 		return clone;
