@@ -3,7 +3,7 @@ import { CHANNELS, TOPICS } from 'const/message-bus';
 import Transaction from 'business/Transaction';
 import CashMovement from 'business/CashMovement';
 import Decimal from 'decimal.js';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 import postal from 'postal';
 import { isObservable } from 'mobx';
 
@@ -13,6 +13,14 @@ let subscription;
 
 beforeEach(() => {
 	register = new Register();
+	register.uuid = 'test-uuid';
+	register.employee = 'test employee';
+	register.openedAt = new Date(123);
+	register.openingCash = new Decimal(12.32);
+	register.closedAt = new Date(963);
+	register.closingCash = new Decimal(41.36);
+	register.POSTRef = 'test post ref';
+	register.POSTAmount = new Decimal(1.35);
 });
 
 afterEach(() => {
@@ -243,6 +251,41 @@ describe('close()', () => {
 	test('does nothing if invalid data', () => {
 		register.close(new Decimal(-1), 'test', new Decimal(1));
 		expect(register.state).not.toBe(STATES.CLOSED);
+	});
+});
+
+describe('update', () => {
+	let newRegister;
+
+	beforeEach(() => {
+		newRegister = new Register();
+		newRegister.state = STATES.OPENED;
+		newRegister.uuid = `${register.uuid}-new`;
+		newRegister.employee = `${register.employee} new`;
+		newRegister.openedAt = new Date(register.openedAt.getTime() + 10000);
+		newRegister.openingCash = register.openingCash.add(1);
+		newRegister.closedAt = new Date(register.closedAt.getTime() + 10000);
+		newRegister.closingCash = register.closingCash.add(1);
+		newRegister.POSTRef = `${newRegister.POSTRef}-new`;
+		newRegister.POSTAmount = register.POSTAmount.add(1);
+		newRegister.cashMovements.push(new CashMovement('cm-new-1'));
+		newRegister.cashMovements.push(new CashMovement('cm-new-2'));
+	});
+
+	test('replaces attributes', () => {
+		register.update(newRegister);
+		const newSerialized = serialize(newRegister);
+		const currentSerialized = serialize(register);
+		expect(currentSerialized).toEqual(newSerialized);
+	});
+
+	test('replaces cashMovements', () => {
+		register.cashMovements.push(new CashMovement('cm-1'));
+		const oldCashMovements = register.cashMovements;
+		register.update(newRegister);
+		expect(register.cashMovements).not.toBe(oldCashMovements);
+		expect(register.cashMovements).not.toBe(newRegister.cashMovements);
+		expect(register.cashMovements).toEqual(newRegister.cashMovements);
 	});
 });
 

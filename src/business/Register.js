@@ -1,4 +1,4 @@
-import { serializable, list, object, date, identifier } from 'serializr';
+import { date, identifier, list, object, serializable } from 'serializr';
 import EventEmiter from 'events';
 import postal from 'postal';
 import { observable } from 'mobx';
@@ -186,6 +186,24 @@ class Register extends EventEmiter {
 		channel.publish(TOPICS.register.closed, {
 			register: this,
 		});
+	}
+
+	/**
+	 * Updates all the attributes of this Register with the values of `newRegister`
+	 *
+	 * @param newRegister
+	 */
+	update(newRegister) {
+		this.state = newRegister.state;
+		this.uuid = newRegister.uuid;
+		this.employee = newRegister.employee;
+		this.openedAt = newRegister.openedAt;
+		this.openingCash = newRegister.openingCash;
+		this.closedAt = newRegister.closedAt;
+		this.closingCash = newRegister.closingCash;
+		this.POSTRef = newRegister.POSTRef;
+		this.POSTAmount = newRegister.POSTAmount;
+		this.cashMovements = [...newRegister.cashMovements];
 	}
 
 	/**
