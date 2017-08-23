@@ -8,6 +8,13 @@ import validate from '../Validator';
  */
 class Field {
 	/**
+	 * Id of this field
+	 *
+	 * @type {String}
+	 */
+	@serializable(identifier())
+	id = null;
+	/**
 	 * Type of this field. It is used when deserializing an array of Fields (which can contain
 	 * multiple types), to create the correct instance. The value must be a valid key in
 	 * src/fields/index.js
@@ -20,13 +27,6 @@ class Field {
 	 */
 	@serializable
 	type = 'Field';
-	/**
-	 * Unique id of this field
-	 *
-	 * @type {String}
-	 */
-	@serializable(identifier())
-	uuid = null;
 	/**
 	 * Label of this field
 	 *

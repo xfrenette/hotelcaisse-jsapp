@@ -5,7 +5,7 @@ let field;
 
 beforeEach(() => {
 	field = new Field();
-	field.uuid = 'test-uuid';
+	field.id = 7123;
 	field.label = 'test-label';
 	field.role = 'test-role';
 	field.defaultValue = 'test-defaultValue';
@@ -22,7 +22,7 @@ describe('serializing', () => {
 	test('saves primitives', () => {
 		expect(data).toEqual({
 			type: field.type,
-			uuid: field.uuid,
+			id: field.id,
 			label: field.label,
 			role: field.role,
 			required: field.required,
@@ -33,7 +33,7 @@ describe('serializing', () => {
 
 describe('deserializing', () => {
 	const jsonObject = {
-		uuid: 'test-uuid-2',
+		id: 8963,
 		label: 'test-label-2',
 		role: 'test-role-2',
 		required: true,
@@ -45,7 +45,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores primitives', () => {
-		expect(field.uuid).toBe(jsonObject.uuid);
+		expect(field.id).toBe(jsonObject.id);
 		expect(field.label).toBe(jsonObject.label);
 		expect(field.required).toBe(jsonObject.required);
 		expect(field.defaultValue).toBe(jsonObject.defaultValue);

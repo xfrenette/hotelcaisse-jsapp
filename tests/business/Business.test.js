@@ -2,6 +2,7 @@ import { serialize, deserialize } from 'serializr';
 import { isObservable } from 'mobx';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from 'const/message-bus';
+import Decimal from 'decimal.js';
 import Business from 'business/Business';
 import Register from 'business/Register';
 import Product from 'business/Product';
@@ -10,7 +11,6 @@ import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
 import Room from 'business/Room';
-import Decimal from 'decimal.js';
 import { TextField, EmailField } from 'fields/';
 
 let business;
@@ -192,9 +192,9 @@ describe('addOrder()', () => {
 describe('serializing', () => {
 	let data;
 	const textField = new TextField();
-	textField.uuid = 'text-field';
+	textField.id = 8520;
 	const emailField = new EmailField();
-	emailField.uuid = 'email-field';
+	emailField.id = 7410;
 
 	beforeEach(() => {
 		business.deviceRegister.employee = 'test-employee';
@@ -228,12 +228,12 @@ describe('serializing', () => {
 
 	test('serializes customerFields', () => {
 		expect(data.customerFields.length).toBe(business.customerFields.length);
-		expect(data.customerFields[1].uuid).toBe(business.customerFields[1].uuid);
+		expect(data.customerFields[1].id).toBe(business.customerFields[1].id);
 	});
 
 	test('serializes roomSelectionFields', () => {
 		expect(data.roomSelectionFields.length).toBe(business.roomSelectionFields.length);
-		expect(data.roomSelectionFields[1].uuid).toBe(business.roomSelectionFields[1].uuid);
+		expect(data.roomSelectionFields[1].id).toBe(business.roomSelectionFields[1].id);
 	});
 
 	test('serializes rooms', () => {
@@ -266,12 +266,12 @@ describe('deserializing', () => {
 			{ createdAt: (new Date()).getTime() },
 		],
 		customerFields: [
-			{ uuid: 'field-1', type: 'TextField' },
-			{ uuid: 'field-2', type: 'EmailField' },
+			{ id: 369, type: 'TextField' },
+			{ id: 258, type: 'EmailField' },
 		],
 		roomSelectionFields: [
-			{ uuid: 'field-3', type: 'TextField' },
-			{ uuid: 'field-4', type: 'EmailField' },
+			{ id: 147, type: 'TextField' },
+			{ id: 951, type: 'EmailField' },
 		],
 		rooms: [
 			{ id: 4456 },
@@ -322,13 +322,13 @@ describe('deserializing', () => {
 	test('restores customerFields', () => {
 		expect(newBusiness.customerFields.length).toBe(data.customerFields.length);
 		expect(newBusiness.customerFields[1]).toBeInstanceOf(EmailField);
-		expect(newBusiness.customerFields[1].uuid).toBe(data.customerFields[1].uuid);
+		expect(newBusiness.customerFields[1].id).toBe(data.customerFields[1].id);
 	});
 
 	test('restores roomSelectionFields', () => {
 		expect(newBusiness.roomSelectionFields.length).toBe(data.roomSelectionFields.length);
 		expect(newBusiness.roomSelectionFields[1]).toBeInstanceOf(EmailField);
-		expect(newBusiness.roomSelectionFields[1].uuid).toBe(data.roomSelectionFields[1].uuid);
+		expect(newBusiness.roomSelectionFields[1].id).toBe(data.roomSelectionFields[1].id);
 	});
 
 	test('restores rooms', () => {

@@ -211,7 +211,7 @@ describe('rawObject', () => {
 describe('field', () => {
 	const schema = field();
 	const fieldInstance = new EmailField();
-	fieldInstance.uuid = 'email-field-1';
+	fieldInstance.id = 357;
 
 	describe('serializer()', () => {
 		test('returns same object as serialize()', () => {
@@ -226,7 +226,7 @@ describe('field', () => {
 			const data = serialize(fieldInstance);
 			schema.deserializer(data, (err, val) => {
 				expect(val).toBeInstanceOf(EmailField);
-				expect(val.uuid).toBe(fieldInstance.uuid);
+				expect(val.id).toBe(fieldInstance.id);
 				done();
 			});
 		});
