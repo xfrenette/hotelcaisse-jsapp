@@ -13,6 +13,7 @@ import { TextField } from 'fields';
 import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 import postal from 'postal';
+import AppliedTax from '../../src/business/AppliedTax';
 
 let order;
 let item1;
@@ -28,32 +29,33 @@ let subscription;
 let customerField;
 
 const taxes = {
-	tax1: new Decimal(0.38),
-	tax2_1: new Decimal(0.45),
-	tax2_2: new Decimal(0.12),
-	tax3: new Decimal(1.78),
+	tax1: new AppliedTax(1123, new Decimal(0.38)),
+	tax2_1: new AppliedTax(1456, new Decimal(0.45)),
+	tax2_2: new AppliedTax(1456, new Decimal(0.12)), // Same taxId as tax2_1
+	tax3: new AppliedTax(1741, new Decimal(1.78)),
 };
 
 const quantities = [2, -1];
 
 const taxesTotals = [
-	{ name: 'tax1', amount: taxes.tax1.mul(quantities[0]) },
-	{ name: 'tax2', amount: taxes.tax2_1.mul(quantities[0]).add(taxes.tax2_2.mul(quantities[1])) },
-	{ name: 'tax3', amount: taxes.tax3.mul(quantities[1]) },
+	new AppliedTax(taxes.tax1.taxId, taxes.tax1.amount.mul(quantities[0])),
+	new AppliedTax(taxes.tax2_1.taxId, taxes.tax2_1.amount.mul(quantities[0])
+		.add(taxes.tax2_2.amount.mul(quantities[1]))),
+	new AppliedTax(taxes.tax3.taxId, taxes.tax3.amount.mul(quantities[1])),
 ];
 
 beforeEach(() => {
 	const product1 = new Product();
 	product1.name = 'test-product-1';
 	product1.price = new Decimal(1.23);
-	product1.addTax('tax1', taxes.tax1);
-	product1.addTax('tax2', taxes.tax2_1);
+	product1.taxes.push(taxes.tax1);
+	product1.taxes.push(taxes.tax2_1);
 
 	const product2 = new Product();
 	product2.name = 'test-product-2';
 	product2.price = new Decimal(4.56);
-	product2.addTax('tax2', taxes.tax2_2);
-	product2.addTax('tax3', taxes.tax3);
+	product2.taxes.push(taxes.tax2_2);
+	product2.taxes.push(taxes.tax3);
 
 	item1 = new Item('item1');
 	item1.product = product1;
@@ -166,7 +168,9 @@ describe('taxesTotals', () => {
 	});
 
 	test('returns correct array of taxes', () => {
-		expect(order.taxesTotals).toEqual(taxesTotals);
+		const actual = serialize(order.taxesTotals);
+		const expected = serialize(taxesTotals);
+		expect(actual).toEqual(expected);
 	});
 
 	test('is observable', () => {

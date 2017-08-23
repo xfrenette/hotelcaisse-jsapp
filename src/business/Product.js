@@ -1,9 +1,10 @@
 import { getDefaultModelSchema, identifier, list, object, serializable } from 'serializr';
 import Decimal from 'decimal.js';
 import { observable } from 'mobx';
-import { decimal, productTax } from '../vendor/serializr/propSchemas';
+import { decimal } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
 import utils from '../utils';
+import AppliedTax from './AppliedTax';
 
 /**
  * Constraints for validation.
@@ -66,15 +67,11 @@ class Product {
 	@observable
 	price = null;
 	/**
-	 * List of taxes. Each element is an object:
-	 * {
-	 * 	name: <String>
-	 * 	amount: <Decimal>
-	 * }
+	 * List of applied taxes for a unit of this Product.
 	 *
-	 * @type {Array}
+	 * @type {Array<AppliedTax>}
 	 */
-	@serializable(list(productTax()))
+	@serializable(list(object(AppliedTax)))
 	taxes = [];
 	/**
 	 * If this product is a variant, reference to the parent product. Else, null. This information
@@ -132,19 +129,6 @@ class Product {
 	addVariant(product) {
 		this.variants.push(product);
 		product.parent = this;
-	}
-
-	/**
-	 * Adds a tax for a unit of this product
-	 *
-	 * @param {String} name
-	 * @param {Decimal} amount
-	 */
-	addTax(name, amount) {
-		this.taxes.push({
-			name,
-			amount,
-		});
 	}
 
 	/**

@@ -128,27 +128,27 @@ class Order extends EventEmitter {
 	}
 
 	/**
-	 * Returns an array of tax totals of the items. Taxes with the same name are added.
-	 * Each element is an object:
+	 * Returns an array of AppliedTax totals of the items. Taxes with the same taxId are added.
 	 *
-	 * {name:<String>, amount:<Decimal>},
-	 *
-	 * @return {Array}
+	 * @return {Array<AppliedTax>}
 	 */
 	@computed
 	get taxesTotals() {
 		// We construct a temporary object that is the sum of each tax. The object will have this
 		// shape:
 		// {
-		// 	<taxName> : <amount>
+		// 	<taxId> : <AppliedTax>
 		// 	...
 		// }
 		const totals = this.items.reduce(
 			(prevTotal, item) => {
 				item.taxesTotals.forEach((tax) => {
-					prevTotal[tax.name] = prevTotal[tax.name]
-						? prevTotal[tax.name].add(tax.amount)
-						: tax.amount;
+					if (prevTotal[tax.taxId]) {
+						const current = prevTotal[tax.taxId];
+						current.amount = current.amount.add(tax.amount);
+					} else {
+						prevTotal[tax.taxId] = tax.clone();
+					}
 				});
 
 				return prevTotal;
@@ -156,14 +156,8 @@ class Order extends EventEmitter {
 			{}
 		);
 
-		// From the totals object, we return an array of this shape:
-		// [
-		// 	{name: <taxName>, amount: <amount>},
-		// 	...
-		// ]
-		return Object.entries(totals).map(
-			([name, amount]) => ({ name, amount })
-		);
+		// From the totals object, we return an array of AppliedTax:
+		return Object.values(totals);
 	}
 
 	/**

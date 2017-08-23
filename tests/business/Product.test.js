@@ -2,6 +2,7 @@ import Product from 'business/Product';
 import Decimal from 'decimal.js';
 import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
+import AppliedTax from '../../src/business/AppliedTax';
 
 let product;
 
@@ -71,17 +72,6 @@ describe('isVariant', () => {
 	});
 });
 
-describe('addTax()', () => {
-	test('adds a new tax', () => {
-		const tax = {
-			name: 'tax-test',
-			amount: new Decimal(123),
-		};
-		product.addTax(tax.name, tax.amount);
-		expect(product.taxes).toEqual([tax]);
-	});
-});
-
 describe('clone()', () => {
 	test('clone is new instance', () => {
 		const clone = product.clone();
@@ -93,8 +83,8 @@ describe('clone()', () => {
 		product.name = 'test name';
 		product.description = 'test description';
 		product.price = new Decimal(22);
-		product.addTax('tax1', new Decimal(1.22));
-		product.addTax('tax2', new Decimal(2.33));
+		product.taxes.push(new AppliedTax(2569, new Decimal(1.22)));
+		product.taxes.push(new AppliedTax(2789, new Decimal(2.33)));
 
 		const clone = product.clone();
 		expect(clone.id).toBe(product.id);
@@ -119,8 +109,8 @@ describe('serializing', () => {
 		product.name = 'test-name';
 		product.description = 'test-description';
 		product.price = new Decimal(12.34);
-		product.addTax('tax1', new Decimal(5.25));
-		product.addTax('tax2', new Decimal(8.14));
+		product.taxes.push(new AppliedTax(9632, new Decimal(5.25)));
+		product.taxes.push(new AppliedTax(9874, new Decimal(8.14)));
 		product.parent = { id: 6985 };
 		data = serialize(product);
 	});
@@ -137,10 +127,7 @@ describe('serializing', () => {
 
 	test('saves taxes', () => {
 		expect(data.taxes.length).toBe(product.taxes.length);
-		expect(data.taxes[0]).toEqual({
-			name: product.taxes[0].name,
-			amount: product.taxes[0].amount.toString(),
-		});
+		expect(data.taxes[0]).toEqual(serialize(product.taxes[0]));
 	});
 
 	test('saves variants', () => {
@@ -161,8 +148,8 @@ describe('deserializing', () => {
 		description: 'test-description',
 		price: '12.34',
 		taxes: [
-			{ name: 'tax1', amount: '1.23' },
-			{ name: 'tax2', amount: '4.56' },
+			{ taxId: 8963, amount: '1.23' },
+			{ taxId: 8521, amount: '4.56' },
 		],
 		variants: [
 			{ id: 1233, parent: id },
@@ -187,7 +174,7 @@ describe('deserializing', () => {
 
 	test('restores taxes', () => {
 		expect(product.taxes.length).toBe(data.taxes.length);
-		expect(product.taxes[0].name).toBe(data.taxes[0].name);
+		expect(product.taxes[0].taxId).toBe(data.taxes[0].taxId);
 		expect(product.taxes[0].amount.toString()).toBe(data.taxes[0].amount);
 	});
 

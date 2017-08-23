@@ -3,6 +3,7 @@ import Product from 'business/Product';
 import Decimal from 'decimal.js';
 import { isObservable } from 'mobx';
 import { deserialize, serialize } from 'serializr';
+import AppliedTax from '../../src/business/AppliedTax';
 
 let item;
 let parentProduct;
@@ -17,8 +18,8 @@ beforeEach(() => {
 	product = new Product();
 	product.name = 'Product name';
 	product.price = new Decimal(12.95);
-	product.addTax('tax1', new Decimal(1.25));
-	product.addTax('tax2', new Decimal(2.33));
+	product.taxes.push(new AppliedTax(1123, new Decimal(1.25)));
+	product.taxes.push(new AppliedTax(1456, new Decimal(2.33)));
 
 	parentProduct.addVariant(product);
 });
@@ -119,9 +120,11 @@ describe('taxesTotals', () => {
 		item.product = product;
 		[-2, 0, 2].forEach((quantity) => {
 			item.quantity = quantity;
-			const expected	= product.taxes.map(
-				({ name, amount }) => ({ name, amount: amount.mul(quantity) })
-			);
+			const expected	= product.taxes.map((tax) => {
+				const clone = tax.clone();
+				clone.amount = clone.amount.mul(quantity);
+				return clone;
+			});
 			expect(item.taxesTotals).toEqual(expected);
 		});
 	});
@@ -135,7 +138,7 @@ describe('unitFullPrice', () => {
 	test('works with taxes', () => {
 		item.product = product;
 		const expected = product.taxes.reduce(
-			(prev, { amount }) => prev.add(amount),
+			(prev, tax) => prev.add(tax.amount),
 			item.unitPrice
 		);
 		expect(item.unitFullPrice.eq(expected)).toBeTruthy();

@@ -2,8 +2,8 @@ import { computed, observable } from 'mobx';
 import { identifier, object, serializable } from 'serializr';
 import Decimal from 'decimal.js';
 import { timestamp } from '../vendor/serializr/propSchemas';
-import validate from '../Validator';
 import Product from './Product';
+import validate from '../Validator';
 import utils from '../utils';
 
 /**
@@ -98,15 +98,12 @@ class Item {
 	}
 
 	/**
-	 * Returns an array of taxes applied to the unit price.
-	 * Each entry is an object :
+	 * Returns an array of AppliedTax for a unit.
 	 *
-	 * {name:<String>, amount:<Decimal>}
-	 *
-	 * @return {array}
+	 * @return {array<AppliedTax>}
 	 */
 	get unitTaxes() {
-		return this.product.taxes;
+		return [...this.product.taxes];
 	}
 
 	/**
@@ -118,7 +115,7 @@ class Item {
 	@computed
 	get unitFullPrice() {
 		return this.unitTaxes.reduce(
-			(prev, { amount }) => prev.add(amount),
+			(prev, tax) => prev.add(tax.amount),
 			this.unitPrice
 		);
 	}
@@ -141,9 +138,11 @@ class Item {
 	 */
 	@computed
 	get taxesTotals() {
-		return this.unitTaxes.map(
-			({ name, amount }) => ({ name, amount: amount.mul(this.quantity) })
-		);
+		return this.unitTaxes.map((tax) => {
+			const unitTax = tax.clone();
+			unitTax.amount = tax.amount.mul(this.quantity);
+			return unitTax;
+		});
 	}
 
 	/**
