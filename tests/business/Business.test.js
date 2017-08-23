@@ -44,9 +44,9 @@ beforeEach(() => {
 	business.orders.push(new Order());
 
 	const room1 = new Room();
-	room1.uuid = 'room1';
+	room1.id = 8123;
 	const room2 = new Room();
-	room2.uuid = 'room2';
+	room2.id = 8456;
 
 	business.rooms.push(room1);
 	business.rooms.push(room2);
@@ -249,13 +249,13 @@ describe('deserializing', () => {
 			employee: 'test-employee',
 		},
 		products: [
-			{ uuid: 'p1', name: 'product-1' },
-			{ uuid: 'p2' },
+			{ id: 4123, name: 'product-1' },
+			{ id: 4456 },
 		],
 		rootProductCategory: {
 			id: 8123,
 			name: 'category-1',
-			products: ['p1', 'p2'],
+			products: [4123, 4456],
 		},
 		transactionModes: [
 			{ name: 'tm1' },

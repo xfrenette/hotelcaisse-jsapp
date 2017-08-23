@@ -7,11 +7,11 @@ let productCategory;
 beforeEach(() => {
 	const product1 = new Product();
 	product1.name = 'Product 1';
-	product1.uuid = 'p1';
+	product1.id = 1123;
 
 	const product2 = new Product();
 	product2.name = 'Product 2';
-	product2.uuid = 'p2';
+	product2.id = 2123;
 
 	const subCategory1 = new ProductCategory();
 	subCategory1.id = 1123;
@@ -42,7 +42,7 @@ describe('serializing', () => {
 
 	test('serializes products as ids', () => {
 		expect(data.products.length).toBe(productCategory.products.length);
-		expect(data.products[1]).toBe(productCategory.products[1].uuid);
+		expect(data.products[1]).toBe(productCategory.products[1].id);
 	});
 
 	test('serializes categories', () => {

@@ -89,6 +89,7 @@ describe('clone()', () => {
 	});
 
 	test('clones properties', () => {
+		product.id = 6123;
 		product.name = 'test name';
 		product.isCustom = true;
 		product.description = 'test description';
@@ -97,6 +98,7 @@ describe('clone()', () => {
 		product.addTax('tax2', new Decimal(2.33));
 
 		const clone = product.clone();
+		expect(clone.id).toBe(product.id);
 		expect(clone.name).toBe(product.name);
 		expect(clone.isCustom).toBe(product.isCustom);
 		expect(clone.description).toBe(product.description);
@@ -115,19 +117,19 @@ describe('serializing', () => {
 	let data;
 
 	beforeEach(() => {
-		product.uuid = 'test-id';
+		product.id = 3654;
 		product.name = 'test-name';
 		product.description = 'test-description';
 		product.price = new Decimal(12.34);
 		product.isCustom = true;
 		product.addTax('tax1', new Decimal(5.25));
 		product.addTax('tax2', new Decimal(8.14));
-		product.parent = { uuid: 'test-parent-uuid' };
+		product.parent = { id: 6985 };
 		data = serialize(product);
 	});
 
 	test('saves primitives', () => {
-		expect(data.uuid).toBe(product.uuid);
+		expect(data.id).toBe(product.id);
 		expect(data.name).toBe(product.name);
 		expect(data.description).toBe(product.description);
 		expect(data.isCustom).toBe(product.isCustom);
@@ -155,14 +157,14 @@ describe('serializing', () => {
 	});
 
 	test('saves parent', () => {
-		expect(data.parent).toBe(product.parent.uuid);
+		expect(data.parent).toBe(product.parent.id);
 	});
 });
 
 describe('deserializing', () => {
-	const uuid = 'test-id';
+	const id = 7321;
 	const data = {
-		uuid,
+		id,
 		name: 'test-name',
 		description: 'test-description',
 		price: '12.34',
@@ -172,8 +174,8 @@ describe('deserializing', () => {
 			{ name: 'tax2', amount: '4.56' },
 		],
 		variants: [
-			{ uuid: 'variant1', parent: uuid },
-			{ uuid: 'variant2', parent: uuid },
+			{ id: 1233, parent: id },
+			{ id: 9652, parent: id },
 		],
 	};
 
@@ -182,7 +184,7 @@ describe('deserializing', () => {
 	});
 
 	test('restores primitives', () => {
-		expect(product.uuid).toBe(data.uuid);
+		expect(product.id).toBe(data.id);
 		expect(product.name).toBe(data.name);
 		expect(product.description).toBe(data.description);
 		expect(product.isCustom).toBe(data.isCustom);
@@ -203,7 +205,7 @@ describe('deserializing', () => {
 		expect(product.variants.length).toBe(data.variants.length);
 		const variant = product.variants[0];
 		expect(variant).toBeInstanceOf(Product);
-		expect(variant.uudi).toBe(data.variants[0].uudi);
+		expect(variant.id).toBe(data.variants[0].id);
 		expect(variant.parent).toBe(product);
 	});
 });

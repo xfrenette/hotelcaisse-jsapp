@@ -1,7 +1,7 @@
 import { serializable, identifier, list, object, getDefaultModelSchema, reference } from 'serializr';
 import Decimal from 'decimal.js';
-import { decimal, productTax } from '../vendor/serializr/propSchemas';
 import { observable } from 'mobx';
+import { decimal, productTax } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
 import utils from '../utils';
 
@@ -35,13 +35,13 @@ const constraints = {
  */
 class Product {
 	/**
-	 * Unique id of the Product (the same as on the server). It is possible it stays null (ex: for a
+	 * Id of the Product (defined by the server). It is possible it stays null (ex: for a
 	 * custom product).
 	 *
-	 * @type {String|null}
+	 * @type {Integer|null}
 	 */
 	@serializable(identifier())
-	uuid = null;
+	id = null;
 	/**
 	 * Name of the product. If a variant, name of the variant.
 	 *
@@ -171,6 +171,7 @@ class Product {
 	 */
 	clone() {
 		const clone = new Product();
+		clone.id = this.id;
 		clone.name = this.name;
 		clone.description = this.description;
 		clone.taxes = [...this.taxes];
