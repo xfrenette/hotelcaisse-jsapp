@@ -5,12 +5,12 @@ import { serializable, identifier } from 'serializr';
  */
 class TransactionMode {
 	/**
-	 * UUID of the transaction mode.
+	 * ID of the transaction mode.
 	 *
 	 * @type {String}
 	 */
 	@serializable(identifier())
-	uuid = null;
+	id = null;
 	/**
 	 * Name of the transaction mode.
 	 *
@@ -20,10 +20,11 @@ class TransactionMode {
 	name = '';
 
 	/**
+	 * @param {Integer} id
 	 * @param {String} name
 	 */
-	constructor(uuid = null, name = null) {
-		this.uuid = uuid;
+	constructor(id = null, name = null) {
+		this.id = id;
 		this.name = name;
 	}
 }

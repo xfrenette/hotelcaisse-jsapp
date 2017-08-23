@@ -8,10 +8,10 @@ beforeEach(() => {
 });
 
 describe('constructor()', () => {
-	test('it sets uuid if supplied', () => {
-		const uuid = 'test-uuid';
-		transactionMode = new TransactionMode(uuid);
-		expect(transactionMode.uuid).toBe(uuid);
+	test('it sets id if supplied', () => {
+		const id = 4569;
+		transactionMode = new TransactionMode(id);
+		expect(transactionMode.id).toBe(id);
 	});
 
 	test('it sets name if supplied', () => {
@@ -24,11 +24,11 @@ describe('constructor()', () => {
 describe('serializing', () => {
 	test('serializes', () => {
 		transactionMode.name = 'test-name';
-		transactionMode.uuid = 'test-uuid';
+		transactionMode.id = 3456;
 		const data = serialize(transactionMode);
 		expect(data).toEqual({
 			name: transactionMode.name,
-			uuid: transactionMode.uuid,
+			id: transactionMode.id,
 		});
 	});
 });
@@ -37,11 +37,11 @@ describe('deserializing', () => {
 	test('deserializes', () => {
 		const data = {
 			name: 'test-name',
-			uuid: 'test-uuid',
+			id: 3456,
 		};
 		const newTransactionMode = deserialize(TransactionMode, data);
 		expect(newTransactionMode).toBeInstanceOf(TransactionMode);
 		expect(newTransactionMode.name).toBe(data.name);
-		expect(newTransactionMode.uuid).toBe(data.uuid);
+		expect(newTransactionMode.id).toBe(data.id);
 	});
 });
