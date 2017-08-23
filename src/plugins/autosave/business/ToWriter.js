@@ -34,10 +34,6 @@ class ToWriter extends Plugin {
 		const business = this.application.business;
 		const callback = () => { this.writeBusiness(); };
 
-		business.on('registerOpen', callback);
-		business.on('registerClose', callback);
-		business.on('cashMovementAdd', callback);
-		business.on('cashMovementRemove', callback);
 		business.on('newOrder', callback);
 		business.on('orderChange', callback);
 	}

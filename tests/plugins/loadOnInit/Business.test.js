@@ -1,18 +1,16 @@
 import BusinessAutoLoad from 'plugins/loadOnInit/Business';
-import Register from 'business/Register';
 import Business from 'business/Business';
 import Application from 'Application';
+import TransactionMode from 'business/TransactionMode';
 import TestReader from '../../mock/TestReader';
 
 let businessAutoLoad;
 let testReader;
 let application;
 const business1 = new Business();
-business1.deviceRegister = new Register();
-business1.deviceRegister.uuid = 'register-test-1';
+business1.transactionModes.push(new TransactionMode(12, 'mode 1'));
 const business2 = new Business();
-business2.deviceRegister = new Register();
-business2.deviceRegister.uuid = 'register-test-2';
+business2.transactionModes.push(new TransactionMode(36, 'mode 2'));
 
 beforeEach(() => {
 	testReader = new TestReader();
@@ -25,17 +23,17 @@ beforeEach(() => {
 describe('updateBusiness', () => {
 	test('does nothing if null', () => {
 		businessAutoLoad.updateBusiness(null);
-		expect(application.business.deviceRegister.uuid).toBe(business1.deviceRegister.uuid);
+		expect(application.business.transactionModes[0].id).toBe(business1.transactionModes[0].id);
 	});
 
 	test('does nothing if not a business instance', () => {
 		businessAutoLoad.updateBusiness({ a: 'b' });
-		expect(application.business.deviceRegister.uuid).toBe(business1.deviceRegister.uuid);
+		expect(application.business.transactionModes[0].id).toBe(business1.transactionModes[0].id);
 	});
 
 	test('updates application business if new', () => {
 		businessAutoLoad.updateBusiness(business2);
-		expect(application.business.deviceRegister.uuid).toBe(business2.deviceRegister.uuid);
+		expect(application.business.transactionModes[0].id).toBe(business2.transactionModes[0].id);
 	});
 
 	test('only updates the business, does not replace it', () => {
@@ -50,11 +48,11 @@ describe('start()', () => {
 		expect(businessAutoLoad.start()).toBeInstanceOf(Promise);
 	});
 
-	test('udates business on resolve', (done) => {
+	test('updates business on resolve', (done) => {
 		testReader.data = business2;
 		businessAutoLoad.start()
 			.then(() => {
-				expect(application.business.uuid).toBe(business2.uuid);
+				expect(application.business.transactionModes[0].id).toBe(business2.transactionModes[0].id);
 				done();
 			});
 	});

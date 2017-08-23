@@ -3,7 +3,6 @@ import { observable, observe } from 'mobx';
 import EventEmitter from 'events';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from '../const/message-bus';
-import Register from './Register';
 import Product from './Product';
 import ProductCategory from './ProductCategory';
 import TransactionMode from './TransactionMode';
@@ -22,19 +21,11 @@ const channel = postal.channel(CHANNELS.business);
  * Class that represents the business currently on this device and all its business related data.
  * Examples:
  * - Products and product categories
- * - Register assigned to the device
+ * - Rooms
  * - Accepted transaction modes
  * - ...
  */
 class Business extends EventEmitter {
-	/**
-	 * Register currently assigned to this device.
-	 *
-	 * @type {Register}
-	 */
-	@serializable(object(Register))
-	@observable
-	deviceRegister = null;
 	/**
 	 * List of all *currently* active Product of the business. Top level products only (variants
 	 * are inside each product).
@@ -88,17 +79,9 @@ class Business extends EventEmitter {
 	 */
 	@serializable(list(object(Room)))
 	rooms = [];
-	/**
-	 * Listeners currently on the deviceRegister. Since the deviceRegister may change, we keep here
-	 * the listeners we put on it to remove them when it changes.
-	 *
-	 * @type {Object}
-	 */
-	registerListeners = {};
 
 	constructor() {
 		super();
-		this.listenWhenRegisterChanges();
 		this.listenToOrders();
 
 		/*
@@ -110,16 +93,6 @@ class Business extends EventEmitter {
 			const order = this;
 			business.onOrderChange.call(business, order, changes);
 		};
-	}
-
-	/**
-	 * When the deviceRegister is changed, adds listeners on it.
-	 */
-	listenWhenRegisterChanges() {
-		observe(this, 'deviceRegister', ({ oldValue }) => {
-			this.clearRegisterListeners(oldValue);
-			this.listenToRegister();
-		});
 	}
 
 	/**
@@ -162,80 +135,6 @@ class Business extends EventEmitter {
 	}
 
 	/**
-	 * Removes listeners on an old deviceRegister. When this method is called, the deviceRegister was
-	 * already changed, that is why it is passed the old Register.
-	 *
-	 * @param {Register} register
-	 */
-	clearRegisterListeners(register) {
-		if (!register) {
-			return;
-		}
-
-		Object.entries(this.registerListeners).forEach(([event, listener]) => {
-			register.removeListener(event, listener);
-		});
-
-		this.registerListeners = {};
-	}
-
-	/**
-	 * Adds listeners to the current deviceRegister
-	 */
-	listenToRegister() {
-		if (!this.deviceRegister) {
-			return;
-		}
-
-		const listeners = {};
-
-		listeners.open = () => { this.onRegisterOpen(); };
-		listeners.close = () => { this.onRegisterClose(); };
-		listeners.cashMovementAdd = (cm) => { this.onCashMovementAdd(cm); };
-		listeners.cashMovementRemove = (cm) => { this.onCashMovementRemove(cm); };
-
-		Object.entries(listeners).forEach(([event, listener]) => {
-			this.deviceRegister.on(event, listener);
-		});
-
-		this.registerListeners = listeners;
-	}
-
-	/**
-	 * When the Register opens, emits 'registerOpen'
-	 */
-	onRegisterOpen() {
-		this.emit('registerOpen');
-	}
-
-	/**
-	 * When the Register closes, emits 'registerClose'
-	 */
-	onRegisterClose() {
-		this.emit('registerClose');
-	}
-
-	/**
-	 * When a CashMovement is added to the Register, emits 'cashMovementAdd' with the
-	 * CashMovement.
-	 *
-	 * @param {CashMovement} cm The CashMovement that was added
-	 */
-	onCashMovementAdd(cm) {
-		this.emit('cashMovementAdd', cm);
-	}
-
-	/**
-	 * When a CashMovement is removed from the Register, emits 'cashMovementRemove' with the
-	 * CashMovement
-	 *
-	 * @param {CashMovement} cm The CashMovement that was removed.
-	 */
-	onCashMovementRemove(cm) {
-		this.emit('cashMovementRemove', cm);
-	}
-
-	/**
 	 * When an Order changes, emit the 'orderChange' event with the Order and its changes.
 	 *
 	 * @param {Order} order
@@ -268,7 +167,6 @@ class Business extends EventEmitter {
 	 */
 	update(newBusiness) {
 		[
-			'deviceRegister',
 			'products',
 			'rootProductCategory',
 			'transactionModes',

@@ -1,17 +1,13 @@
-import { serialize, deserialize } from 'serializr';
-import { isObservable } from 'mobx';
+import { deserialize, serialize } from 'serializr';
 import postal from 'postal';
 import { CHANNELS, TOPICS } from 'const/message-bus';
-import Decimal from 'decimal.js';
 import Business from 'business/Business';
-import Register from 'business/Register';
 import Product from 'business/Product';
-import CashMovement from 'business/CashMovement';
 import ProductCategory from 'business/ProductCategory';
 import TransactionMode from 'business/TransactionMode';
 import Order from 'business/Order';
 import Room from 'business/Room';
-import { TextField, EmailField } from 'fields/';
+import { EmailField, TextField } from 'fields/';
 
 let business;
 const channel = postal.channel(CHANNELS.business);
@@ -19,7 +15,6 @@ let subscription;
 
 beforeEach(() => {
 	business = new Business();
-	business.deviceRegister = new Register();
 
 	const product1 = new Product();
 	product1.name = 'test-product-1';
@@ -57,61 +52,6 @@ afterEach(() => {
 		subscription.unsubscribe();
 		subscription = null;
 	}
-});
-
-describe('emits registerOpen', () => {
-	test('with new deviceRegister', (done) => {
-		business.on('registerOpen', () => {
-			done();
-		});
-		const register = new Register();
-		business.deviceRegister = register;
-		register.open('test', new Decimal(1));
-	});
-
-	test('current deviceRegister changes state', (done) => {
-		business.on('registerOpen', () => {
-			done();
-		});
-		business.deviceRegister.open('test', new Decimal(1));
-	});
-});
-
-describe('emits registerClose', () => {
-	test('with new deviceRegister', (done) => {
-		business.on('registerClose', () => {
-			done();
-		});
-		const register = new Register();
-		business.deviceRegister = register;
-		register.close(new Decimal(1), 'test', new Decimal(1));
-	});
-
-	test('current deviceRegister changes state', (done) => {
-		business.on('registerClose', () => {
-			done();
-		});
-		business.deviceRegister.close(new Decimal(1), 'test', new Decimal(1));
-	});
-});
-
-test('emits cashMovementAdd', (done) => {
-	const cashMovement = new CashMovement();
-	business.on('cashMovementAdd', (cm) => {
-		expect(cm).toBe(cashMovement);
-		done();
-	});
-	business.deviceRegister.addCashMovement(cashMovement);
-});
-
-test('emits cashMovementRemove', (done) => {
-	const cashMovement = new CashMovement();
-	business.on('cashMovementRemove', (cm) => {
-		expect(cm).toBe(cashMovement);
-		done();
-	});
-	business.deviceRegister.addCashMovement(cashMovement);
-	business.deviceRegister.removeCashMovement(cashMovement);
 });
 
 describe('emits orderChange', () => {
@@ -197,14 +137,9 @@ describe('serializing', () => {
 	emailField.id = 7410;
 
 	beforeEach(() => {
-		business.deviceRegister.employee = 'test-employee';
 		business.customerFields = [textField, emailField];
 		business.roomSelectionFields = [textField, emailField];
 		data = serialize(business);
-	});
-
-	test('serializes deviceRegister', () => {
-		expect(data.deviceRegister.employee).toBe(business.deviceRegister.employee);
 	});
 
 	test('serializes products', () => {
@@ -245,9 +180,6 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	let newBusiness;
 	const data = {
-		deviceRegister: {
-			employee: 'test-employee',
-		},
 		products: [
 			{ id: 4123, name: 'product-1' },
 			{ id: 4456 },
@@ -281,11 +213,6 @@ describe('deserializing', () => {
 
 	beforeEach(() => {
 		newBusiness = deserialize(Business, data);
-	});
-
-	test('restores deviceRegister', () => {
-		expect(newBusiness.deviceRegister).toBeInstanceOf(Register);
-		expect(newBusiness.deviceRegister.employee).toBe(data.deviceRegister.employee);
 	});
 
 	test('restores products', () => {
@@ -341,7 +268,6 @@ describe('deserializing', () => {
 describe('update()', () => {
 	test('replaces all attributes', () => {
 		const attributes = {
-			deviceRegister: new Register(),
 			products: [],
 			rootProductCategory: new ProductCategory(),
 			transactionModes: [],
@@ -369,8 +295,4 @@ describe('update()', () => {
 			}
 		});
 	});
-});
-
-test('deviceRegister is observable', () => {
-	expect(isObservable(business, 'deviceRegister')).toBe(true);
 });
