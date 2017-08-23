@@ -13,12 +13,12 @@ import Product from './Product';
  */
 class ProductCategory {
 	/**
-	 * UUID of the category.
+	 * ID of the category.
 	 *
 	 * @type {String}
 	 */
 	// @serializable see below
-	uuid = null;
+	id = null;
 	/**
 	 * Name of the category.
 	 *
@@ -56,7 +56,7 @@ class ProductCategory {
 const modelSchema = {
 	factory: () => new ProductCategory(),
 	props: {
-		uuid: identifier(),
+		id: identifier(),
 		name: true,
 		products: list(reference(Product)),
 		// See below for 'categories'

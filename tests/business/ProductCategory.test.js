@@ -14,14 +14,14 @@ beforeEach(() => {
 	product2.uuid = 'p2';
 
 	const subCategory1 = new ProductCategory();
-	subCategory1.uuid = 'sc1';
+	subCategory1.id = 1123;
 
 	const subCategory2 = new ProductCategory();
-	subCategory2.uuid = 'sc2';
+	subCategory2.id = 2123;
 
 	productCategory = new ProductCategory();
 	productCategory.name = 'test-name';
-	productCategory.uuid = 'test-uuid';
+	productCategory.id = 3123;
 	productCategory.products.push(product1);
 	productCategory.products.push(product2);
 	productCategory.categories.push(subCategory1);
@@ -37,17 +37,17 @@ describe('serializing', () => {
 
 	test('serializes primitives', () => {
 		expect(data.name).toBe(productCategory.name);
-		expect(data.uuid).toBe(productCategory.uuid);
+		expect(data.id).toBe(productCategory.id);
 	});
 
-	test('serializes products as uuids', () => {
+	test('serializes products as ids', () => {
 		expect(data.products.length).toBe(productCategory.products.length);
 		expect(data.products[1]).toBe(productCategory.products[1].uuid);
 	});
 
 	test('serializes categories', () => {
 		expect(data.categories.length).toBe(productCategory.categories.length);
-		expect(data.categories[1].uuid).toBe(productCategory.categories[1].uuid);
+		expect(data.categories[1].id).toBe(productCategory.categories[1].id);
 	});
 });
 
@@ -55,11 +55,11 @@ describe('deserializing', () => {
 	let newProductCategory;
 	const data = {
 		name: 'test-name',
-		uuid: 'test-uuid',
+		id: 4123,
 		products: [],
 		categories: [
-			{ uuid: 'sc1', name: 'test-sc1-name' },
-			{ uuid: 'sc2', name: 'test-sc2-name' },
+			{ id: 5123, name: 'test-sc1-name' },
+			{ id: 6123, name: 'test-sc2-name' },
 		],
 	};
 
@@ -69,12 +69,12 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(newProductCategory.name).toBe(data.name);
-		expect(newProductCategory.uuid).toBe(data.uuid);
+		expect(newProductCategory.id).toBe(data.id);
 	});
 
 	test('restores categories', () => {
 		expect(newProductCategory.categories.length).toBe(data.categories.length);
-		expect(newProductCategory.categories[1].uuid).toBe(data.categories[1].uuid);
+		expect(newProductCategory.categories[1].id).toBe(data.categories[1].id);
 	});
 
 	// NOTE: we cannot test here that the products array is restored, because it must reference

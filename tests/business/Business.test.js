@@ -31,7 +31,7 @@ beforeEach(() => {
 	business.products.push(product2);
 
 	const rootProductCategory = new ProductCategory();
-	rootProductCategory.uuid = 'test-category1';
+	rootProductCategory.id = 9123;
 	rootProductCategory.products.push(product1);
 	rootProductCategory.products.push(product2);
 
@@ -213,7 +213,7 @@ describe('serializing', () => {
 	});
 
 	test('serializes rootProductCategory', () => {
-		expect(data.rootProductCategory.uuid).toBe(business.rootProductCategory.uuid);
+		expect(data.rootProductCategory.id).toBe(business.rootProductCategory.id);
 	});
 
 	test('serializes transactionModes', () => {
@@ -253,7 +253,7 @@ describe('deserializing', () => {
 			{ uuid: 'p2' },
 		],
 		rootProductCategory: {
-			uuid: 'test-category1',
+			id: 8123,
 			name: 'category-1',
 			products: ['p1', 'p2'],
 		},
@@ -296,7 +296,7 @@ describe('deserializing', () => {
 
 	test('restores rootProductCategory', () => {
 		expect(newBusiness.rootProductCategory).toBeInstanceOf(ProductCategory);
-		expect(newBusiness.rootProductCategory.uuid).toBe(data.rootProductCategory.uuid);
+		expect(newBusiness.rootProductCategory.id).toBe(data.rootProductCategory.id);
 	});
 
 	// Tests the deserialization of ProductCategory.products
