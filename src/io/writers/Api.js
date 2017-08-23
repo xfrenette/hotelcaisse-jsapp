@@ -62,7 +62,7 @@ class Api extends Writer {
 	/**
 	 * Writes data to the API on the channel. Returns a Promise. Must be authenticated to the API
 	 * (through the ApiWithToken class passed in the constructor()) else the Promise rejects. The
-	 * Promise will resolve if a sucess response is received from the API, rejects in all other
+	 * Promise will resolve if a success response is received from the API, rejects in all other
 	 * cases.
 	 *
 	 * @param {Object} data

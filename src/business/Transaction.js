@@ -5,7 +5,7 @@ import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 /**
  * A Transaction is an exchange of money between the business and the customer. The Transaction is
  * generally added to the active register and to an Order. The amount sign (positive or negative)
- * is as viewed by the business (a payment from a customer is positive, a reimbursment is
+ * is as viewed by the business (a payment from a customer is positive, a refund is
  * negative). A Transaction is made with a specific TransactionMode (cash, credit card, ...)
  */
 class Transaction {
@@ -32,7 +32,7 @@ class Transaction {
 	@serializable(object(TransactionMode))
 	transactionMode = null;
 	/**
-	 * Optionnal note.
+	 * Optional note.
 	 *
 	 * @type {String}
 	 */

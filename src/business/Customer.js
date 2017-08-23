@@ -24,7 +24,7 @@ class Customer {
 	fieldValues = new Map();
 	/**
 	 * References to Field object for which we store values in fieldValues. Setting this attribute
-	 * is optionnal, but required if we want to use get() or validate(). This attribute is not
+	 * is optional, but required if we want to use get() or validate(). This attribute is not
 	 * serialized.
 	 *
 	 * @type {Array<Field>}

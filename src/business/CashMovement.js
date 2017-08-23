@@ -1,4 +1,4 @@
-import { serializable, date, identifier } from 'serializr';
+import { date, identifier, serializable } from 'serializr';
 import validate from '../Validator';
 import utils from '../utils';
 import { decimal } from '../vendor/serializr/propSchemas';
@@ -21,7 +21,7 @@ const constraints = {
 
 /**
  * A CashMovement represents an addition or substraction of physical cash from
- * the Register that is not a payment/reimbursement from/to a customer. A
+ * the Register that is not a payment/refund from/to a customer. A
  * CashMovement is generally added to a Register. See Payment for transactions
  * with a customer.
  *
@@ -44,7 +44,7 @@ class CashMovement {
 	@serializable(decimal())
 	amount = null;
 	/**
-	 * Optionnal note for this cash movement.
+	 * Optional note for this cash movement.
 	 *
 	 * @type {String}
 	 */

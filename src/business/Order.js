@@ -21,7 +21,7 @@ import Customer from './Customer';
 const channel = postal.channel(CHANNELS.order);
 
 /**
- * An Order, associated with a Customer, contains a list of Items sold (or reimbursed), a list of
+ * An Order, associated with a Customer, contains a list of Items sold (or refunded), a list of
  * Credits, a list of Transactions (payments or refunds) and a list of RoomSelections.
  *
  * We wish the Order to send a message when it is modified. But since the desired new Order may
@@ -434,7 +434,7 @@ class Order extends EventEmitter {
 	 *
 	 * For Customer, any change in its values is considered a whole customer change.
 	 *
-	 * For RoomSelection, any change (a new RoomChange, a modif in one, ...) is considered a change
+	 * For RoomSelection, any change (a new RoomChange, a modif. in one, ...) is considered a change
 	 * for ALL the RoomSelection (any change in any RoomSelection will consider the whole list as
 	 * changed.)
 	 */

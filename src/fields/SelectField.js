@@ -29,7 +29,7 @@ class SelectField extends Field {
 	}
 
 	/**
-	 * Returns the labal for a value
+	 * Returns the label for a value
 	 *
 	 * @param {String} value
 	 * @return {String}

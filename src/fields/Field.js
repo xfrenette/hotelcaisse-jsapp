@@ -1,9 +1,9 @@
-import { serializable, identifier } from 'serializr';
+import { identifier, serializable } from 'serializr';
 import validate from '../Validator';
 
 /**
  * A field is a name-value pair of a specific type. They are used in some classes that have a
- * variable number of attributes, that are generaly editable by the user. This class is a generic
+ * variable number of attributes, that are generally editable by the user. This class is a generic
  * field (only a name-value pair of strings), but it can be extended for more specific needs.
  */
 class Field {

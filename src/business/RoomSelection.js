@@ -50,7 +50,7 @@ class RoomSelection {
 	fieldValues = new Map();
 	/**
 	 * References to Field object for which we store values in fieldValues. Setting this attribute
-	 * is optionnal, but required if we want to use validate(). This attribute is not serialized.
+	 * is optional, but required if we want to use validate(). This attribute is not serialized.
 	 *
 	 * @type {Array<Field>}
 	 */
