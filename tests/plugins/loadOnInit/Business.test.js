@@ -1,4 +1,5 @@
 import BusinessAutoLoad from 'plugins/loadOnInit/Business';
+import Register from 'business/Register';
 import Business from 'business/Business';
 import Application from 'Application';
 import TestReader from '../../mock/TestReader';
@@ -6,10 +7,12 @@ import TestReader from '../../mock/TestReader';
 let businessAutoLoad;
 let testReader;
 let application;
-let business1 = new Business();
-business1.uuid = '1';
-let business2 = new Business();
-business1.uuid = '2';
+const business1 = new Business();
+business1.deviceRegister = new Register();
+business1.deviceRegister.uuid = 'register-test-1';
+const business2 = new Business();
+business2.deviceRegister = new Register();
+business2.deviceRegister.uuid = 'register-test-2';
 
 beforeEach(() => {
 	testReader = new TestReader();
@@ -22,17 +25,17 @@ beforeEach(() => {
 describe('updateBusiness', () => {
 	test('does nothing if null', () => {
 		businessAutoLoad.updateBusiness(null);
-		expect(application.business.uuid).toBe(business1.uuid);
+		expect(application.business.deviceRegister.uuid).toBe(business1.deviceRegister.uuid);
 	});
 
 	test('does nothing if not a business instance', () => {
 		businessAutoLoad.updateBusiness({ a: 'b' });
-		expect(application.business.uuid).toBe(business1.uuid);
+		expect(application.business.deviceRegister.uuid).toBe(business1.deviceRegister.uuid);
 	});
 
 	test('updates application business if new', () => {
 		businessAutoLoad.updateBusiness(business2);
-		expect(application.business.uuid).toBe(business2.uuid);
+		expect(application.business.deviceRegister.uuid).toBe(business2.deviceRegister.uuid);
 	});
 
 	test('only updates the business, does not replace it', () => {
