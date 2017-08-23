@@ -18,8 +18,8 @@ beforeEach(() => {
 	product = new Product();
 	product.name = 'Product name';
 	product.price = new Decimal(12.95);
-	product.taxes.push(new AppliedTax(1123, new Decimal(1.25)));
-	product.taxes.push(new AppliedTax(1456, new Decimal(2.33)));
+	product.taxes.push(new AppliedTax(1123, 'tax 1', new Decimal(1.25)));
+	product.taxes.push(new AppliedTax(1456, 'tax 2', new Decimal(2.33)));
 
 	parentProduct.addVariant(product);
 });

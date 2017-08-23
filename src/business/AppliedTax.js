@@ -18,13 +18,22 @@ class AppliedTax {
 	 */
 	@serializable(decimal())
 	amount = null;
+	/**
+	 * Name of the applied tax.
+	 *
+	 * @type {Decimal}
+	 */
+	@serializable
+	name = null;
 
 	/**
 	 * @param {number} taxId
+	 * @param {string} name
 	 * @param {Decimal} amount
 	 */
-	constructor(taxId = null, amount = null) {
+	constructor(taxId = null, name = null, amount = null) {
 		this.taxId = taxId;
+		this.name = name;
 		this.amount = amount;
 	}
 
@@ -34,7 +43,7 @@ class AppliedTax {
 	 * @returns {AppliedTax}
 	 */
 	clone() {
-		return new AppliedTax(this.taxId, new Decimal(this.amount));
+		return new AppliedTax(this.taxId, this.name, new Decimal(this.amount));
 	}
 
 	/**
@@ -44,7 +53,9 @@ class AppliedTax {
 	 * @returns {boolean}
 	 */
 	equals(other) {
-		return other.taxId === this.taxId && other.amount.equals(this.amount);
+		return other.taxId === this.taxId
+			&& other.name === this.name
+			&& other.amount.equals(this.amount);
 	}
 }
 

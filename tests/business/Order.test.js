@@ -29,19 +29,19 @@ let subscription;
 let customerField;
 
 const taxes = {
-	tax1: new AppliedTax(1123, new Decimal(0.38)),
-	tax2_1: new AppliedTax(1456, new Decimal(0.45)),
-	tax2_2: new AppliedTax(1456, new Decimal(0.12)), // Same taxId as tax2_1
-	tax3: new AppliedTax(1741, new Decimal(1.78)),
+	tax1: new AppliedTax(1123, 'tax 1', new Decimal(0.38)),
+	tax2_1: new AppliedTax(1456, 'tax 2', new Decimal(0.45)),
+	tax2_2: new AppliedTax(1456, 'tax 2', new Decimal(0.12)), // Same taxId as tax2_1
+	tax3: new AppliedTax(1741, 'tax 3', new Decimal(1.78)),
 };
 
 const quantities = [2, -1];
 
 const taxesTotals = [
-	new AppliedTax(taxes.tax1.taxId, taxes.tax1.amount.mul(quantities[0])),
-	new AppliedTax(taxes.tax2_1.taxId, taxes.tax2_1.amount.mul(quantities[0])
+	new AppliedTax(taxes.tax1.taxId, taxes.tax1.name, taxes.tax1.amount.mul(quantities[0])),
+	new AppliedTax(taxes.tax2_1.taxId, taxes.tax2_1.name, taxes.tax2_1.amount.mul(quantities[0])
 		.add(taxes.tax2_2.amount.mul(quantities[1]))),
-	new AppliedTax(taxes.tax3.taxId, taxes.tax3.amount.mul(quantities[1])),
+	new AppliedTax(taxes.tax3.taxId, taxes.tax3.name, taxes.tax3.amount.mul(quantities[1])),
 ];
 
 beforeEach(() => {

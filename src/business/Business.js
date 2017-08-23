@@ -1,4 +1,4 @@
-import { serializable, object, list } from 'serializr';
+import { list, object, serializable } from 'serializr';
 import { observable, observe } from 'mobx';
 import EventEmitter from 'events';
 import postal from 'postal';
@@ -36,7 +36,8 @@ class Business extends EventEmitter {
 	@observable
 	deviceRegister = null;
 	/**
-	 * List of all *currently* active Product of the business.
+	 * List of all *currently* active Product of the business. Top level products only (variants
+	 * are inside each product).
 	 *
 	 * @type {Array<Product>}
 	 */

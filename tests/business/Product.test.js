@@ -83,8 +83,8 @@ describe('clone()', () => {
 		product.name = 'test name';
 		product.description = 'test description';
 		product.price = new Decimal(22);
-		product.taxes.push(new AppliedTax(2569, new Decimal(1.22)));
-		product.taxes.push(new AppliedTax(2789, new Decimal(2.33)));
+		product.taxes.push(new AppliedTax(2569, 'tax 1', new Decimal(1.22)));
+		product.taxes.push(new AppliedTax(2789, 'tax 2', new Decimal(2.33)));
 
 		const clone = product.clone();
 		expect(clone.id).toBe(product.id);
@@ -109,8 +109,8 @@ describe('serializing', () => {
 		product.name = 'test-name';
 		product.description = 'test-description';
 		product.price = new Decimal(12.34);
-		product.taxes.push(new AppliedTax(9632, new Decimal(5.25)));
-		product.taxes.push(new AppliedTax(9874, new Decimal(8.14)));
+		product.taxes.push(new AppliedTax(9632, 'tax 1', new Decimal(5.25)));
+		product.taxes.push(new AppliedTax(9874, 'tax 2', new Decimal(8.14)));
 		product.parent = { id: 6985 };
 		data = serialize(product);
 	});
