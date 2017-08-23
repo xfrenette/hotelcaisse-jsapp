@@ -31,8 +31,8 @@ afterEach(() => {
 });
 
 describe('state', () => {
-	test('is NEW when created', () => {
-		expect(register.state).toBe(STATES.NEW);
+	test('is UNINITIALIZED when created', () => {
+		expect(register.state).toBe(STATES.UNINITIALIZED);
 	});
 
 	test('is observable', () => {

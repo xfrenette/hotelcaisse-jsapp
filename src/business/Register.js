@@ -15,6 +15,12 @@ import utils from '../utils';
  */
 const channel = postal.channel(CHANNELS.register);
 
+const STATES = {
+	OPENED: 0,
+	CLOSED: 1,
+	UNINITIALIZED: 2,
+};
+
 /**
  * Constraints on the values when opening
  *
@@ -67,13 +73,14 @@ class Register extends EventEmiter {
 	@serializable(identifier())
 	uuid = null;
 	/**
-	 * The Register can be OPENED or CLOSED. It is NEW when created, before being opened or closed.
+	 * The Register can be OPENED or CLOSED. It is UNINITIALIZED when created, before being opened
+	 * or closed.
 	 *
 	 * @type {Number}
 	 */
 	@serializable
 	@observable
-	state = STATES.NEW;
+	state = STATES.UNINITIALIZED;
 	/**
 	 * Employee in charge of this Register.
 	 *
@@ -285,8 +292,4 @@ Register.validateClose = (values) => {
 };
 
 export default Register;
-export const STATES = {
-	OPENED: 0,
-	CLOSED: 1,
-	NEW: 2,
-};
+export { STATES };
