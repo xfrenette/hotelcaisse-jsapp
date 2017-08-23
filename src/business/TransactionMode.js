@@ -18,6 +18,19 @@ class TransactionMode {
 	 */
 	@serializable
 	name = '';
+	/**
+	 * If true, this TransactionMode is archived and cannot be used for new Transaction
+	 *
+	 * @type {Boolean}
+	 */
+	@serializable
+	archived = false;
+	/**
+	 * Type of this TransactionMode (can be null)
+	 * @type {String}
+	 */
+	@serializable
+	type = null;
 
 	/**
 	 * @param {Integer} id
