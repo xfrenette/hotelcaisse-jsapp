@@ -1,6 +1,6 @@
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 
 let product;
@@ -150,10 +150,6 @@ describe('serializing', () => {
 		data = serialize(product);
 		expect(data.variants.length).toBe(1);
 		expect(data.variants[0].name).toBe(variant.name);
-	});
-
-	test('saves parent', () => {
-		expect(data.parent).toBe(product.parent.id);
 	});
 });
 

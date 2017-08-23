@@ -1,4 +1,4 @@
-import { serializable, identifier, list, object, getDefaultModelSchema, reference } from 'serializr';
+import { getDefaultModelSchema, identifier, list, object, serializable } from 'serializr';
 import Decimal from 'decimal.js';
 import { observable } from 'mobx';
 import { decimal, productTax } from '../vendor/serializr/propSchemas';
@@ -77,29 +77,20 @@ class Product {
 	@serializable(list(productTax()))
 	taxes = [];
 	/**
-	 * If this product is a variant, reference to the parent product. Else, null.
-	 *
-	 * For @serializable, see the constructor since a self-reference causes problems with Babel 6.
+	 * If this product is a variant, reference to the parent product. Else, null. This information
+	 * is not serialized. See the constructor for how parent is automatically set when deserializing
+	 * a variant.
 	 *
 	 * @type {Product|null}
 	 */
-	// @serializable(reference(Product)) // see constructor
 	parent = null;
 	/**
 	 * All the variants of this product. Empty array if no variants.
 	 *
-	 * For @serializable, see the constructor since a self-reference causes problems with Babel 6.
-	 *
 	 * @type {Array<Product>}
 	 */
-	// @serializable(list(object(Product))) // see constructor
+	// @serializable(list(object(Product))) // see end of file, after Product class declaration
 	variants = [];
-
-	constructor() {
-		// Add serializable props that have self references
-		getDefaultModelSchema(Product).props.variants = list(object(Product));
-		getDefaultModelSchema(Product).props.parent = reference(Product);
-	}
 
 	/**
 	 * Returns true if this Product has variants.
@@ -201,6 +192,27 @@ class Product {
 Product.validate = (values) => {
 	const appliedConstraints = utils.getConstraintsFor(constraints, values);
 	return validate(values, appliedConstraints);
+};
+
+/**
+ * We update the model schema for Product since it has some self references and it can cause
+ * problems with Babel 6
+ */
+// `variants` prop has self reference
+getDefaultModelSchema(Product).props.variants = list(object(Product));
+// In the factory, we first check if the Product being deserialized is a variant of a parent
+// Product. If so, set the `parent` attribute.
+getDefaultModelSchema(Product).factory = (context) => {
+	const model = new Product();
+
+	if (context.parentContext) {
+		const parent = context.parentContext.target;
+		if (parent instanceof Product) {
+			model.parent = parent;
+		}
+	}
+
+	return model;
 };
 
 export default Product;
