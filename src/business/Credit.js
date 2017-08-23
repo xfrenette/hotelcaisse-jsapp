@@ -1,7 +1,7 @@
-import { serializable, date, identifier } from 'serializr';
+import { identifier, serializable } from 'serializr';
 import { observable } from 'mobx';
 import validate from '../Validator';
-import { decimal } from '../vendor/serializr/propSchemas';
+import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 import utils from '../utils';
 
 /**
@@ -53,7 +53,7 @@ class Credit {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	createdAt = null;
 
 	constructor(uuid = null, amount = null, note = null) {

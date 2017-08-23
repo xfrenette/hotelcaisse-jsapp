@@ -1,6 +1,6 @@
-import { serializable, date, object, identifier } from 'serializr';
+import { identifier, object, serializable } from 'serializr';
 import TransactionMode from './TransactionMode';
-import { decimal } from '../vendor/serializr/propSchemas';
+import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 
 /**
  * A Transaction is an exchange of money between the business and the customer. The Transaction is
@@ -43,7 +43,7 @@ class Transaction {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	createdAt = null;
 	/**
 	 * Register where this transaction is saved. It is set when calling

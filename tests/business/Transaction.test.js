@@ -1,7 +1,7 @@
 import Transaction from 'business/Transaction';
 import TransactionMode from 'business/TransactionMode';
 import Decimal from 'decimal.js';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 
 let transaction;
 
@@ -73,7 +73,7 @@ describe('deserializing', () => {
 		},
 		note: 'test-note',
 		uuid: 'test-uuid',
-		createdAt: (new Date()).getTime(),
+		createdAt: Math.round((new Date()).getTime() / 1000),
 	};
 
 	beforeEach(() => {

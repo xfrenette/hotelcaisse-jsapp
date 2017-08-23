@@ -1,6 +1,7 @@
-import { observable, computed } from 'mobx';
-import { serializable, date, object, identifier } from 'serializr';
+import { computed, observable } from 'mobx';
+import { identifier, object, serializable } from 'serializr';
 import Decimal from 'decimal.js';
+import { timestamp } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
 import Product from './Product';
 import utils from '../utils';
@@ -65,7 +66,7 @@ class Item {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	createdAt = null;
 
 	constructor(uuid = null) {

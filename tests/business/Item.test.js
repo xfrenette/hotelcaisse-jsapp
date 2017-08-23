@@ -2,7 +2,7 @@ import Item from 'business/Item';
 import Product from 'business/Product';
 import Decimal from 'decimal.js';
 import { isObservable } from 'mobx';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 
 let item;
 let parentProduct;
@@ -70,7 +70,7 @@ describe('unitPrice', () => {
 
 	test('is observable', () => {
 		expect(isObservable(item, 'unitPrice')).toBe(true);
-	})
+	});
 });
 
 describe('name', () => {
@@ -269,7 +269,7 @@ describe('deserializing', () => {
 		},
 		quantity: 2,
 		uuid: 'test-uuid',
-		createdAt: (new Date()).getTime(),
+		createdAt: Math.round((new Date()).getTime() / 1000),
 	};
 
 	beforeEach(() => {
