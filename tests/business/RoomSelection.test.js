@@ -20,7 +20,7 @@ beforeEach(() => {
 	roomSelection.fieldValues.set('three', 4);
 
 	room = new Room();
-	room.uuid = 'test-room-uuid';
+	room.id = 8965;
 	roomSelection.room = room;
 });
 
@@ -146,7 +146,7 @@ describe('isEqualTo()', () => {
 
 	test('returns true if different room with same uuid', () => {
 		const newRoom = new Room();
-		newRoom.uuid = room.uuid;
+		newRoom.id = room.id;
 		copy.room = newRoom;
 		expect(roomSelection.isEqualTo(copy)).toBe(true);
 	});
@@ -222,7 +222,7 @@ describe('serializing', () => {
 	});
 
 	test('saves room', () => {
-		expect(data.room).toBe(room.uuid);
+		expect(data.room).toBe(room.id);
 	});
 
 	test('saves fieldValues', () => {

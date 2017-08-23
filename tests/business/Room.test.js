@@ -5,7 +5,7 @@ let room;
 
 beforeEach(() => {
 	room = new Room();
-	room.uuid = 'test-uuid';
+	room.id = 4963;
 	room.name = 'test-name';
 });
 
@@ -17,7 +17,7 @@ describe('clone()', () => {
 	});
 
 	test('same primitive attributes', () => {
-		const attrs = ['name', 'uuid'];
+		const attrs = ['name', 'id'];
 		attrs.forEach((attr) => {
 			expect(clone[attr]).toEqual(room[attr]);
 		});
@@ -34,14 +34,14 @@ describe('serializing', () => {
 	test('saves primitives', () => {
 		expect(data).toEqual({
 			name: room.name,
-			uuid: room.uuid,
+			id: room.id,
 		});
 	});
 });
 
 describe('deserializing', () => {
 	const jsonObject = {
-		uuid: 'test-uuid',
+		id: 'test-id',
 		name: 'test-name',
 	};
 
@@ -51,6 +51,6 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(room.name).toBe(jsonObject.name);
-		expect(room.uuid).toBe(jsonObject.uuid);
+		expect(room.id).toBe(jsonObject.id);
 	});
 });

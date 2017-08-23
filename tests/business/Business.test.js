@@ -238,7 +238,7 @@ describe('serializing', () => {
 
 	test('serializes rooms', () => {
 		expect(data.rooms.length).toBe(business.rooms.length);
-		expect(data.rooms[1].uuid).toBe(business.rooms[1].uuid);
+		expect(data.rooms[1].id).toBe(business.rooms[1].id);
 	});
 });
 
@@ -274,8 +274,8 @@ describe('deserializing', () => {
 			{ uuid: 'field-4', type: 'EmailField' },
 		],
 		rooms: [
-			{ uuid: 'room1' },
-			{ uuid: 'room2' },
+			{ id: 4456 },
+			{ id: 4789 },
 		],
 	};
 
@@ -334,7 +334,7 @@ describe('deserializing', () => {
 	test('restores rooms', () => {
 		expect(newBusiness.rooms.length).toBe(data.rooms.length);
 		expect(newBusiness.rooms[1]).toBeInstanceOf(Room);
-		expect(newBusiness.rooms[1].uuid).toBe(data.rooms[1].uuid);
+		expect(newBusiness.rooms[1].id).toBe(data.rooms[1].id);
 	});
 });
 

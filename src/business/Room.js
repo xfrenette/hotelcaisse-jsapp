@@ -5,7 +5,7 @@ import { serializable, identifier } from 'serializr';
  */
 class Room {
 	@serializable(identifier())
-	uuid = null;
+	id = null;
 	@serializable
 	name = null;
 
