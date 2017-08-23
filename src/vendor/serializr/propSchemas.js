@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 
 /**
  * Custom PropSchemas that can be used with serializr to serialize:
@@ -168,6 +168,51 @@ const fieldPropSchema = {
 	},
 };
 
+/**
+ * Serializes a Map {<key1>:<value1>, <key2>:<value2>} to an array
+ * [{fieldId:<key1>, value:<value1>}, {fieldId:<key2>, value:<value2>}]
+ */
+const fieldValuesPropSchema = {
+	/**
+	 * Serializer function that converts the Map to an array of objects.
+	 *
+	 * @param {Map} value
+	 * @return {array|null|undefined}
+	 */
+	serializer(value) {
+		if (value === null || value === undefined) {
+			return value;
+		}
+
+		const serialized = [];
+
+		value.forEach((fieldValue, key) => {
+			serialized.push({
+				fieldId: key,
+				value: fieldValue,
+			});
+		});
+
+		return serialized;
+	},
+
+	/**
+	 * Deserializer function that converts the array of objects to a Map
+	 *
+	 * @param {array|null|undefined} jsonValue
+	 * @param {Function} callback
+	 */
+	deserializer(jsonValue, callback) {
+		if (jsonValue === null || jsonValue === undefined) {
+			callback(null, jsonValue);
+			return;
+		}
+		const deserialized = new Map(jsonValue.map(obj => [obj.fieldId, obj.value]));
+
+		callback(null, deserialized);
+	},
+};
+
 const timestampPropSchema = {
 	/**
 	 * Serializer function that returns the literal object as is.
@@ -203,4 +248,5 @@ export const decimal = () => decimalPropSchema;
 export const productTax = () => productTaxPropSchema;
 export const rawObject = () => rawObjectPropSchema;
 export const field = () => fieldPropSchema;
+export const fieldValues = () => fieldValuesPropSchema;
 export const timestamp = () => timestampPropSchema;

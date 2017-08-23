@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 import { serialize } from 'serializr';
-import { decimal, productTax, rawObject, field, timestamp } from 'vendor/serializr/propSchemas';
+import { decimal, field, fieldValues, productTax, rawObject, timestamp } from 'vendor/serializr/propSchemas';
 import { EmailField } from 'fields';
 
 describe('decimal', () => {
@@ -299,6 +299,72 @@ describe('timestamp', () => {
 
 			schema.deserializer(data, (err, val) => {
 				expect(val.getTime()).toEqual(expected.getTime());
+				done();
+			});
+		});
+
+		test('returns null if null', (done) => {
+			schema.deserializer(null, (err, val) => {
+				expect(val).toBeNull();
+				done();
+			});
+		});
+
+		test('returns undefined if undefined', (done) => {
+			schema.deserializer(undefined, (err, val) => {
+				expect(val).toBeUndefined();
+				done();
+			});
+		});
+	});
+});
+
+describe('fieldValues', () => {
+	const schema = fieldValues();
+
+	describe('serializer()', () => {
+		const map = new Map([
+			[453, 'value1'],
+			[698, true],
+		]);
+
+		test('converts map to array', () => {
+			const expected = [
+				{ fieldId: 453, value: 'value1' },
+				{ fieldId: 698, value: true },
+			];
+			const data = schema.serializer(map);
+			expect(data).toEqual(expected);
+		});
+
+		test('returns null if null', () => {
+			const data = schema.serializer(null);
+			expect(data).toBeNull();
+		});
+
+		test('returns undefined if undefined', () => {
+			const data = schema.serializer();
+			expect(data).toBeUndefined();
+		});
+	});
+
+	describe('deserializer', () => {
+		const data = [
+			{ fieldId: 987, value: 'value1' },
+			{ fieldId: 321, value: true },
+		];
+
+		test('returns Map instance', (done) => {
+			schema.deserializer(data, (err, val) => {
+				expect(val).toBeInstanceOf(Map);
+				done();
+			});
+		});
+
+		test('returns correct keys and values', (done) => {
+			schema.deserializer(data, (err, val) => {
+				expect(Array.from(val.keys())).toEqual([987, 321]);
+				expect(Array.from(val.values())).toEqual(['value1', true]);
 				done();
 			});
 		});
