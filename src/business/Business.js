@@ -1,4 +1,4 @@
-import { serializable, object, list, identifier } from 'serializr';
+import { serializable, object, list } from 'serializr';
 import { observable, observe } from 'mobx';
 import EventEmitter from 'events';
 import postal from 'postal';
@@ -27,14 +27,6 @@ const channel = postal.channel(CHANNELS.business);
  * - ...
  */
 class Business extends EventEmitter {
-	/**
-	 * UUID of the Business. The app cannot create new Business, so the UUID will either be null (not
-	 * yet associated with the server) or a UUID returned by the server.
-	 *
-	 * @type {String}
-	 */
-	@serializable(identifier())
-	uuid = null;
 	/**
 	 * Register currently assigned to this device.
 	 *
@@ -275,7 +267,6 @@ class Business extends EventEmitter {
 	 */
 	update(newBusiness) {
 		[
-			'uuid',
 			'deviceRegister',
 			'products',
 			'rootProductCategory',

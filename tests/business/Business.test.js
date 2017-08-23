@@ -197,15 +197,10 @@ describe('serializing', () => {
 	emailField.uuid = 'email-field';
 
 	beforeEach(() => {
-		business.uuid = 'test-uuid';
 		business.deviceRegister.employee = 'test-employee';
 		business.customerFields = [textField, emailField];
 		business.roomSelectionFields = [textField, emailField];
 		data = serialize(business);
-	});
-
-	test('serializes uuid', () => {
-		expect(data.uuid).toBe(business.uuid);
 	});
 
 	test('serializes deviceRegister', () => {
@@ -346,7 +341,6 @@ describe('deserializing', () => {
 describe('update()', () => {
 	test('replaces all attributes', () => {
 		const attributes = {
-			uuid: 'new-uuid',
 			deviceRegister: new Register(),
 			products: [],
 			rootProductCategory: new ProductCategory(),
