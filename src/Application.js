@@ -1,5 +1,6 @@
 import Config from './Config';
 import Business from './business/Business';
+import Register from './business/Register';
 import Logger from './loggers/Logger';
 
 /**
@@ -15,11 +16,19 @@ class Application {
 	 */
 	config = new Config();
 	/**
-	 * Business instance.
+	 * Business instance. Once created in `bootstrap()`, the same instance will always be used,
+	 * even when new Business data is loaded, so you can add event listeners on it.
 	 *
 	 * @type {Business}
 	 */
 	business = null;
+	/**
+	 * Register instance of this device. Once created in `bootstrap()`, the same instance will
+	 * always be used, even when new Register data is loaded, so you can add event listeners on it.
+	 *
+	 * @type {Register}
+	 */
+	register = null;
 	/**
 	 * Logger instance of the application. The default one does nothing.
 	 *
@@ -51,6 +60,7 @@ class Application {
 	bootstrap() {
 		this.log.info('bootstrapping start');
 		this.business = new Business();
+		this.register = new Register();
 		this.config.get('plugins', []).forEach((plugin) => {
 			plugin.bootstrap(this);
 		});

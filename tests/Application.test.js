@@ -1,5 +1,6 @@
 import Application from 'Application';
 import Business from 'business/Business';
+import Register from 'business/Register';
 
 let application;
 
@@ -16,15 +17,15 @@ describe('constructor()', () => {
 
 	test('sets logger', () => {
 		const logger = {};
-		const config = { logger };
 		expect(application.logger).toEqual(logger);
 	});
 });
 
 describe('bootstrap()', () => {
-	test('creates Business', () => {
+	test('creates Business and Register', () => {
 		application.bootstrap();
 		expect(application.business).toBeInstanceOf(Business);
+		expect(application.register).toBeInstanceOf(Register);
 	});
 
 	test('does not create error if no plugins', () => {
