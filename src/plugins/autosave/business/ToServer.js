@@ -1,8 +1,8 @@
 import Plugin from '../../Plugin';
 
 /**
- * Plugin that listens to modifications to the application's Business (and its Register instance)
- * and calls methods on its Server instance to save the modifications.
+ * Plugin that listens to modifications to the application's Business and calls methods on its
+ * Server instance to save the modifications.
  */
 class ToServer extends Plugin {
 	id = 'autosave.business.toServer';
