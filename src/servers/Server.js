@@ -14,6 +14,16 @@ class Server {
 	}
 
 	/**
+	 * Returns a Promise that resolves with the device's Register instance that is currently on the
+	 * server.
+	 *
+	 * @return {Promise}
+	 */
+	getRegister() {
+		return Promise.resolve(null);
+	}
+
+	/**
 	 * Returns a Promise that resolves with (an array of Order) the next [quantity] Orders following
 	 * the [from] Order. It is the Server that determines the order of the Orders.
 	 *
