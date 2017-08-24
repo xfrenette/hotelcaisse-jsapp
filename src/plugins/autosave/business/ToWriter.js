@@ -1,9 +1,8 @@
 import Plugin from '../../Plugin';
 
 /**
- * Plugin that listens to any change to the Business instance (and its Register) and writes the
- * *whole* Business instance to a writer; that is for each modification, writes the whole Business
- * instance.
+ * Plugin that listens to any change to the Business instance and writes the *whole* Business
+ * instance to a writer; that is for each modification, writes the whole Business instance.
  */
 class ToWriter extends Plugin {
 	id = 'autosave.business.toWriter';
