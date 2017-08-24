@@ -4,7 +4,7 @@ export default {
 		closed: 'register.closed',
 		cashMovement: {
 			added: 'cashMovement.added',
-		}
+		},
 	},
 	business: {
 		order: {

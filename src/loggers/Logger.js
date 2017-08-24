@@ -7,7 +7,8 @@ const logMethods = ['error', 'warn', 'info', 'debug', 'trace'];
 
 /**
  * Class to save log messages. It uses a system of namespace, so before being able to log, you must
- * call the getNamespace(namespace) method that will return an object containing the loggin methods.
+ * call the getNamespace(namespace) method that will return an object containing the logging
+ * methods.
  *
  * The returned object will have the following methods :
  * - error(message, data)
@@ -30,7 +31,7 @@ const loggerMixin = superClass => class extends superClass {
 	 * @param {String} type
 	 * @param {String} namespace
 	 * @param {String} message
-	 * @param {mixed} data
+	 * @param {*} data
 	 */
 	// eslint-disable-next-line no-unused-vars
 	log(type, namespace, message, data) {

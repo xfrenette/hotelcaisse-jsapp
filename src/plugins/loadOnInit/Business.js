@@ -41,7 +41,7 @@ class Business extends Plugin {
 	 * Updates the Business of the Application instance with the [newBusiness] only if it is a valid
 	 * Business (BusinessModel) instance.
 	 *
-	 * @param {BusinessModel} newBusiness
+	 * @param {Business} newBusiness
 	 */
 	updateBusiness(newBusiness) {
 		if (newBusiness instanceof BusinessModel) {

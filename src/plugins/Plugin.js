@@ -28,7 +28,7 @@ class Plugin {
 	 * start() is called. Receives the Application in parameter. Also sets up a logger namespaced
 	 * with the plugin id.
 	 *
-	 * @param {Application} app
+	 * @param {Application} application
 	 */
 	bootstrap(application) {
 		this.application = application;

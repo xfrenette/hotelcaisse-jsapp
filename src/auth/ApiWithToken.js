@@ -14,7 +14,7 @@ const ERRORS = {
 /**
  * Creates an error object containing a code and a message.
  *
- * @param {ERRORS} code
+ * @param {number} code
  * @param {String} message
  * @return {Object}
  */

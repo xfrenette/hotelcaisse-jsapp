@@ -17,7 +17,7 @@ class Auth {
 	/**
 	 * If the device is authenticated
 	 *
-	 * @type {Bool}
+	 * @type {boolean}
 	 */
 	@observable
 	authenticated = false;
@@ -29,6 +29,7 @@ class Auth {
 	 * @param {string} deviceUUID Device UUID
 	 * @return {Promise}
 	 */
+	// noinspection JSUnusedLocalSymbols
 	// eslint-disable-next-line no-unused-vars
 	authenticate(code, deviceUUID) {
 		return Promise.reject();
