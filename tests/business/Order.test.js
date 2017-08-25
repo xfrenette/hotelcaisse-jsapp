@@ -90,7 +90,7 @@ beforeEach(() => {
 	order.roomSelections.push(roomSelection2);
 
 	customerField = new TextField();
-	customerField.uuid = 'test-customer-field';
+	customerField.id = 99789;
 
 	order.customer.setFieldValue(customerField, 'test-value');
 });
@@ -693,6 +693,50 @@ describe('trim', () => {
 		order.trim();
 		expect(order.credits.length).toBe(1);
 		expect(order.credits[0].uuid).toBe(credit2.uuid);
+	});
+});
+
+describe('freeze', () => {
+	test('calls freeze on items', () => {
+		order = new Order();
+		const mock = jest.fn();
+
+		for (let i = 0; i < 2; i += 1) {
+			const item = new Item();
+			item.freeze = mock;
+			order.items.push(item);
+		}
+
+		order.freeze();
+		expect(mock).toHaveBeenCalledTimes(2);
+	});
+
+	test('calls freeze on roomSelections', () => {
+		order = new Order();
+		const mock = jest.fn();
+
+		for (let i = 0; i < 2; i += 1) {
+			const roomSelection = new RoomSelection();
+			roomSelection.freeze = mock;
+			order.roomSelections.push(roomSelection);
+		}
+
+		order.freeze();
+		expect(mock).toHaveBeenCalledTimes(2);
+	});
+
+	test('calls freeze on transactions', () => {
+		order = new Order();
+		const mock = jest.fn();
+
+		for (let i = 0; i < 2; i += 1) {
+			const transaction = new Transaction();
+			transaction.freeze = mock;
+			order.transactions.push(transaction);
+		}
+
+		order.freeze();
+		expect(mock).toHaveBeenCalledTimes(2);
 	});
 });
 

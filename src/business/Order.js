@@ -542,6 +542,15 @@ class Order extends EventEmitter {
 	}
 
 	/**
+	 * Freezes the order by freezing all its elements that can be frozen.
+	 */
+	freeze() {
+		this.items.forEach((item) => { item.freeze(); });
+		this.roomSelections.forEach((roomSelection) => { roomSelection.freeze(); });
+		this.transactions.forEach((transaction) => { transaction.freeze(); });
+	}
+
+	/**
 	 * The Order validates its own attributes, as specified in the attributes property. If all
 	 * are attributes valid, returns undefined, else returns an object where the keys are the invalid
 	 * attributes.
