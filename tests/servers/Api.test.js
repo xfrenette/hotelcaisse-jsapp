@@ -1,15 +1,27 @@
-import Api, { ERRORS } from 'servers/Api';
 import { Response } from 'node-fetch';
+import Api, { ERRORS } from 'servers/Api';
+import Business from 'business/Business';
 import TestAuth from '../mock/TestAuth';
+import Register from '../../src/business/Register';
 
 let api;
 let auth;
-const validResponse = new Response('{"status":"ok"}');
+let validResponse;
+const originalFn = {
+	validateResponse: Api.validateResponse,
+	fetch: global.fetch,
+};
 
 beforeEach(() => {
 	const url = 'https://api.example.com/1.0';
 	auth = new TestAuth();
-	api = new Api(url, auth);
+	api = new Api(url);
+	validResponse = new Response('{"status":"ok"}');
+});
+
+afterEach(() => {
+	Api.validateResponse = originalFn.validateResponse;
+	global.fetch = originalFn.fetch;
 });
 
 describe('constructor()', () => {
@@ -19,287 +31,512 @@ describe('constructor()', () => {
 		expect(api.url).toBe(url);
 	});
 
-	test('sets apiAuth', () => {
-		api = new Api('test', auth);
-		expect(api.apiAuth).toBe(auth);
+	test('sets application', () => {
+		const application = {};
+		api = new Api('test', application);
+		expect(api.application).toBe(application);
 	});
 });
 
-describe('buildRequestURL()', () => {
-	test('uses url and path', () => {
-		const path = 'test-path';
-		const res = api.buildRequestURL(path);
-		expect(res).toBe(`${api.url}/${path}`);
+describe('isAuthenticated', () => {
+	test('returns false if no auth', () => {
+		api.auth = null;
+		expect(api.isAuthenticated()).toBeFalsy();
 	});
 
-	test('uses params if set', () => {
-		const params = { a: 'b', c: 'd' };
-		const res = api.buildRequestURL(null, params);
-		expect(res).toBe(`${api.url}?a=b&c=d`);
+	test('returns false if auth not authenticated', () => {
+		auth.authenticated = false;
+		api.auth = auth;
+		expect(api.isAuthenticated()).toBeFalsy();
 	});
 
-	test('encodes params', () => {
-		const params = { a: '?', c: '&' };
-		const res = api.buildRequestURL(null, params);
-		expect(res).toBe(`${api.url}?a=%3F&c=%26`);
-	});
-
-	test('works without path', () => {
-		const expected = api.url;
-		let res = api.buildRequestURL();
-		expect(res).toBe(expected);
-		res = api.buildRequestURL(null);
-		expect(res).toBe(expected);
+	test('returns true if auth is authenticated', () => {
+		auth.authenticated = true;
+		api.auth = auth;
+		expect(api.isAuthenticated()).toBeTruthy();
 	});
 });
 
 describe('buildRequestBody()', () => {
-	test('returns FormData', () => {
-		expect(api.buildRequestBody({})).toBeInstanceOf(FormData);
-	});
-
-	test('contains data as JSON', () => {
+	test('contains data IFF', () => {
 		const data = {
 			aa: 'bb',
 			cc: true,
 			dd: { ee: ['ff'] },
 		};
-		const res = api.buildRequestBody(data);
-		expect(res.get('data')).toEqual(JSON.stringify(data));
+		let res = api.buildRequestBody(data);
+		expect(res.data).toEqual(data);
+
+		res = api.buildRequestBody(null);
+		expect(res.data).toBeUndefined();
+
+		res = api.buildRequestBody();
+		expect(res.data).toBeUndefined();
 	});
 
-	test('contains lastDataVersion number', () => {
+	test('contains dataVersion number IFF set', () => {
 		api.lastDataVersion = 'test-version-number';
-		const res = api.buildRequestBody({});
-		expect(res.get('lastDataVersion')).toEqual(api.lastDataVersion);
+		let res = api.buildRequestBody({});
+		expect(res.dataVersion).toEqual(api.lastDataVersion);
+
+		api.lastDataVersion = null;
+		res = api.buildRequestBody({});
+		expect(res.dataVersion).toBeUndefined();
 	});
 
-	test('contains token', () => {
-		auth.token = 'test-token';
-		const res = api.buildRequestBody({});
-		expect(res.get('token')).toEqual(auth.token);
+	test('contains dataVersion number IFF set', () => {
+		api.lastDataVersion = 'test-version-number';
+		let res = api.buildRequestBody({});
+		expect(res.dataVersion).toEqual(api.lastDataVersion);
+
+		api.lastDataVersion = null;
+		res = api.buildRequestBody({});
+		expect(res.dataVersion).toBeUndefined();
+	});
+
+	test('contains token number IFF (set and authenticated=true)', () => {
+		api.token = 'test';
+		let res = api.buildRequestBody({}, false);
+		expect(res.token).toBeUndefined();
+
+		api.token = null;
+		res = api.buildRequestBody({});
+		expect(res.token).toBeUndefined();
+
+		api.token = 'test-token';
+		res = api.buildRequestBody({});
+		expect(res.token).toBe(api.token);
+	});
+});
+
+describe('requestApi', () => {
+	beforeEach(() => {
+		global.fetch = jest.fn(() => Promise.resolve(validResponse));
+	});
+
+	test('calls fetch with POST and correct headers', () => {
+		const expected = {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		};
+		return api.requestApi()
+			.then(() => {
+				expect(global.fetch).toHaveBeenCalledWith(
+					expect.anything(),
+					expect.objectContaining(expected)
+				);
+			});
+	});
+
+	test('fetch body is undefined if body is null', () => {
+		global.fetch = (url, init) => {
+			expect(init.body).toBeUndefined();
+			return Promise.resolve(validResponse);
+		};
+		return api.requestApi();
+	});
+
+	test('fetch body is JSONified body', () => {
+		const body = {
+			a: 'b',
+			c: true,
+		};
+		const expected = {
+			body: JSON.stringify(body),
+		};
+		return api.requestApi('/', body)
+			.then(() => {
+				expect(fetch).toHaveBeenCalledWith(expect.anything(), expect.objectContaining(expected));
+			});
+	});
+
+	test('calls fetch with correct URL', () => {
+		const path = '/test-path';
+		const expected = api.url + path;
+		api.requestApi(path);
+		expect(fetch).toHaveBeenCalledWith(expected, expect.anything());
+	});
+
+	test('rejects error if fetch fails', () => {
+		const message = 'test error message';
+		global.fetch = () => Promise.reject(new TypeError(message));
+		return api.requestApi()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(e) => {
+					expect(e.code).toBe(ERRORS.NETWORK_ERROR);
+					expect(e.message).toBe(message);
+				}
+			);
+	});
+
+	test('rejects if response is not json', () => {
+		global.fetch = () => Promise.resolve(new Response('invalid json'));
+		return api.requestApi()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(e) => {
+					expect(e.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
+	});
+
+	test('resolves with response object', () => {
+		const expected = {
+			a: 'b',
+			c: true,
+			d: 12.45678,
+		};
+		global.fetch = () => Promise.resolve(new Response(JSON.stringify(expected)));
+		return api.requestApi()
+			.then((data) => {
+				expect(data).toEqual(expected);
+			});
 	});
 });
 
 describe('validateResponse()', () => {
-	test('returns Promise', () => {
-		const res = Api.validateResponse({});
-		res.catch(() => {});
-		expect(res).toBeInstanceOf(Promise);
+	// eslint-disable-next-line arrow-body-style
+	test('rejects if no status and error', () => {
+		return Api.validateResponse({ data: 'tmp' })
+			.then(
+				() => {
+					throw new Error('Should have rejected');
+				},
+				(e) => {
+					expect(e.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
 	});
 
-	test('rejects if response.ok is false', (done) => {
-		const response = { ok: false };
-		Api.validateResponse(response)
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.SERVER_ERROR);
-				done();
-			});
-	});
-
-	test('rejects if invalid json', (done) => {
-		const response = new Response('invalid, {json}');
-		Api.validateResponse(response)
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
-				done();
-			});
-	});
-
-	test('rejects if response does not contain status', (done) => {
-		const response = new Response('{"aa":true}');
-		Api.validateResponse(response)
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
-				done();
-			});
-	});
-
-	test('resolves with data object', (done) => {
+	test('resolves with same data if all valid', () => {
 		const data = {
-			status: 'ok',
-			cc: true,
-			data: {
-				aa: 'bb',
-			},
-		};
-		const response = new Response(JSON.stringify(data));
-		Api.validateResponse(response)
-			.then((responseData) => {
-				expect(responseData).toEqual(data);
-				done();
-			});
-	});
-});
-
-describe('processResponseData()', () => {
-	test('updates lastDataVersion', (done) => {
-		const data = {
-			status: 'ok',
-			dataVersion: 'test-data-version',
-		};
-		api.lastDataVersion = '1';
-		api.processResponseData(data)
-			.then(() => {
-				expect(api.lastDataVersion).toBe(data.dataVersion);
-				done();
-			});
-	});
-
-	test('does not update lastDataVersion if not there', (done) => {
-		const version = 'test';
-		api.lastDataVersion = version;
-		api.processResponseData({ status: 'ok' })
-			.then(() => {
-				expect(api.lastDataVersion).toBe(version);
-				done();
-			});
-	});
-
-	test('resolves with data when success', (done) => {
-		const data = {
-			status: 'ok',
-			data: { test: 'aa' },
-		};
-		api.processResponseData(data)
-			.then((processedData) => {
-				expect(processedData).toEqual(data.data);
-				done();
-			});
-	});
-
-	test('resolves with null if no data key', (done) => {
-		api.processResponseData({ status: 'ok' })
-			.then((processedData) => {
-				expect(processedData).toBeNull();
-				done();
-			});
-	});
-
-	test('rejects when status is error', (done) => {
-		const data = {
-			status: 'error',
+			status: 'error', // resolves even if an error
+			data: { test: true },
 			error: {
-				code: 'test-code',
-				message: 'test-message',
-				userMessage: 'test-user-message',
+				code: 'test',
 			},
 		};
-		api.processResponseData(data)
-			.catch((error) => {
-				expect(error.code).toEqual(ERRORS.RESPONSE_ERROR);
-				expect(error.data).toEqual(data.error);
-				done();
+		return Api.validateResponse(data)
+			.then((ret) => {
+				expect(ret).toEqual(data);
 			});
 	});
 });
 
-describe('doRequest()', () => {
-	test('returns Promise', () => {
-		global.fetch = () => Promise.resolve(validResponse);
-		const res = api.doRequest('GET', {}, 'test');
-		expect(res).toBeInstanceOf(Promise);
+describe('processResponseMeta', () => {
+	test('updates token IIF present', () => {
+		const oldToken = 'old-token';
+		const newToken = 'new-token';
+		api.token = oldToken;
+		api.processResponseMeta({});
+		expect(api.token).toBe(oldToken);
+		api.processResponseMeta({ token: null });
+		expect(api.token).toBe(oldToken);
+		api.processResponseMeta({ token: newToken });
+		expect(api.token).toBe(newToken);
 	});
 
-	test('fetch body is null if method is not POST', (done) => {
-		const method = 'GET';
-		global.fetch = (url, init) => {
-			expect(init.body).toBeFalsy();
-			done();
-			return Promise.reject();
+	test('updates lastDataVersion IIF present', () => {
+		const oldVersion = 'old-version';
+		const newVersion = 'new-version';
+		api.lastDataVersion = oldVersion;
+		api.processResponseMeta({});
+		expect(api.lastDataVersion).toBe(oldVersion);
+		api.processResponseMeta({ dataVersion: null });
+		expect(api.lastDataVersion).toBe(oldVersion);
+		api.processResponseMeta({ dataVersion: newVersion });
+		expect(api.lastDataVersion).toBe(newVersion);
+	});
+});
+
+describe('processResponseBusiness', () => {
+	let business;
+
+	beforeEach(() => {
+		business = {
+			update: jest.fn(),
 		};
-		api.doRequest(method, { a: 'b' })
-			.catch(() => {});
+
+		api.application = { business };
 	});
 
-	test('calls fetch with correct URL', () => {
-		const path = 'test-path';
-		const data = { a: 'b', c: '&' };
-		const expectedUrl = api.buildRequestURL(path, data);
-		global.fetch = jest.fn().mockImplementation(() => Promise.reject());
-		api.doRequest('GET', data, path)
-			.catch(() => {});
-		expect(fetch).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
+	test('does nothing if not present', () => {
+		api.processResponseBusiness({});
+		expect(business.update).not.toHaveBeenCalled();
 	});
 
-	test('calls fetch with correct init', (done) => {
-		const data = { a: 'b' };
-		const expected = api.buildRequestBody(data);
-		const method = 'POST';
-		global.fetch = (url, init) => {
-			expect(init.method).toEqual(method);
-			expect(init.cache).toEqual('no-cache');
-			expect(init.body).toEqual(expected);
-			done();
-			return Promise.reject();
+	test('does nothing if invalid', () => {
+		const data = {
+			business: { rooms: 'invalid' },
 		};
-		api.doRequest(method, {})
-			.catch(() => {});
+		api.processResponseBusiness(data);
+		expect(business.update).not.toHaveBeenCalled();
 	});
 
-	test('rejects when fetch rejects', (done) => {
-		global.fetch = () => Promise.reject({});
-		api.doRequest('GET', {})
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.NETWORK_ERROR);
-				done();
-			});
+	test('calls update if valid', () => {
+		const data = {
+			business: { rooms: [] },
+		};
+		api.processResponseBusiness(data);
+		expect(business.update).toHaveBeenCalledWith(expect.any(Business));
 	});
 
-	test('rejects if receives invalid response', (done) => {
-		const response = new Response('invalid {json}');
-		global.fetch = () => Promise.resolve(response);
-		api.doRequest('GET', {})
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
-				done();
-			});
+	test('works if no application', () => {
+		const data = {
+			business: { rooms: [] },
+		};
+		api.application = null;
+		api.processResponseBusiness(data);
+	});
+});
+
+describe('processResponseRegister', () => {
+	let register;
+
+	beforeEach(() => {
+		register = {
+			update: jest.fn(),
+		};
+
+		api.application = { register };
 	});
 
-	test('rejects if receives error response', (done) => {
-		const response = new Response('{"status":"error"}');
-		global.fetch = () => Promise.resolve(response);
-		api.doRequest('GET', {})
-			.catch((error) => {
-				expect(error.code).toBe(ERRORS.RESPONSE_ERROR);
-				done();
-			});
+	test('does nothing if not present', () => {
+		api.processResponseRegister({});
+		expect(register.update).not.toHaveBeenCalled();
 	});
 
-	test('resolves with success response', (done) => {
-		const response = new Response('{"status":"ok"}');
-		global.fetch = () => Promise.resolve(response);
-		api.doRequest('GET', {})
-			.then(() => {
-				done();
-			});
+	test('does nothing if invalid', () => {
+		const data = {
+			register: { cashMovements: 'invalid' },
+		};
+		api.processResponseRegister(data);
+		expect(register.update).not.toHaveBeenCalled();
+	});
+
+	test('calls update if valid', () => {
+		const data = {
+			register: { cashMovements: [], uuid: 'test' },
+		};
+		api.processResponseRegister(data);
+		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
+	});
+
+	test('works if no application', () => {
+		const data = {
+			register: { cashMovements: [], uuid: 'test' },
+		};
+		api.application = null;
+		api.processResponseRegister(data);
+	});
+});
+
+describe('processResponseAuth', () => {
+	test('does nothing if no auth', () => {
+		api.auth = null;
+		api.processResponseAuth({ token: 'new-token' });
+		// should not throw
+	});
+
+	describe('already authenticated', () => {
+		beforeEach(() => {
+			api.auth = auth;
+			auth.authenticated = true;
+		});
+
+		test('does nothing if no token', () => {
+			api.processResponseAuth({});
+			expect(auth.authenticated).toBeTruthy();
+		});
+
+		test('does nothing if new token', () => {
+			api.processResponseAuth({ token: 'new-token' });
+			expect(auth.authenticated).toBeTruthy();
+		});
+
+		test('sets to false if auth error', () => {
+			const data = {
+				error: {
+					code: ERRORS.AUTH_FAILED,
+				},
+			};
+			api.processResponseAuth(data);
+			expect(auth.authenticated).toBeFalsy();
+		});
+	});
+
+	describe('not authenticated', () => {
+		beforeEach(() => {
+			api.auth = auth;
+			auth.authenticated = false;
+		});
+
+		test('does nothing if no token', () => {
+			api.processResponseAuth({});
+			expect(auth.authenticated).toBeFalsy();
+		});
+
+		test('authenticates if token', () => {
+			api.processResponseAuth({ token: 'new-token' });
+			expect(auth.authenticated).toBeTruthy();
+		});
+
+		test('does nothing if auth error', () => {
+			const data = {
+				error: {
+					code: ERRORS.AUTH_FAILED,
+				},
+			};
+			api.processResponseAuth(data);
+			expect(auth.authenticated).toBeFalsy();
+		});
 	});
 });
 
 describe('query', () => {
-	global.fetch = () => Promise.reject('test');
+	const successResponseData = {
+		status: 'ok',
+		data: {
+			test: 'true',
+			foo: 'bar',
+		},
+		token: '123456',
+	};
 
-	test('returns Promise', () => {
-		const res = api.query(null, {}, 'test');
-		res.catch(() => {});
-		expect(res).toBeInstanceOf(Promise);
+	const errorResponseData = {
+		status: 'error',
+		error: {
+			code: 'test:error',
+			message: 'test error message',
+		},
+	};
+
+	beforeEach(() => {
+		api.auth = auth;
+		auth.authenticated = true;
+		api.requestApi = () => Promise.resolve(successResponseData);
 	});
 
-	test('rejects if not authenticated', (done) => {
-		auth.authenticated = false;
-		const res = api.query(null, {}, 'test');
-		res.catch((error) => {
-			expect(error.code).toBe(ERRORS.NOT_AUTHENTICATED);
-			done();
+	describe('not authenticated', () => {
+		test('rejects if authenticated=true and no auth', () => {
+			api.auth = null;
+			return api.query()
+				.then(
+					() => { throw new Error('Should not resolve'); },
+					(e) => { expect(e.code).toBe(ERRORS.NOT_AUTH); }
+				);
+		});
+
+		test('rejects if authenticated=true and not authenticated', () => {
+			api.auth = auth;
+			auth.authenticated = false;
+			return api.query()
+				.then(
+					() => { throw new Error('Should not resolve'); },
+					(e) => { expect(e.code).toBe(ERRORS.NOT_AUTH); }
+				);
 		});
 	});
 
-	test('calls doRequest with params', () => {
-		const data = { a: 'bb' };
-		const path = 'test-path';
-		const method = 'GET';
-		api.doRequest = jest.fn().mockImplementation(() => Promise.resolve({}));
-		api.query(method, data, path);
-		expect(api.doRequest).toHaveBeenCalledWith(method, data, path);
+	test('calls requestApi with expected data', () => {
+		const data = { test: true };
+		const path = '/path';
+		const expected = api.buildRequestBody(data, true);
+		api.requestApi = jest.fn(() => Promise.resolve(successResponseData));
+		api.query(path, data);
+		expect(api.requestApi).toHaveBeenCalledWith(path, expected);
+	});
+
+	test('rejects if requestApi rejects', () => {
+		const error = { test: true };
+		api.requestApi = () => Promise.reject(error);
+		return api.query()
+			.then(
+				() => { throw new Error('Should not resolve'); },
+				(e) => { expect(e).toEqual(error); }
+			);
+	});
+
+	test('validateResponse receives requestApi data', () => {
+		Api.validateResponse = jest.fn(() => Promise.resolve(successResponseData));
+		return api.query()
+			.then(() => {
+				expect(Api.validateResponse).toHaveBeenCalledWith(successResponseData);
+			});
+	});
+
+	test('rejects if validateResponse rejects', () => {
+		const error = { test: true };
+		Api.validateResponse = () => Promise.reject(error);
+		return api.query()
+			.then(
+				() => { throw new Error('Should not resolve'); },
+				(e) => { expect(e).toEqual(error); }
+			);
+	});
+
+	test('calls processResponseMeta', () => {
+		api.processResponseMeta = jest.fn();
+		return api.query()
+			.then(() => {
+				expect(api.processResponseMeta).toHaveBeenCalledWith(successResponseData);
+			});
+	});
+
+	test('calls processResponseBusiness', () => {
+		api.processResponseBusiness = jest.fn();
+		return api.query()
+			.then(() => {
+				expect(api.processResponseBusiness).toHaveBeenCalledWith(successResponseData);
+			});
+	});
+
+	test('calls processResponseRegister', () => {
+		api.processResponseRegister = jest.fn();
+		return api.query()
+			.then(() => {
+				expect(api.processResponseRegister).toHaveBeenCalledWith(successResponseData);
+			});
+	});
+
+	test('calls processResponseAuth if authenticated = true', () => {
+		api.processResponseAuth = jest.fn();
+		return api.query('/', {}, true)
+			.then(() => {
+				expect(api.processResponseAuth).toHaveBeenCalledWith(successResponseData);
+			});
+	});
+
+	test('if error response data returned, reject with error', () => {
+		api.requestApi = () => Promise.resolve(errorResponseData);
+		return api.query()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(error) => {
+					expect(error.code).toBe(errorResponseData.error.code);
+					expect(error.message).toBe(errorResponseData.error.message);
+				}
+			);
+	});
+
+	// eslint-disable-next-line arrow-body-style
+	test('resolve with response data', () => {
+		return api.query()
+			.then((data) => {
+				expect(data).toEqual(successResponseData.data);
+			});
+	});
+
+	test('resolve with null if response has no data', () => {
+		api.requestApi = () => Promise.resolve({ status: 'ok' });
+		return api.query()
+			.then((data) => {
+				expect(data).toBeNull();
+			});
 	});
 });
+

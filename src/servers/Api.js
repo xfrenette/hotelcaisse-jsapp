@@ -1,4 +1,7 @@
+import { deserialize } from 'serializr';
 import Server from './Server';
+import Business from '../business/Business';
+import Register from '../business/Register';
 
 /**
  * Error codes that can be returned.
@@ -6,11 +9,11 @@ import Server from './Server';
  * @type {Object}
  */
 const ERRORS = {
-	SERVER_ERROR: 0,
-	NETWORK_ERROR: 1,
-	INVALID_RESPONSE: 2,
-	RESPONSE_ERROR: 3,
-	NOT_AUTHENTICATED: 4,
+	SERVER_ERROR: 'server:error',
+	NETWORK_ERROR: 'network:error',
+	INVALID_RESPONSE: 'response:invalid',
+	AUTH_FAILED: 'auth:failed',
+	NOT_AUTH: 'request:notAuthenticated',
 };
 
 function createError(code, message) {
@@ -22,173 +25,268 @@ function createError(code, message) {
 
 class Api extends Server {
 	/**
-	 * ApiWithToken authentication class that authenticated to the API.
+	 * Authentication class that wants to be controlled by the responses from the api. If set,
+	 * its `authenticated` attribute will be set based on responses from the API.
 	 *
-	 * @type {ApiWithToken}
+	 * @type {Auth|null}
 	 */
-	apiAuth = null;
+	auth = null;
 	/**
 	 * Base URL of the API.
 	 *
-	 * @type {String}
+	 * @type {string}
 	 */
 	url = null;
 	/**
 	 * Data version number received from the last request to the API.
 	 *
-	 * @type {String}
+	 * @type {string|null}
 	 */
 	lastDataVersion = null;
+	/**
+	 * Last authentication token received
+	 *
+	 * @type {string|null}
+	 */
+	token = null;
+	/**
+	 * Application instance. If set, its business and register will be updated when api response
+	 * contain new data.
+	 *
+	 * @type {Application|null}
+	 */
+	application = null;
 
 	/**
-	 * @param {String} url API url
-	 * @param {ApiWithToken} apiAuth API Authentication class using token
+	 * @param {string} url API url
+	 * @param {Application} application Application instance
 	 */
-	constructor(url, apiAuth) {
+	constructor(url, application = null) {
 		super();
 		this.url = url;
-		this.apiAuth = apiAuth;
+		this.application = application;
 	}
 
 	/**
-	 * Queries the API. Returns a Promise. First ensures we are authenticated (else rejects).
+	 * Returns true if an Auth instance is in `auth` and is authenticated.
 	 *
-	 * @see  doRequest
-	 * @param {String} method
-	 * @param {Object} data
-	 * @param {String} path
-	 * @return {Promise}
+	 * @returns {boolean}
 	 */
-	query(method, data, path) {
-		if (!this.apiAuth.authenticated) {
-			const errorMessage = 'Not authenticated to the API.';
-			return Promise.reject(createError(ERRORS.NOT_AUTHENTICATED, errorMessage));
+	isAuthenticated() {
+		return this.auth && this.auth.authenticated;
+	}
+
+	/**
+	 * Queries the api at `path` with the specified `data`. Returns a Promise that resolves with
+	 * the response's `data` value. Rejects if an error occured of if the response's `status` is
+	 * not 'ok'. If `authenticated` is true (default value), it will first check if we are
+	 * authenticated (rejects if not) and will include the last token in the request.
+	 *
+	 * @param {string} path
+	 * @param {object} data
+	 * @param {boolean} authenticated
+	 * @returns {Promise}
+	 */
+	query(path, data = null, authenticated = true) {
+		if (authenticated && !this.isAuthenticated()) {
+			return Promise.reject(createError(
+				ERRORS.NOT_AUTH,
+				'This request can be made only if authenticated.'
+			));
 		}
 
-		return this.doRequest(method, data, path);
+		const body = this.buildRequestBody(data, authenticated);
+
+		return this.requestApi(path, body)
+			.then(Api.validateResponse)
+			.then((responseData) => {
+				this.processResponseMeta(responseData);
+				this.processResponseBusiness(responseData);
+				this.processResponseRegister(responseData);
+				this.processResponseAuth(responseData);
+
+				if (responseData.status !== 'ok') {
+					return Promise.reject(Api.buildErrorObjectForResponse(responseData));
+				}
+
+				return responseData.data || null;
+			});
 	}
 
 	/**
-	 * Does a fetch request to the api on the specified path with the specified data and method.
-	 * Returns a Promise that resolves with the returned data on success, else rejects with an
-	 * error.
+	 * Does the actual ajax request to the API with the `body`. The `body` will be converted to
+	 * JSON. If the request fails, rejects with an error object. If the request succeeds, extracts
+	 * the response's JSON object (if the response is not a JSON, rejects with an error object) and
+	 * resolves with the response's body as a JS object.
 	 *
-	 * @param {string} method HTTP method
-	 * @param {object} data
-	 * @param {string} path
-	 * @return {Promise}
+	 * @param {string} path Relative path
+	 * @param {object|null} body
+	 * @returns {Promise}
 	 */
-	doRequest(method, data, path = null) {
-		const fetchInit = {
-			method,
-			cache: 'no-cache',
+	requestApi(path = '/', body = null) {
+		const init = {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
 		};
 
-		if (method === 'POST') {
-			fetchInit.body = this.buildRequestBody(data);
+		if (body !== null) {
+			init.body = JSON.stringify(body);
 		}
 
-		const urlParams = method === 'POST' ? null : data;
-		const url = this.buildRequestURL(path, urlParams);
+		const url = this.url + path;
 
-		return fetch(url, fetchInit)
-			.catch(
-				error => Promise.reject(createError(ERRORS.NETWORK_ERROR, error.message))
-			)
-			.then(response => (
-				Api.validateResponse(response)
-					.then(responseData => this.processResponseData(responseData))
-			));
+		const resolved = response =>
+			response.json()
+				.catch(
+					error => Promise.reject(createError(ERRORS.INVALID_RESPONSE, error.message))
+				);
+
+		const rejected = error => Promise.reject(createError(ERRORS.NETWORK_ERROR, error.message));
+
+		return fetch(url, init)
+			.then(resolved, rejected);
 	}
 
 	/**
-	 * Returns the API URL where to send the request using the specified path. If the path is not
-	 * supplied, returns the base url. If data is an object, it is used as GET params and added to
-	 * the URL (note that path and base url must not already have params).
+	 * Returns an object containing the body to send to an Api POST request. Contains the `data` of
+	 * the request, the last `dataVersion` received. If `authenticated` parameter is true (means we
+	 * want to do an authenticated request), the `token` is added.
 	 *
-	 * @param {String} path
-	 * @param {Object} params
-	 * @return {String}
+	 * @param {object} data
+	 * @param {boolean} authenticated Set to true if this is an authenticated request
+	 * @return {object}
 	 */
-	buildRequestURL(path = false, params = null) {
-		const url = path ? `${this.url}/${path}` : this.url;
-		let urlParams = '';
+	buildRequestBody(data = null, authenticated = true) {
+		const body = {};
 
-		if (params) {
-			urlParams = '?' + Object.entries(params).map(
-				([key, val]) => `${key}=${encodeURIComponent(val)}`
-			).join('&');
+		if (data !== null) {
+			body.data = data;
 		}
 
-		return `${url}${urlParams}`;
+		if (this.lastDataVersion !== null) {
+			body.dataVersion = this.lastDataVersion;
+		}
+
+		if (authenticated && this.token !== null) {
+			body.token = this.token;
+		}
+
+		return body;
 	}
 
 	/**
-	 * Returns a FormData prefilled with the data, but also with other required parameters, that can
-	 * be used when making a POST fetch() request.
+	 * Extracts some attributes from the response, if present.
+	 * * token
+	 * * dataVersion
 	 *
 	 * @param {object} data
-	 * @return {FormData}
 	 */
-	buildRequestBody(data) {
-		const formData = new FormData();
-		formData.set('data', JSON.stringify(data));
-		formData.set('lastDataVersion', this.lastDataVersion);
-		formData.set('token', this.apiAuth.token);
-		return formData;
-	}
+	processResponseMeta(data) {
+		if (data.token) {
+			this.token = data.token;
+		}
 
-	/**
-	 * Processes data returned by the server. Returns Promise that resolves with data.data if the
-	 * status is 'ok'. Else, rejects with an error containing the data.error object. Expects the
-	 * data to be well formed (see Api.validateResponse). If a dataVersion is present, will update
-	 * the lastDataVersion.
-	 *
-	 * @param {object} data
-	 * @return {Promise}
-	 */
-	processResponseData(data) {
 		if (data.dataVersion) {
 			this.lastDataVersion = data.dataVersion;
 		}
+	}
 
-		if (data.status !== 'ok') {
-			const error = createError(ERRORS.RESPONSE_ERROR);
-			error.data = data.error;
-
-			return Promise.reject(error);
+	/**
+	 * If the data has a `business` attribute, tries to deserialize it. If successful, updates
+	 * the application's business instance. Note that if the deserialization fails, this method
+	 * fails silently since it is not as important as the data of the response.
+	 *
+	 * @param {object} data
+	 */
+	processResponseBusiness(data) {
+		if (!data.business || !this.application) {
+			return;
 		}
 
-		return Promise.resolve(data.data || null);
+		try {
+			const business = deserialize(Business, data.business);
+			this.application.business.update(business);
+		} catch (e) {
+			// Do nothing
+		}
+	}
+
+	/**
+	 * If the data has a `register` attribute, tries to deserialize it. If successful, updates
+	 * the application's register instance. Note that if the deserialization fails, this method
+	 * fails silently since it is not as important as the data of the response.
+	 *
+	 * @param {object} data
+	 */
+	processResponseRegister(data) {
+		if (!data.register || !this.application) {
+			return;
+		}
+
+		try {
+			const register = deserialize(Register, data.register);
+			this.application.register.update(register);
+		} catch (e) {
+			// Do nothing
+		}
+	}
+
+	/**
+	 * If the response `data` contains an authentication error, 'log out' the `auth` instance.
+	 * If it contains an authentication token, 'log in' the `auth` instance. Does nothing if no
+	 * `auth` instance.
+	 *
+	 * @param {object} data
+	 */
+	processResponseAuth(data) {
+		if (!this.auth) {
+			return;
+		}
+
+		if (this.auth.authenticated) {
+			if (data.error && data.error.code === ERRORS.AUTH_FAILED) {
+				this.auth.authenticated = false;
+			}
+		} else if (data.token) {
+			this.auth.authenticated = true;
+		}
 	}
 }
 
 /**
- * Validates the Response and its data. Returns a Promise that resolves if the response is 'OK' and
- * it contains an expected json object. Else, the Promise reject with an error.
+ * Validates that a response's body (`data`) is well formed (see below). Returns a Promise that
+ * resolves with the same `data` if well formed, else it rejects with an error object.
  *
- * @param {Response} response
- * @return {Promise}
+ * A well formed response object has a `status` with 'ok' or 'error' value.
+ *
+ * @param {object} data
+ * @returns {Promise}
  */
-Api.validateResponse = (response) => {
-	if (!response.ok) {
-		const errorMessage = `Received response status ${response.status} ${response.statusText}`;
-		return Promise.reject(createError(ERRORS.SERVER_ERROR, errorMessage));
+Api.validateResponse = (data) => {
+	if (data.status !== 'ok' && data.status !== 'error') {
+		return Promise.reject(createError(
+			ERRORS.INVALID_RESPONSE,
+			'Response object is not well formed.'
+		));
 	}
 
-	return response.json()
-		.then((data) => {
-			if (!data.status) {
-				const error = createError(ERRORS.INVALID_RESPONSE, 'Unexpected response received.');
-				return Promise.reject(error);
-			}
+	return Promise.resolve(data);
+};
 
-			return data;
-		})
-		.catch(() => {
-			const error = createError(ERRORS.INVALID_RESPONSE, 'Response contains invalid JSON.');
-			return Promise.reject(error);
-		});
+/**
+ * Returns an error object with a code and message set from the response data.
+ *
+ * @param {object} data
+ * @returns {object}
+ */
+Api.buildErrorObjectForResponse = (data) => {
+	const code = data.error ? data.error.code : ERRORS.SERVER_ERROR;
+	const message = data.error && data.error.message ? data.error.message : '';
+
+	return createError(code, message);
 };
 
 export default Api;
