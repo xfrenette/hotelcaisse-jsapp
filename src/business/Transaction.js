@@ -63,6 +63,13 @@ class Transaction {
 		this.amount = amount;
 		this.transactionMode = transactionMode;
 	}
+
+	/**
+	 * Freezes this Transaction by making a clone of TransactionMode
+	 */
+	freeze() {
+		this.transactionMode = this.transactionMode.clone();
+	}
 }
 
 export default Transaction;

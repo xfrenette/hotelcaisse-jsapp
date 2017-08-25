@@ -9,7 +9,7 @@ beforeEach(() => {
 	transaction = new Transaction(
 		'test-uuid',
 		new Decimal(123),
-		new TransactionMode('test')
+		new TransactionMode(20, 'test')
 	);
 });
 
@@ -34,6 +34,16 @@ describe('constructor()', () => {
 		const transactionMode = new TransactionMode(10);
 		transaction = new Transaction(null, null, transactionMode);
 		expect(transaction.transactionMode).toBe(transactionMode);
+	});
+});
+
+describe('freeze', () => {
+	test('makes a copy of transactionMode', () => {
+		const oldTransactionMode = transaction.transactionMode;
+		transaction.freeze();
+		expect(transaction.transactionMode).not.toBe(oldTransactionMode);
+		transaction.transactionMode.name = 'new name';
+		expect(transaction.transactionMode.name).not.toBe(oldTransactionMode.name);
 	});
 });
 
