@@ -85,6 +85,7 @@ describe('clone()', () => {
 	let clone;
 
 	beforeEach(() => {
+		roomSelection.fields.push(new TextField());
 		clone = roomSelection.clone();
 	});
 
@@ -111,6 +112,11 @@ describe('clone()', () => {
 	test('dates are copies, not references', () => {
 		expect(clone.startDate).not.toBe(roomSelection.startDate);
 		expect(clone.endDate).not.toBe(roomSelection.endDate);
+	});
+
+	test('copy fields', () => {
+		expect(clone.fields).not.toBe(roomSelection.fields);
+		expect(clone.fields).toEqual(roomSelection.fields);
 	});
 });
 

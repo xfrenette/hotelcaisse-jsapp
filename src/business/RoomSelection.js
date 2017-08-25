@@ -100,6 +100,7 @@ class RoomSelection {
 			}
 		});
 		clone.fieldValues.replace(this.fieldValues);
+		clone.fields = [...this.fields];
 
 		return clone;
 	}
