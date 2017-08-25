@@ -1,4 +1,4 @@
-import { identifier, serializable } from 'serializr';
+import { serializable } from 'serializr';
 import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
 import { fieldValues } from '../vendor/serializr/propSchemas';
@@ -8,14 +8,7 @@ import { fieldValues } from '../vendor/serializr/propSchemas';
  */
 class Customer {
 	/**
-	 * Unique identifier of this Customer
-	 *
-	 * @type {String}
-	 */
-	@serializable(identifier())
-	uuid = null;
-	/**
-	 * Values for each of the fields. Key is field uuid and the value is a primitive.
+	 * Values for each of the fields. Key is field id and the value is a primitive.
 	 *
 	 * @type {Map}
 	 */
@@ -31,19 +24,15 @@ class Customer {
 	 */
 	fields = [];
 
-	constructor(uuid = null) {
-		this.uuid = uuid;
-	}
-
 	/**
 	 * Returns the value saved for the specified Field. Returns null if no value is found.
 	 *
 	 * @param {Field} field
-	 * @return {mixed}
+	 * @return {*}
 	 */
 	getFieldValue(field) {
-		if (this.fieldValues.has(field.uuid)) {
-			return this.fieldValues.get(field.uuid);
+		if (this.fieldValues.has(field.id)) {
+			return this.fieldValues.get(field.id);
 		}
 
 		return null;
@@ -53,10 +42,10 @@ class Customer {
 	 * Sets the value for the field. The value must be a primitive.
 	 *
 	 * @param {Field} field
-	 * @param {mixed} value
+	 * @param {*} value
 	 */
 	setFieldValue(field, value) {
-		this.fieldValues.set(field.uuid, value);
+		this.fieldValues.set(field.id, value);
 	}
 
 	/**
@@ -65,7 +54,7 @@ class Customer {
 	 * null if no value found.
 	 *
 	 * @param {String} role
-	 * @return {mixed}
+	 * @return {*}
 	 */
 	get(role) {
 		let value = null;
@@ -88,7 +77,6 @@ class Customer {
 	 */
 	clone() {
 		const clone = new Customer();
-		clone.uuid = this.uuid;
 		clone.fieldValues.replace(this.fieldValues);
 		return clone;
 	}
@@ -100,10 +88,6 @@ class Customer {
 	 * @return {Boolean}
 	 */
 	isEqualTo(other) {
-		if (this.uuid !== other.uuid) {
-			return false;
-		}
-
 		return isEqual(this.fieldValues.toJS(), other.fieldValues.toJS());
 	}
 
@@ -122,7 +106,7 @@ class Customer {
 		this.fields.forEach((field) => {
 			const fieldValidation = field.validate(this.getFieldValue(field));
 			if (fieldValidation) {
-				res[field.uuid] = fieldValidation;
+				res[field.id] = fieldValidation;
 				valid = false;
 			}
 		});

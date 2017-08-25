@@ -64,11 +64,11 @@ class RoomSelection {
 	 * Returns the value saved for the specified Field. Returns null if no value is found.
 	 *
 	 * @param {Field} field
-	 * @return {mixed}
+	 * @return {*}
 	 */
 	getFieldValue(field) {
-		if (this.fieldValues.has(field.uuid)) {
-			return this.fieldValues.get(field.uuid);
+		if (this.fieldValues.has(field.id)) {
+			return this.fieldValues.get(field.id);
 		}
 
 		return null;
@@ -78,10 +78,10 @@ class RoomSelection {
 	 * Sets the value for the field. The value must be a primitive.
 	 *
 	 * @param {Field} field
-	 * @param {mixed} value
+	 * @param {*} value
 	 */
 	setFieldValue(field, value) {
-		this.fieldValues.set(field.uuid, value);
+		this.fieldValues.set(field.id, value);
 	}
 
 	/**
@@ -160,7 +160,7 @@ class RoomSelection {
 		this.fields.forEach((field) => {
 			const fieldValidation = field.validate(this.getFieldValue(field));
 			if (fieldValidation) {
-				res[field.uuid] = fieldValidation;
+				res[field.id] = fieldValidation;
 				valid = false;
 			}
 		});

@@ -9,19 +9,11 @@ let field;
 
 beforeEach(() => {
 	field = new TextField();
-	field.uuid = 'field-uuid';
+	field.id = 123;
 
-	customer = new Customer('customer-uuid');
-	customer.fieldValues.set(field.uuid, 'two');
+	customer = new Customer();
+	customer.fieldValues.set(field.id, 'two');
 	customer.fieldValues.set('three', 4);
-});
-
-describe('construct', () => {
-	test('sets uuid', () => {
-		const uuid = 'test-uuid';
-		customer = new Customer(uuid);
-		expect(customer.uuid).toBe(uuid);
-	});
 });
 
 describe('fieldValues', () => {
@@ -33,12 +25,12 @@ describe('fieldValues', () => {
 describe('getFieldValue()', () => {
 	test('returns null if field is unknown', () => {
 		const newField = new TextField();
-		newField.uuid = 'test-new-field';
+		newField.id = 456;
 		expect(customer.getFieldValue(newField)).toBeNull();
 	});
 
 	test('returns value if field exists', () => {
-		customer.fieldValues.set(field.uuid, false);
+		customer.fieldValues.set(field.id, false);
 		expect(customer.getFieldValue(field)).toBe(false);
 	});
 });
@@ -95,11 +87,6 @@ describe('isEqualTo()', () => {
 	});
 
 	describe('returns false if', () => {
-		test('different uuid', () => {
-			other.uuid = `${customer.uuid} (other)`;
-			expect(customer.isEqualTo(other)).toBe(false);
-		});
-
 		test('different fieldValues', () => {
 			other.fieldValues.set('a', `${customer.fieldValues.a} (other)`);
 			expect(customer.isEqualTo(other)).toBe(false);
@@ -122,7 +109,7 @@ describe('validate()', () => {
 		customer.setFieldValue(field, '');
 		const res = customer.validate();
 		expect(res).toEqual({
-			[field.uuid]: expect.any(Array),
+			[field.id]: expect.any(Array),
 		});
 	});
 
@@ -141,15 +128,10 @@ describe('serializing', () => {
 	};
 
 	beforeEach(() => {
-		customer = new Customer('customer-uuid');
+		customer = new Customer();
 		customer.fieldValues.replace(fieldValues);
 		data = serialize(customer);
 	});
-
-	test('saves primitives', () => {
-		expect(data.uuid).toBe(customer.uuid);
-	});
-
 	test('saves fieldValues', () => {
 		const expected = fieldValuesSerializer().serializer(customer.fieldValues);
 		expect(data.fieldValues).toEqual(expected);
@@ -159,7 +141,6 @@ describe('serializing', () => {
 describe('deserializing', () => {
 	let restoredCustomer;
 	const data = {
-		uuid: 'test-uuid',
 		fieldValues: [
 			{ fieldId: 'd', value: 'e' },
 			{ fieldId: 'f', value: 4 },
@@ -168,10 +149,6 @@ describe('deserializing', () => {
 
 	beforeEach(() => {
 		restoredCustomer = deserialize(Customer, data);
-	});
-
-	test('restores primitives', () => {
-		expect(restoredCustomer.uuid).toBe(data.uuid);
 	});
 
 	test('restores fieldValues', () => {

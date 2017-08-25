@@ -11,13 +11,13 @@ let field;
 
 beforeEach(() => {
 	field = new TextField();
-	field.uuid = 'field-uuid';
+	field.id = 7123;
 
 	roomSelection = new RoomSelection();
 	roomSelection.uuid = 'test-uuid';
 	roomSelection.startDate = new Date(1494883301000);
 	roomSelection.endDate = new Date(1495142500000);
-	roomSelection.fieldValues.set(field.uuid, 'two');
+	roomSelection.fieldValues.set(field.id, 'two');
 	roomSelection.fieldValues.set('three', 4);
 
 	room = new Room();
@@ -60,12 +60,12 @@ describe('endDate', () => {
 describe('getFieldValue()', () => {
 	test('returns null if field is unknown', () => {
 		const newField = new TextField();
-		newField.uuid = 'test-new-field';
+		newField.id = 4567;
 		expect(roomSelection.getFieldValue(newField)).toBeNull();
 	});
 
 	test('returns value if field exists', () => {
-		roomSelection.fieldValues.set(field.uuid, false);
+		roomSelection.fieldValues.set(field.id, false);
 		expect(roomSelection.getFieldValue(field)).toBe(false);
 	});
 });
@@ -135,7 +135,7 @@ describe('isEqualTo()', () => {
 
 	test('returns false if different room', () => {
 		const newRoom = new Room();
-		newRoom.uuid = `${room.uuid}-copy`;
+		newRoom.id = `${room.id}-copy`;
 		copy.room = newRoom;
 		expect(roomSelection.isEqualTo(copy)).toBe(false);
 	});
@@ -145,7 +145,7 @@ describe('isEqualTo()', () => {
 		expect(roomSelection.isEqualTo(copy)).toBe(false);
 	});
 
-	test('returns true if different room with same uuid', () => {
+	test('returns true if different room with same id', () => {
 		const newRoom = new Room();
 		newRoom.id = room.id;
 		copy.room = newRoom;
@@ -167,7 +167,7 @@ describe('freezeRoom()', () => {
 	});
 
 	test('has same values', () => {
-		expect(roomSelection.room.uuid).toBe(room.uuid);
+		expect(roomSelection.room.id).toBe(room.id);
 		expect(roomSelection.room.name).toBe(room.name);
 	});
 });
@@ -196,7 +196,7 @@ describe('validate()', () => {
 		roomSelection.setFieldValue(field, '');
 		const res = roomSelection.validate();
 		expect(res).toEqual({
-			[field.uuid]: expect.any(Array),
+			[field.id]: expect.any(Array),
 		});
 	});
 });
