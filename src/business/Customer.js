@@ -78,6 +78,7 @@ class Customer {
 	clone() {
 		const clone = new Customer();
 		clone.fieldValues.replace(this.fieldValues);
+		clone.fields = [...this.fields];
 		return clone;
 	}
 

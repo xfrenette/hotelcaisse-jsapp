@@ -60,6 +60,7 @@ describe('clone()', () => {
 	let clone;
 
 	beforeEach(() => {
+		customer.fields.push(new TextField());
 		clone = customer.clone();
 	});
 
@@ -71,6 +72,11 @@ describe('clone()', () => {
 	test('has same fieldValues but different instances', () => {
 		expect(clone.fieldValues).toEqual(customer.fieldValues);
 		expect(clone.fieldValues).not.toBe(customer.fieldValues);
+	});
+
+	test('copy fields', () => {
+		expect(clone.fields).not.toBe(customer.fields);
+		expect(clone.fields).toEqual(customer.fields);
 	});
 });
 
