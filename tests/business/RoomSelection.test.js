@@ -3,7 +3,10 @@ import { isObservable } from 'mobx';
 import RoomSelection from 'business/RoomSelection';
 import Room from 'business/Room';
 import { TextField } from 'fields';
-import { fieldValues as fieldValuesSerializer } from 'vendor/serializr/propSchemas';
+import {
+	fieldValues as fieldValuesSerializer,
+	timestamp as timestampSerializer,
+} from 'vendor/serializr/propSchemas';
 
 let roomSelection;
 let room;
@@ -15,8 +18,8 @@ beforeEach(() => {
 
 	roomSelection = new RoomSelection();
 	roomSelection.uuid = 'test-uuid';
-	roomSelection.startDate = new Date(1494883301000);
-	roomSelection.endDate = new Date(1495142500000);
+	roomSelection.startDate = new Date(1494883301632);
+	roomSelection.endDate = new Date(1495142500123);
 	roomSelection.fieldValues.set(field.id, 'two');
 	roomSelection.fieldValues.set('three', 4);
 
@@ -225,8 +228,8 @@ describe('serializing', () => {
 	test('saves primitives', () => {
 		expect(data).toEqual(expect.objectContaining({
 			uuid: roomSelection.uuid,
-			startDate: expect.any(Number),
-			endDate: expect.any(Number),
+			startDate: timestampSerializer().serializer(roomSelection.startDate),
+			endDate: timestampSerializer().serializer(roomSelection.endDate),
 		}));
 	});
 
@@ -241,10 +244,13 @@ describe('serializing', () => {
 });
 
 describe('deserializing', () => {
+	const date = new Date();
+	date.setMilliseconds(0);
+
 	const jsonObject = {
 		uuid: 'test-uuid',
-		startDate: 1494883301000,
-		endDate: 1495142500000,
+		startDate: timestampSerializer().serializer(date),
+		endDate: timestampSerializer().serializer(date),
 		fieldValues: [{ fieldId: 'a', value: 'b' }],
 	};
 
@@ -257,8 +263,8 @@ describe('deserializing', () => {
 	});
 
 	test('restores dates', () => {
-		expect(roomSelection.startDate).toBeInstanceOf(Date);
-		expect(roomSelection.endDate).toBeInstanceOf(Date);
+		expect(roomSelection.startDate).toEqual(date);
+		expect(roomSelection.endDate).toEqual(date);
 	});
 
 	test('restores fieldValues', () => {

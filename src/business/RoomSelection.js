@@ -1,7 +1,7 @@
-import { date, identifier, reference, serializable } from 'serializr';
+import { identifier, reference, serializable } from 'serializr';
 import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
-import { fieldValues } from '../vendor/serializr/propSchemas';
+import { fieldValues, timestamp } from '../vendor/serializr/propSchemas';
 import Room from './Room';
 
 /**
@@ -29,7 +29,7 @@ class RoomSelection {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	@observable
 	startDate = null;
 	/**
@@ -37,7 +37,7 @@ class RoomSelection {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	@observable
 	endDate = null;
 	/**
