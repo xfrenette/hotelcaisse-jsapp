@@ -327,7 +327,7 @@ describe('serializing', () => {
 	});
 
 	test('serializes openedAt', () => {
-		expect(data.openedAt).toEqual(expect.any(Number));
+		expect(data.openedAt).toEqual(Math.round(register.openedAt.getTime() / 1000));
 	});
 
 	test('serializes openingCash', () => {
@@ -335,7 +335,7 @@ describe('serializing', () => {
 	});
 
 	test('serializes closedAt', () => {
-		expect(data.closedAt).toEqual(expect.any(Number));
+		expect(data.closedAt).toEqual(Math.round(register.closedAt.getTime() / 1000));
 	});
 
 	test('serializes closingCash', () => {
@@ -349,13 +349,16 @@ describe('serializing', () => {
 
 describe('deserializing', () => {
 	let newRegister;
+	const date = new Date();
+	date.setMilliseconds(0);
+
 	const data = {
 		uuid: 'test-uuid1',
 		state: STATES.CLOSED,
 		employee: 'test-employee',
-		openedAt: (new Date()).getTime(),
+		openedAt: date.getTime() / 1000,
 		openingCash: '100.34',
-		closedAt: (new Date()).getTime(),
+		closedAt: date.getTime() / 1000,
 		closingCash: '456.21',
 		POSTRef: 'test-ref-1234',
 		POSTAmount: '34.87',
@@ -378,10 +381,12 @@ describe('deserializing', () => {
 
 	test('restores openedAt', () => {
 		expect(newRegister.openedAt).toBeInstanceOf(Date);
+		expect(newRegister.openedAt).toEqual(date);
 	});
 
 	test('restores closedAt', () => {
 		expect(newRegister.closedAt).toBeInstanceOf(Date);
+		expect(newRegister.closedAt).toEqual(date);
 	});
 
 	test('restores openingCash', () => {

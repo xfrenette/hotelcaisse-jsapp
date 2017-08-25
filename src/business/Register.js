@@ -1,10 +1,10 @@
-import { date, identifier, list, object, serializable } from 'serializr';
+import { identifier, list, object, serializable } from 'serializr';
 import EventEmiter from 'events';
 import postal from 'postal';
 import { observable } from 'mobx';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
-import { decimal } from '../vendor/serializr/propSchemas';
+import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
 import utils from '../utils';
 
@@ -93,7 +93,7 @@ class Register extends EventEmiter {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	openedAt = null;
 	/**
 	 * Amount of cash when the register was opened.
@@ -107,7 +107,7 @@ class Register extends EventEmiter {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	closedAt = null;
 	/**
 	 * Amount of cash when the register was closed.
