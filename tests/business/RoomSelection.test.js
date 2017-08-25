@@ -120,7 +120,7 @@ describe('clone()', () => {
 	});
 });
 
-describe('isEqualTo()', () => {
+describe('equals()', () => {
 	let copy;
 
 	beforeEach(() => {
@@ -129,36 +129,41 @@ describe('isEqualTo()', () => {
 
 	test('returns false if different uuid', () => {
 		copy.uuid = `${roomSelection.uuid}-copy`;
-		expect(roomSelection.isEqualTo(copy)).toBe(false);
+		expect(roomSelection.equals(copy)).toBe(false);
 	});
 
 	test('returns false if different startDate', () => {
 		copy.startDate = new Date(roomSelection.startDate.getTime() + 1);
-		expect(roomSelection.isEqualTo(copy)).toBe(false);
+		expect(roomSelection.equals(copy)).toBe(false);
 	});
 
 	test('returns false if different endDate', () => {
 		copy.endDate = new Date(roomSelection.endDate.getTime() + 1);
-		expect(roomSelection.isEqualTo(copy)).toBe(false);
+		expect(roomSelection.equals(copy)).toBe(false);
 	});
 
 	test('returns false if different room', () => {
 		const newRoom = new Room();
 		newRoom.id = `${room.id}-copy`;
 		copy.room = newRoom;
-		expect(roomSelection.isEqualTo(copy)).toBe(false);
+		expect(roomSelection.equals(copy)).toBe(false);
 	});
 
 	test('returns false if different fieldValue', () => {
 		copy.setFieldValue(field, 'two (copy)');
-		expect(roomSelection.isEqualTo(copy)).toBe(false);
+		expect(roomSelection.equals(copy)).toBe(false);
 	});
 
-	test('returns true if different room with same id', () => {
-		const newRoom = new Room();
-		newRoom.id = room.id;
+	test('returns false if different room', () => {
+		const newRoom = room.clone();
+		newRoom.name = `${room.name}-new`;
 		copy.room = newRoom;
-		expect(roomSelection.isEqualTo(copy)).toBe(true);
+		expect(roomSelection.equals(copy)).toBe(false);
+	});
+
+	test('returns true if equal', () => {
+		const other = roomSelection.clone();
+		expect(roomSelection.equals(other)).toBeTruthy();
 	});
 });
 

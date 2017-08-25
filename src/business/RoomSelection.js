@@ -111,7 +111,7 @@ class RoomSelection {
 	 * @param {RoomSelection} other
 	 * @return {Boolean}
 	 */
-	isEqualTo(other) {
+	equals(other) {
 		let otherIsEqual = true;
 		const attributes = ['uuid', 'startDate', 'endDate', 'room'];
 
