@@ -1,10 +1,12 @@
 import TransactionMode from 'business/TransactionMode';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
 
 let transactionMode;
 
 beforeEach(() => {
-	transactionMode = new TransactionMode('test-uuid');
+	transactionMode = new TransactionMode(12, 'test-name');
+	transactionMode.archived = true;
+	transactionMode.type = 'cash';
 });
 
 describe('constructor()', () => {
@@ -18,6 +20,18 @@ describe('constructor()', () => {
 		const name = 'test-name';
 		transactionMode = new TransactionMode(null, name);
 		expect(transactionMode.name).toBe(name);
+	});
+});
+
+describe('clone', () => {
+	test('makes copy', () => {
+		const clone = transactionMode.clone();
+		expect(clone).not.toBe(transactionMode);
+		expect(clone).toBeInstanceOf(TransactionMode);
+		expect(clone.id).toEqual(transactionMode.id);
+		expect(clone.name).toEqual(transactionMode.name);
+		expect(clone.archived).toEqual(transactionMode.archived);
+		expect(clone.type).toEqual(transactionMode.type);
 	});
 });
 

@@ -1,4 +1,4 @@
-import { serializable, identifier } from 'serializr';
+import { identifier, serializable } from 'serializr';
 
 /**
  * Represents a method used for a Transaction. Examples : cash, credit card, ...
@@ -39,6 +39,14 @@ class TransactionMode {
 	constructor(id = null, name = null) {
 		this.id = id;
 		this.name = name;
+	}
+
+	/**
+	 * Returns a copy of this instance
+	 * @return {TransactionMode}
+	 */
+	clone() {
+		return Object.assign(Object.create(this), this);
 	}
 }
 
