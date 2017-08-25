@@ -80,7 +80,7 @@ describe('clone()', () => {
 	});
 });
 
-describe('isEqualTo()', () => {
+describe('equals()', () => {
 	let other;
 
 	beforeEach(() => {
@@ -89,13 +89,13 @@ describe('isEqualTo()', () => {
 	});
 
 	test('returns true if equal', () => {
-		expect(customer.isEqualTo(other)).toBe(true);
+		expect(customer.equals(other)).toBe(true);
 	});
 
 	describe('returns false if', () => {
 		test('different fieldValues', () => {
 			other.fieldValues.set('a', `${customer.fieldValues.a} (other)`);
-			expect(customer.isEqualTo(other)).toBe(false);
+			expect(customer.equals(other)).toBe(false);
 		});
 	});
 });

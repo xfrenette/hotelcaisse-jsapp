@@ -88,7 +88,7 @@ class Customer {
 	 * @param {Customer} other
 	 * @return {Boolean}
 	 */
-	isEqualTo(other) {
+	equals(other) {
 		return isEqual(this.fieldValues.toJS(), other.fieldValues.toJS());
 	}
 
