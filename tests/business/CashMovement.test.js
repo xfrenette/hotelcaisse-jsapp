@@ -1,5 +1,6 @@
 import Decimal from 'decimal.js';
-import { serialize, deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
+import { timestamp as timestampPropSchema } from 'vendor/serializr/propSchemas';
 import CashMovement from 'business/CashMovement';
 
 describe('constructor()', () => {
@@ -44,7 +45,7 @@ describe('serializing', () => {
 	test('serializes primitives', () => {
 		expect(data.note).toBe(cashMovement.note);
 		expect(data.uuid).toBe(cashMovement.uuid);
-		expect(data.createdAt).toEqual(expect.any(Number));
+		expect(data.createdAt).toBe(timestampPropSchema().serializer(cashMovement.createdAt));
 	});
 
 	test('serializes amount', () => {
@@ -54,8 +55,11 @@ describe('serializing', () => {
 
 describe('deserializing', () => {
 	let cashMovement;
+	const date = new Date();
+	date.setMilliseconds(0);
+
 	const data = {
-		createdAt: (new Date()).getTime(),
+		createdAt: date.getTime() / 1000,
 		uuid: 'test-uuid',
 		note: 'test-note',
 		amount: '1.34',
@@ -69,6 +73,7 @@ describe('deserializing', () => {
 		expect(cashMovement.note).toBe(data.note);
 		expect(cashMovement.uuid).toBe(data.uuid);
 		expect(cashMovement.createdAt).toBeInstanceOf(Date);
+		expect(cashMovement.createdAt).toEqual(date);
 	});
 
 	test('restores amount', () => {

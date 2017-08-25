@@ -1,7 +1,7 @@
-import { date, identifier, serializable } from 'serializr';
+import { identifier, serializable } from 'serializr';
 import validate from '../Validator';
 import utils from '../utils';
-import { decimal } from '../vendor/serializr/propSchemas';
+import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 
 /**
  * Constraints for validation.
@@ -55,7 +55,7 @@ class CashMovement {
 	 *
 	 * @type {Date}
 	 */
-	@serializable(date())
+	@serializable(timestamp())
 	createdAt = null;
 	/**
 	 * Register where this cash movement is saved. It is set when calling
