@@ -167,6 +167,13 @@ class Item {
 	}
 
 	/**
+	 * Freezes this Item
+	 */
+	freeze() {
+		this.freezeProduct();
+	}
+
+	/**
 	 * Validates its own properties (quantity) and its product
 	 *
 	 * @return {Object}

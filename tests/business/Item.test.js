@@ -193,6 +193,14 @@ describe('freezeProduct()', () => {
 	});
 });
 
+describe('freeze', () => {
+	test('calls freezeProduct', () => {
+		item.freezeProduct = jest.fn();
+		item.freeze();
+		expect(item.freezeProduct).toHaveBeenCalled();
+	});
+});
+
 describe('validate()', () => {
 	test('rejects invalid quantity', () => {
 		item.quantity = 0;
