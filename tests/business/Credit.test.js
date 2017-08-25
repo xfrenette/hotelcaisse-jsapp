@@ -6,7 +6,7 @@ import Credit from 'business/Credit';
 let credit;
 
 beforeEach(() => {
-	credit = new Credit('credit');
+	credit = new Credit('test-uuid', new Decimal(1.23), 'credit');
 });
 
 describe('constructor()', () => {
@@ -51,6 +51,46 @@ describe('amount', () => {
 describe('note', () => {
 	test('is observable', () => {
 		expect(isObservable(credit, 'note')).toBe(true);
+	});
+});
+
+describe('clone', () => {
+	test('clones', () => {
+		const clone = credit.clone();
+		expect(clone).not.toBe(credit);
+		expect(clone).toEqual(credit);
+	});
+});
+
+describe('equals', () => {
+	let clone;
+
+	beforeEach(() => {
+		clone = credit.clone();
+	});
+
+	test('returns true if equal', () => {
+		expect(credit.equals(clone)).toBeTruthy();
+	});
+
+	test('returns false if different uuid', () => {
+		clone.uuid = `${credit.uuid}-new`;
+		expect(credit.equals(clone)).toBeFalsy();
+	});
+
+	test('returns false if different note', () => {
+		clone.note = `${credit.note}-new`;
+		expect(credit.equals(clone)).toBeFalsy();
+	});
+
+	test('returns false if different amount', () => {
+		clone.amount = credit.amount.add(1);
+		expect(credit.equals(clone)).toBeFalsy();
+	});
+
+	test('returns false if different createdAt', () => {
+		clone.createdAt = new Date(credit.createdAt.getTime() + 1000);
+		expect(credit.equals(clone)).toBeFalsy();
 	});
 });
 

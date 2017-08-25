@@ -1,5 +1,7 @@
 import { identifier, serializable } from 'serializr';
 import { observable } from 'mobx';
+import Decimal from 'decimal.js';
+import isEqual from 'lodash.isequal';
 import validate from '../Validator';
 import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 import utils from '../utils';
@@ -73,6 +75,30 @@ class Credit {
 			note: this.note,
 			amount: this.amount,
 		});
+	}
+
+	/**
+	 * Returns true if `other` is equal to this instance
+	 *
+	 * @param {Credit} other
+	 * @return {boolean}
+	 */
+	equals(other) {
+		return isEqual(this, other);
+	}
+
+	/**
+	 * Returns a clone of this Credit (a new object)
+	 *
+	 * @return {Credit}
+	 */
+	clone() {
+		const clone = new Credit();
+		clone.uuid = this.uuid;
+		clone.note = this.note;
+		clone.amount = this.amount ? new Decimal(this.amount) : null;
+		clone.createdAt = this.createdAt ? new Date(this.createdAt.getTime()) : null;
+		return clone;
 	}
 }
 
