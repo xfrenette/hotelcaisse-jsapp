@@ -139,6 +139,13 @@ class RoomSelection {
 	}
 
 	/**
+	 * Freezes this instance
+	 */
+	freeze() {
+		this.freezeRoom();
+	}
+
+	/**
 	 * Validate itself by validating it has a room and that all its fields are valid. Returns
 	 * undefined if valid, else returns an object where the key is the attribute or field (UUID) in
 	 * error and its value an array of errors. Note the fields attribute must be set with the Fields

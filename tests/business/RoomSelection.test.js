@@ -172,6 +172,14 @@ describe('freezeRoom()', () => {
 	});
 });
 
+describe('freeze', () => {
+	test('calls freezeRoom', () => {
+		roomSelection.freezeRoom = jest.fn();
+		roomSelection.freeze();
+		expect(roomSelection.freezeRoom).toHaveBeenCalled();
+	});
+});
+
 describe('validate()', () => {
 	beforeEach(() => {
 		field.required = true;
