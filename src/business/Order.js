@@ -405,12 +405,12 @@ class Order extends EventEmitter {
 	 * elements cannot be changed or removed. This is why we only create a shallow copy :
 	 * - items
 	 * - transactions
-	 * - credit
 	 *
 	 * But the following fields can be changed, so we create a deep copy :
 	 * - note (string, so deep copy is not applicable)
 	 * - customer
 	 * - roomSelections
+	 * - credits
 	 *
 	 * @return {Object}
 	 */
@@ -419,7 +419,7 @@ class Order extends EventEmitter {
 			note: this.note,
 			items: this.items.slice(),
 			transactions: this.transactions.slice(),
-			credits: this.credits.slice(),
+			credits: this.credits.map(credit => credit.clone()),
 			customer: this.customer.clone(),
 			roomSelections: this.roomSelections.map(roomSelection => roomSelection.clone()),
 		};
@@ -429,14 +429,15 @@ class Order extends EventEmitter {
 	 * Returns a OrderChanges containing changes between the current properties of the Order and the
 	 * ones in the restoration data that were set by recordChanges().
 	 *
-	 * Note that for items, transactions and credits, only new elements are considered changes. We
-	 * do not track modification, reordering, suppression, ... since it is not allowed in an Order.
+	 * `items` and `transactions`: the application only allows to add, we cannot delete or
+	 * modify existing elements once it is saved, so the returned changes will contain only new
+	 * elements, if any.
 	 *
-	 * For Customer, any change in its values is considered a whole customer change.
+	 * `roomSelections` and `credits`: it is allowed to add, delete and change elements. If any
+	 * of those change occured, *all* elements will be returned, without the ones deleted, but
+	 * with the ones that changed or not.
 	 *
-	 * For RoomSelection, any change (a new RoomChange, a modif. in one, ...) is considered a change
-	 * for ALL the RoomSelection (any change in any RoomSelection will consider the whole list as
-	 * changed.)
+	 * `customer`: if any fieldValue changed, the whole Customer object is in the changes.
 	 */
 	getChanges() {
 		if (this.restorationData === null || typeof this.restorationData !== 'object') {
@@ -452,7 +453,7 @@ class Order extends EventEmitter {
 			foundChanges = true;
 		}
 
-		['items', 'transactions', 'credits'].forEach((field) => {
+		['items', 'transactions'].forEach((field) => {
 			const diff = arrayDifference(this[field], old[field]);
 			if (diff.length) {
 				changes[field] = diff;
@@ -460,7 +461,7 @@ class Order extends EventEmitter {
 			}
 		});
 
-		if (!this.customer.isEqualTo(old.customer)) {
+		if (!this.customer.equals(old.customer)) {
 			changes.customer = this.customer.clone();
 			foundChanges = true;
 		}
@@ -470,15 +471,20 @@ class Order extends EventEmitter {
 			foundChanges = true;
 		}
 
+		if (this.didCreditsChanged(old)) {
+			changes.credits = this.credits.map(credit => credit.clone());
+			foundChanges = true;
+		}
+
 		return foundChanges ? changes : null;
 	}
 
 	/**
-	 * Compares the current roomSelections with the ones in 'old'. If any change is detected, returns
-	 * true.
+	 * Compares the current roomSelections with the ones in 'old'. If any change is detected,
+	 * returns true.
 	 *
-	 * @param {RoomSelection} old
-	 * @return {Boolean}
+	 * @param {object} old
+	 * @return {boolean}
 	 */
 	didRoomSelectionsChanged(old) {
 		if (old.roomSelections.length !== this.roomSelections.length) {
@@ -486,7 +492,25 @@ class Order extends EventEmitter {
 		}
 
 		const changed = this.roomSelections.find(
-			(roomSelection, index) => !roomSelection.isEqualTo(old.roomSelections[index])
+			(roomSelection, index) => !roomSelection.equals(old.roomSelections[index])
+		);
+
+		return !!changed;
+	}
+
+	/**
+	 * Compares the current credits with the ones in 'old'. If any change is detected, returns true.
+	 *
+	 * @param {object} old
+	 * @return {boolean}
+	 */
+	didCreditsChanged(old) {
+		if (old.credits.length !== this.credits.length) {
+			return true;
+		}
+
+		const changed = this.credits.find(
+			(credit, index) => !credit.equals(old.credits[index])
 		);
 
 		return !!changed;

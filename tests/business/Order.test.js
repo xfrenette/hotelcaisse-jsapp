@@ -440,7 +440,7 @@ describe('restoreFrom()', () => {
 
 	test('restores customer', () => {
 		order.restoreFrom(restorationData);
-		expect(order.customer.isEqualTo(newCustomer)).toBe(true);
+		expect(order.customer.equals(newCustomer)).toBe(true);
 	});
 });
 
@@ -531,33 +531,59 @@ describe('getChanges()', () => {
 			expect(res.transactions).toEqual([newTransaction1, newTransaction2]);
 		});
 
-		test('credits', () => {
-			const newCredit1 = new Credit();
-			const newCredit2 = new Credit();
-			order.credits.push(newCredit1);
-			order.credits.push(newCredit2);
-			const res = order.getChanges();
-			expect(res.credits).toEqual([newCredit1, newCredit2]);
-		});
-
 		test('customer', () => {
 			order.customer.fieldValues.set('test-modif', true);
 			const res = order.getChanges();
-			expect(res.customer.isEqualTo(order.customer)).toBe(true);
+			expect(res.customer.equals(order.customer)).toBe(true);
 			expect(res.customer).not.toBe(order.customer);
 		});
 
-		test('roomSelections (change attribute of one)', () => {
-			const roomSelection = order.roomSelections[0];
-			roomSelection.startDate = new Date(1);
-			const res = order.getChanges();
-			expect(res.roomSelections.length).toBe(order.roomSelections.length);
+		describe('roomSelections', () => {
+			test('change attribute of one', () => {
+				const roomSelection = order.roomSelections[0];
+				roomSelection.startDate = new Date(1);
+				const res = order.getChanges();
+				expect(res.roomSelections).not.toBe(order.roomSelections);
+				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+			});
+
+			test('add one', () => {
+				order.roomSelections.push(new RoomSelection());
+				const res = order.getChanges();
+				expect(res.roomSelections).not.toBe(order.roomSelections);
+				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+			});
+
+			test('delete one', () => {
+				order.roomSelections.pop();
+				const res = order.getChanges();
+				expect(res.roomSelections).not.toBe(order.roomSelections);
+				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+			});
 		});
 
-		test('roomSelections (added roomSelection)', () => {
-			order.roomSelections.push(new RoomSelection());
-			const res = order.getChanges();
-			expect(res.roomSelections.length).toBe(order.roomSelections.length);
+		describe('credits', () => {
+			test('change attribute of one', () => {
+				const credit = order.credits[0];
+				credit.amount = credit.amount.add(1);
+				const res = order.getChanges();
+				expect(res.credits).not.toBe(order.credits);
+				expect(res.credits).toEqual(order.credits.slice());
+			});
+
+			test('add one', () => {
+				order.credits.push(new Credit());
+				const res = order.getChanges();
+				expect(res.credits).not.toBe(order.credits);
+				expect(res.credits).toEqual(order.credits.slice());
+			});
+
+			test('delete one', () => {
+				order.credits.pop();
+				const res = order.getChanges();
+				expect(res.credits).not.toBe(order.credits);
+				expect(res.credits).toEqual(order.credits.slice());
+			});
 		});
 	});
 
@@ -631,14 +657,6 @@ describe('createRestorationData()', () => {
 		expect(res.items.length).toBe(order.items.length - 1);
 	});
 
-	test('saves credits', () => {
-		const res = order.createRestorationData();
-		expect(res.credits).not.toBe(order.credits);
-		expect(res.credits).toEqual(order.credits.slice());
-		order.credits.push(new Credit());
-		expect(res.credits.length).toBe(order.credits.length - 1);
-	});
-
 	test('saves transactions', () => {
 		const res = order.createRestorationData();
 		expect(res.transactions).not.toBe(order.transactions);
@@ -651,7 +669,7 @@ describe('createRestorationData()', () => {
 		const res = order.createRestorationData();
 		expect(res.customer).toBeInstanceOf(Customer);
 		expect(res.customer).not.toBe(order.customer);
-		expect(order.customer.isEqualTo(res.customer)).toBe(true);
+		expect(order.customer.equals(res.customer)).toBe(true);
 	});
 
 	test('saves roomSelections as clones', () => {
@@ -659,6 +677,13 @@ describe('createRestorationData()', () => {
 		expect(res.roomSelections).not.toBe(order.roomSelections);
 		expect(res.roomSelections[0]).not.toBe(order.roomSelections[0]);
 		expect(res.roomSelections[0]).toBeInstanceOf(RoomSelection);
+	});
+
+	test('saves credits as clones', () => {
+		const res = order.createRestorationData();
+		expect(res.credits).not.toBe(order.credits);
+		expect(res.credits[0]).not.toBe(order.credits[0]);
+		expect(res.credits[0]).toBeInstanceOf(Credit);
 	});
 });
 
