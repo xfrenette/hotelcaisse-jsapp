@@ -6,7 +6,7 @@ import { observable } from 'mobx';
  * @type {Object}
  */
 const ERRORS = {
-	AUTHENTICATION_FAILED: 1,
+	AUTHENTICATION_FAILED: 'auth:failed',
 };
 
 /**
@@ -23,15 +23,16 @@ class Auth {
 	authenticated = false;
 
 	/**
-	 * Tries to authenticate the device with the supplied credentials.
+	 * Tries to authenticate the device with the supplied credentials. Returns a Promise that
+	 * resolves if successful, else rejects. If successful, sets this.authenticated to true, else to
+	 * false.
 	 *
 	 * @param {string} code Authentication code
-	 * @param {string} deviceUUID Device UUID
 	 * @return {Promise}
 	 */
 	// noinspection JSUnusedLocalSymbols
 	// eslint-disable-next-line no-unused-vars
-	authenticate(code, deviceUUID) {
+	authenticate(code) {
 		return Promise.reject();
 	}
 
