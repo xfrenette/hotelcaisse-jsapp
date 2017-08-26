@@ -294,16 +294,20 @@ describe('processResponseBusiness', () => {
 		const data = {
 			business: { rooms: 'invalid' },
 		};
+		api.lastBusiness = new Business();
 		api.processResponseBusiness(data);
 		expect(business.update).not.toHaveBeenCalled();
+		expect(api.lastBusiness).toBeNull();
 	});
 
 	test('calls update if valid', () => {
 		const data = {
 			business: { rooms: [] },
 		};
+		api.lastBusiness = null;
 		api.processResponseBusiness(data);
 		expect(business.update).toHaveBeenCalledWith(expect.any(Business));
+		expect(api.lastBusiness).toBeInstanceOf(Business);
 	});
 
 	test('works if no application', () => {
@@ -311,7 +315,9 @@ describe('processResponseBusiness', () => {
 			business: { rooms: [] },
 		};
 		api.application = null;
+		api.lastBusiness = null;
 		api.processResponseBusiness(data);
+		expect(api.lastBusiness).toBeInstanceOf(Business);
 	});
 });
 
@@ -333,26 +339,32 @@ describe('processResponseRegister', () => {
 
 	test('does nothing if invalid', () => {
 		const data = {
-			register: { cashMovements: 'invalid' },
+			deviceRegister: { cashMovements: 'invalid' },
 		};
+		api.lastRegister = new Register();
 		api.processResponseRegister(data);
 		expect(register.update).not.toHaveBeenCalled();
+		expect(api.lastRegister).toBeNull();
 	});
 
 	test('calls update if valid', () => {
 		const data = {
-			register: { cashMovements: [], uuid: 'test' },
+			deviceRegister: { cashMovements: [], uuid: 'test' },
 		};
+		api.lastRegister = null;
 		api.processResponseRegister(data);
 		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
+		expect(api.lastRegister).toBeInstanceOf(Register);
 	});
 
 	test('works if no application', () => {
 		const data = {
-			register: { cashMovements: [], uuid: 'test' },
+			deviceRegister: { cashMovements: [], uuid: 'test' },
 		};
 		api.application = null;
+		api.lastRegister = null;
 		api.processResponseRegister(data);
+		expect(api.lastRegister).toBeInstanceOf(Register);
 	});
 });
 
@@ -965,5 +977,129 @@ describe('orderChanged', () => {
 				expect(api.query).not.toHaveBeenCalled();
 				expect(data).toBeNull();
 			});
+	});
+});
+
+describe('getBusiness', () => {
+	beforeEach(() => {
+		api.isAuthenticated = () => true;
+	});
+
+	test('rejects if query rejects', () => {
+		api.query = () => Promise.reject();
+		return api.getBusiness()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				() => true
+			);
+	});
+
+	test('calls query with expected parameters', () => {
+		api.lastBusiness = new Business();
+		api.query = jest.fn(() => Promise.resolve({}));
+		return api.getBusiness()
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/deviceData');
+			});
+	});
+
+	test('resolves with Business', () => {
+		const business = new Business();
+		business.transactionModes.push(new TransactionMode(123, 'test'));
+
+		api.requestApi = jest.fn(
+			() => Promise.resolve({ status: 'ok', business: serialize(business) })
+		);
+		return api.getBusiness()
+			.then((data) => {
+				expect(data).toBeInstanceOf(Business);
+				expect(data.transactionModes[0].id).toBe(business.transactionModes[0].id);
+			});
+	});
+
+	test('rejects if response doesn\'t have business', () => {
+		api.requestApi = jest.fn(() => Promise.resolve({ status: 'ok', data: {} }));
+		return api.getBusiness()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(error) => {
+					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
+	});
+
+	test('rejects if cannot deserialize', () => {
+		api.requestApi = jest.fn(
+			() => Promise.resolve({ status: 'ok', business: 'invalid business' })
+		);
+		return api.getBusiness()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(error) => {
+					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
+	});
+});
+
+describe('getRegister', () => {
+	beforeEach(() => {
+		api.isAuthenticated = () => true;
+	});
+
+	test('rejects if query rejects', () => {
+		api.query = () => Promise.reject();
+		return api.getRegister()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				() => true
+			);
+	});
+
+	test('calls query with expected parameters', () => {
+		api.lastRegister = new Register();
+		api.query = jest.fn(() => Promise.resolve({}));
+		return api.getRegister()
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/deviceData');
+			});
+	});
+
+	test('resolves with Register', () => {
+		const register = new Register();
+		register.uuid = 'test-register';
+
+		api.requestApi = jest.fn(
+			() => Promise.resolve({ status: 'ok', deviceRegister: serialize(register) })
+		);
+		return api.getRegister()
+			.then((data) => {
+				expect(data).toBeInstanceOf(Register);
+				expect(data.uuid).toBe(register.uuid);
+			});
+	});
+
+	test('rejects if response doesn\'t have register', () => {
+		api.requestApi = jest.fn(() => Promise.resolve({ status: 'ok', data: {} }));
+		return api.getRegister()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(error) => {
+					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
+	});
+
+	test('rejects if cannot deserialize', () => {
+		api.requestApi = jest.fn(
+			() => Promise.resolve({ status: 'ok', deviceRegister: 'invalid register' })
+		);
+		return api.getRegister()
+			.then(
+				() => { throw new Error('Should have rejected'); },
+				(error) => {
+					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
 	});
 });

@@ -58,6 +58,22 @@ class Api extends Server {
 	 * @type {Application|null}
 	 */
 	application = null;
+	/**
+	 * Last Business instance that was in a response's `business` attribute. If a response
+	 * contains an invalid Business instance (present, but invalid), this property will be set
+	 * to null.
+	 *
+	 * @type {Business}
+	 */
+	lastBusiness = null;
+	/**
+	 * Last Register instance that was in a response's `deviceRegister` attribute. If a response
+	 * contains an invalid Register instance (present, but invalid), this property will be set to
+	 * null.
+	 *
+	 * @type {Register}
+	 */
+	lastRegister = null;
 
 	/**
 	 * @param {string} url API url
@@ -197,42 +213,52 @@ class Api extends Server {
 	}
 
 	/**
-	 * If the data has a `business` attribute, tries to deserialize it. If successful, updates
-	 * the application's business instance. Note that if the deserialization fails, this method
-	 * fails silently since it is not as important as the data of the response.
+	 * If the data has a `business` attribute, tries to deserialize it. If successful, updates the
+	 * application's business instance and saves it in the `lastBusiness` attribute. Note that if
+	 * the deserialization fails, this method fails silently since it is not as important as the
+	 * data of the response.  The `lastBusiness` attribute will be set to null.
 	 *
 	 * @param {object} data
 	 */
 	processResponseBusiness(data) {
-		if (!data.business || !this.application) {
+		if (!data.business) {
 			return;
 		}
 
 		try {
 			const business = deserialize(Business, data.business);
-			this.application.business.update(business);
+			this.lastBusiness = business;
+
+			if (this.application) {
+				this.application.business.update(business);
+			}
 		} catch (e) {
-			// Do nothing
+			this.lastBusiness = null;
 		}
 	}
 
 	/**
-	 * If the data has a `register` attribute, tries to deserialize it. If successful, updates
-	 * the application's register instance. Note that if the deserialization fails, this method
-	 * fails silently since it is not as important as the data of the response.
+	 * If the data has a `deviceRegister` attribute, tries to deserialize it. If successful, updates
+	 * the application's register instance and saves the Register in `lastRegister`. Note that if
+	 * the deserialization fails, this method fails silently since it is not as important as the
+	 * data of the response. The `lastRegister` attribute will be set to null.
 	 *
 	 * @param {object} data
 	 */
 	processResponseRegister(data) {
-		if (!data.register || !this.application) {
+		if (!data.deviceRegister) {
 			return;
 		}
 
 		try {
-			const register = deserialize(Register, data.register);
-			this.application.register.update(register);
+			const register = deserialize(Register, data.deviceRegister);
+			this.lastRegister = register;
+
+			if (this.application) {
+				this.application.register.update(register);
+			}
 		} catch (e) {
-			// Do nothing
+			this.lastRegister = null;
 		}
 	}
 
@@ -266,13 +292,51 @@ class Api extends Server {
 	linkDevice(passcode) {
 		return this.query('/device/link', { passcode }, false);
 	}
+	/**
+	 * We query /deviceData. This method is special since it doesn't return the Business in its
+	 * `data` attribute, but `business`. This Business will automatically be deserialized in
+	 * `lastBusiness`. So we do the request, and once finished, return the value in `lastBusiness`.
+	 * Note that if it is null, it means it could not be deserialized (so we return an error).
+	 *
+	 * @see Server
+	 * @return {Promise.<Business>}
+	 */
+	getBusiness() {
+		return this.query('/deviceData')
+			.then(() => {
+				if (this.lastBusiness === null) {
+					return Promise.reject(createError(
+						ERRORS.INVALID_RESPONSE,
+						'Could not deserialize Business'
+					));
+				}
+
+				return this.lastBusiness;
+			});
+	}
 
 	/**
-	 * Calls the /orders API method and returns a Promise with the result (an array of.
+	 * We query /deviceData. This method is special since it doesn't return the Register in its
+	 * `data` attribute, but `register`. This Register will automatically be deserialized in
+	 * `lastRegister`. So we do the request, and once finished, return the value in `lastRegister`.
+	 * Note that if it is null, it means it could not be deserialized (so we return an error).
 	 *
-	 * @param {string} passcode
-	 * @return {Promise}
+	 * @see Server
+	 * @return {Promise.<Register>}
 	 */
+	getRegister() {
+		return this.query('/deviceData')
+			.then(() => {
+				if (this.lastRegister === null) {
+					return Promise.reject(createError(
+						ERRORS.INVALID_RESPONSE,
+						'Could not deserialize Register'
+					));
+				}
+
+				return this.lastRegister;
+			});
+	}
 
 	/**
 	 * @see Server
