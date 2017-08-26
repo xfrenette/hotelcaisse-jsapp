@@ -239,20 +239,24 @@ class Api extends Server {
 	}
 
 	/**
-	 * If the data has a `deviceRegister` attribute, tries to deserialize it. If successful, updates
-	 * the application's register instance and saves the Register in `lastRegister`. Note that if
-	 * the deserialization fails, this method fails silently since it is not as important as the
-	 * data of the response. The `lastRegister` attribute will be set to null.
+	 * If the data has a `deviceRegister` attribute, tries to deserialize it. (Note that if `null`,
+	 * it means the device doesn't have a current register, so we will use a new, uninitialized
+	 * Register.) If successful, updates the application's register instance and saves the Register
+	 * in `lastRegister`. Note that if the deserialization fails, this method fails silently since
+	 * it is not as important as the data of the response. The `lastRegister` attribute will be set
+	 * to null (which means an error).
 	 *
 	 * @param {object} data
 	 */
 	processResponseRegister(data) {
-		if (!data.deviceRegister) {
+		if (!data.deviceRegister && data.deviceRegister !== null) {
 			return;
 		}
 
 		try {
-			const register = deserialize(Register, data.deviceRegister);
+			const register = data.deviceRegister === null
+				? new Register()
+				: deserialize(Register, data.deviceRegister);
 			this.lastRegister = register;
 
 			if (this.application) {

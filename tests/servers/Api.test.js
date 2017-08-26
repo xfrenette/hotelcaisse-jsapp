@@ -8,7 +8,7 @@ import {
 } from 'vendor/serializr/propSchemas';
 import Api, { ERRORS } from 'servers/Api';
 import Business from 'business/Business';
-import Register from 'business/Register';
+import Register, { STATES } from 'business/Register';
 import Order from 'business/Order';
 import CashMovement from 'business/CashMovement';
 import Credit from 'business/Credit';
@@ -355,6 +355,17 @@ describe('processResponseRegister', () => {
 		api.processResponseRegister(data);
 		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
 		expect(api.lastRegister).toBeInstanceOf(Register);
+	});
+
+	test('calls update if null', () => {
+		const data = {
+			deviceRegister: null,
+		};
+		api.lastRegister = null;
+		api.processResponseRegister(data);
+		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
+		expect(api.lastRegister).toBeInstanceOf(Register);
+		expect(api.lastRegister.state).toBe(STATES.UNINITIALIZED);
 	});
 
 	test('works if no application', () => {
