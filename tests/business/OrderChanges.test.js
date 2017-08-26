@@ -11,24 +11,58 @@ let changes;
 
 beforeEach(() => {
 	changes = new OrderChanges();
-	changes.note = 'test-note';
-	changes.customer = new Customer();
-	changes.customer.setFieldValue({ id: 1123, value: 'test1' });
-	changes.items.push(new Item('test-item'));
-	changes.credits.push(new Credit('test-credit'));
-	changes.transactions.push(new Transaction('test-transaction'));
-	changes.roomSelections.push(new RoomSelection('test-room-selection'));
+});
+
+describe('setField', () => {
+	test('sets field', () => {
+		const value = 'new-note';
+		changes.setField('note', value);
+		expect(changes.note).toBe(value);
+		expect(changes.changedFields).toEqual(['note']);
+	});
+
+	test('changedFields does not contain repetition', () => {
+		changes.setField('note', '1');
+		changes.setField('customer', new Customer());
+		changes.setField('note', '2');
+		expect(changes.changedFields).toEqual(['note', 'customer']);
+	});
+});
+
+describe('fieldChanged', () => {
+	test('returns expected value', () => {
+		changes.setField('customer', new Customer());
+		expect(changes.fieldChanged('note')).toBeFalsy();
+		changes.setField('note', 'New note');
+		expect(changes.fieldChanged('note')).toBeTruthy();
+	});
+});
+
+describe('hasChanges', () => {
+	test('returns expected value', () => {
+		expect(changes.hasChanges()).toBeFalsy();
+		changes.setField('note', 'New note');
+		expect(changes.hasChanges()).toBeTruthy();
+	});
 });
 
 describe('serializing', () => {
 	let data;
 
 	beforeEach(() => {
+		changes.setField('note', 'test-note');
+		changes.setField('customer', new Customer());
+		changes.customer.setFieldValue({ id: 1123, value: 'test1' });
+		changes.setField('items', [new Item('test-item')]);
+		changes.setField('credits', [new Credit('test-credit')]);
+		changes.setField('transactions', [new Transaction('test-transaction')]);
+		changes.setField('roomSelections', [new RoomSelection('test-room-selection')]);
 		data = serialize(changes);
 	});
 
 	test('serializes primitives', () => {
 		expect(data.note).toBe(changes.note);
+		expect(data.changedFields).toEqual(['note', 'customer', 'items', 'credits', 'transactions', 'roomSelections']);
 	});
 
 	test('serializes customer', () => {
