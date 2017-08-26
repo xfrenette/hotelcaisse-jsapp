@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * A Server class represents an external entity that can return data for the Application, that can
  * save data or that can execute actions the Application itself cannot do (ex: send emails). This
@@ -7,7 +8,7 @@ class Server {
 	/**
 	 * Returns a Promise that resolves with the Business instance that is currently on the server.
 	 *
-	 * @return {Promise}
+	 * @return {Promise.<Business>}
 	 */
 	getBusiness() {
 		return Promise.resolve(null);
@@ -17,66 +18,84 @@ class Server {
 	 * Returns a Promise that resolves with the device's Register instance that is currently on the
 	 * server.
 	 *
-	 * @return {Promise}
+	 * @return {Promise.<Register>}
 	 */
 	getRegister() {
 		return Promise.resolve(null);
 	}
 
 	/**
-	 * Returns a Promise that resolves with (an array of Order) the next [quantity] Orders following
-	 * the [from] Order. It is the Server that determines the order of the Orders.
+	 * Returns a Promise that resolves with the next `quantity` Orders. If `from` is set, the
+	 * orders following it are returned. It is the Server that determines the order of the Orders.
 	 *
-	 * @param {Order} from
 	 * @param {Number} quantity
-	 * @return {Promise}
+	 * @param {Order} from
+	 * @return {Promise.<Array<Order>>}
 	 */
-	nextOrders(from, quantity) {
+	nextOrders(quantity, from = null) {
 		return Promise.resolve([]);
 	}
 
 	/**
-	 * When the register was opened
+	 * When the register is opened.
 	 *
 	 * @param {Register} register
+	 * @return {Promise}
 	 */
-	registerOpened(register) { }
+	registerOpened(register) {
+		return Promise.resolve();
+	}
 
 	/**
-	 * When the register was closed
+	 * When the register is closed.
 	 *
 	 * @param {Register} register
+	 * @return {Promise}
 	 */
-	registerClosed(register) { }
+	registerClosed(register) {
+		return Promise.resolve();
+	}
 
 	/**
 	 * When a CashMovement is added to the Register
 	 *
 	 * @param {cashMovement} cashMovement
+	 * @return {Promise}
 	 */
-	cashMovementAdded(cashMovement) { }
+	cashMovementAdded(cashMovement) {
+		return Promise.resolve();
+	}
 
 	/**
 	 * When a CashMovement is removed from the Register
 	 *
 	 * @param {cashMovement} cashMovement
+	 * @return {Promise}
 	 */
-	cashMovementRemoved(cashMovement) { }
+	cashMovementRemoved(cashMovement) {
+		return Promise.resolve();
+	}
 
 	/**
 	 * When a new Order is created
 	 *
 	 * @param {Order} order
+	 * @return {Promise}
 	 */
-	orderCreated(order) { }
+	orderCreated(order) {
+		return Promise.resolve();
+	}
 
 	/**
-	 * When an Order was changed.
+	 * When an Order was changed, receives the OrderChanges.
 	 *
 	 * @param {Order} order
 	 * @param {OrderChanges} changes
+	 * @return {Promise}
 	 */
-	orderChanged(order, changes) { }
+	orderChanged(order, changes) {
+		return Promise.resolve();
+	}
 }
 
 export default Server;

@@ -1,8 +1,25 @@
 import { Response } from 'node-fetch';
+import { serialize } from 'serializr';
+import Decimal from 'decimal.js';
+import {
+	decimal as decimalPropSchema,
+	fieldValues as fieldValuesPropSchema,
+	timestamp as timestampPropSchema,
+} from 'vendor/serializr/propSchemas';
 import Api, { ERRORS } from 'servers/Api';
 import Business from 'business/Business';
+import Register from 'business/Register';
+import Order from 'business/Order';
+import CashMovement from 'business/CashMovement';
+import Credit from 'business/Credit';
+import TransactionMode from 'business/TransactionMode';
+import Transaction from 'business/Transaction';
+import Product from 'business/Product';
+import Item from 'business/Item';
+import RoomSelection from 'business/RoomSelection';
+import AppliedTax from 'business/AppliedTax';
+import Room from 'business/Room';
 import TestAuth from '../mock/TestAuth';
-import Register from '../../src/business/Register';
 
 let api;
 let auth;
@@ -165,7 +182,9 @@ describe('requestApi', () => {
 		global.fetch = () => Promise.reject(new TypeError(message));
 		return api.requestApi()
 			.then(
-				() => { throw new Error('Should have rejected'); },
+				() => {
+					throw new Error('Should have rejected');
+				},
 				(e) => {
 					expect(e.code).toBe(ERRORS.NETWORK_ERROR);
 					expect(e.message).toBe(message);
@@ -177,7 +196,9 @@ describe('requestApi', () => {
 		global.fetch = () => Promise.resolve(new Response('invalid json'));
 		return api.requestApi()
 			.then(
-				() => { throw new Error('Should have rejected'); },
+				() => {
+					throw new Error('Should have rejected');
+				},
 				(e) => {
 					expect(e.code).toBe(ERRORS.INVALID_RESPONSE);
 				}
@@ -426,8 +447,12 @@ describe('query', () => {
 			api.auth = null;
 			return api.query()
 				.then(
-					() => { throw new Error('Should not resolve'); },
-					(e) => { expect(e.code).toBe(ERRORS.NOT_AUTH); }
+					() => {
+						throw new Error('Should not resolve');
+					},
+					(e) => {
+						expect(e.code).toBe(ERRORS.NOT_AUTH);
+					}
 				);
 		});
 
@@ -436,8 +461,12 @@ describe('query', () => {
 			auth.authenticated = false;
 			return api.query()
 				.then(
-					() => { throw new Error('Should not resolve'); },
-					(e) => { expect(e.code).toBe(ERRORS.NOT_AUTH); }
+					() => {
+						throw new Error('Should not resolve');
+					},
+					(e) => {
+						expect(e.code).toBe(ERRORS.NOT_AUTH);
+					}
 				);
 		});
 	});
@@ -456,8 +485,12 @@ describe('query', () => {
 		api.requestApi = () => Promise.reject(error);
 		return api.query()
 			.then(
-				() => { throw new Error('Should not resolve'); },
-				(e) => { expect(e).toEqual(error); }
+				() => {
+					throw new Error('Should not resolve');
+				},
+				(e) => {
+					expect(e).toEqual(error);
+				}
 			);
 	});
 
@@ -474,8 +507,12 @@ describe('query', () => {
 		Api.validateResponse = () => Promise.reject(error);
 		return api.query()
 			.then(
-				() => { throw new Error('Should not resolve'); },
-				(e) => { expect(e).toEqual(error); }
+				() => {
+					throw new Error('Should not resolve');
+				},
+				(e) => {
+					expect(e).toEqual(error);
+				}
 			);
 	});
 
@@ -515,7 +552,9 @@ describe('query', () => {
 		api.requestApi = () => Promise.resolve(errorResponseData);
 		return api.query()
 			.then(
-				() => { throw new Error('Should have rejected'); },
+				() => {
+					throw new Error('Should have rejected');
+				},
 				(error) => {
 					expect(error.code).toBe(errorResponseData.error.code);
 					expect(error.message).toBe(errorResponseData.error.message);
@@ -540,3 +579,391 @@ describe('query', () => {
 	});
 });
 
+describe('linkDevice', () => {
+	test('calls query', () => {
+		const passcode = 'test-passcode';
+		api.query = jest.fn(() => Promise.resolve(null));
+		return api.linkDevice(passcode)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/device/link', { passcode }, false);
+			});
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.linkDevice('test');
+		expect(actual).toBe(promise);
+	});
+});
+
+describe('nextOrders', () => {
+	test('rejects if query rejects', () => {
+		api.query = () => Promise.reject();
+		return api.nextOrders()
+			.then(
+				() => {
+					throw new Error('Should have rejected');
+				},
+				() => true
+			);
+	});
+
+	test('calls query with expected parameters', () => {
+		const order = new Order('uuid-test');
+		const quantity = 5;
+		api.query = jest.fn(() => Promise.resolve([]));
+		return api.nextOrders(quantity, order)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/orders', { quantity, from: order.uuid });
+			});
+	});
+
+	test('calls query with expected parameters (no from)', () => {
+		const quantity = 5;
+		api.query = jest.fn(() => Promise.resolve([]));
+		return api.nextOrders(quantity)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/orders', { quantity });
+			});
+	});
+
+	test('resolves with array of Orders', () => {
+		const order1 = new Order('uuid-1');
+		// Next line because Order.createdAt is serialized as a number of seconds
+		order1.createdAt.setMilliseconds(0);
+		const order2 = new Order('uuid-2');
+		order2.createdAt.setMilliseconds(0);
+
+		api.query = jest.fn(() => Promise.resolve([
+			serialize(order1),
+			serialize(order2),
+		]));
+		return api.nextOrders(2)
+			.then((data) => {
+				expect(data.length).toBe(2);
+				expect(data[0]).toBeInstanceOf(Order);
+				expect(data[1].uuid).toBe(order2.uuid);
+				expect(data[1].createdAt.getTime()).toBe(order2.createdAt.getTime());
+			});
+	});
+
+	test('resolves with empty array if empty response', () => {
+		api.query = jest.fn(() => Promise.resolve(null));
+		return api.nextOrders(2)
+			.then((data) => {
+				expect(data).toBeInstanceOf(Array);
+				expect(data.length).toBe(0);
+			});
+	});
+
+	test('rejects if cannot deserialize', () => {
+		api.query = jest.fn(() => Promise.resolve(['invalid order']));
+		return api.nextOrders(2)
+			.then(
+				() => {
+					throw new Error('Should have rejected');
+				},
+				(error) => {
+					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
+				}
+			);
+	});
+});
+
+describe('registerOpened', () => {
+	test('calls query', () => {
+		const register = new Register();
+		register.uuid = 'test-uuid';
+		register.open('test-employee', new Decimal(12.34));
+		const expected = {
+			uuid: register.uuid,
+			employee: register.employee,
+			cashAmount: register.openingCash.toString(),
+			openedAt: timestampPropSchema().serializer(register.openedAt),
+		};
+		api.query = jest.fn(() => Promise.resolve(null));
+
+		return api.registerOpened(register)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/register/open', expected);
+			});
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.registerOpened(new Register());
+		expect(actual).toBe(promise);
+	});
+});
+
+describe('registerClosed', () => {
+	test('calls query', () => {
+		const register = new Register();
+		register.uuid = 'test-uuid';
+		register.open('test-employee', new Decimal(12.34));
+		register.close(new Decimal(10.89), 'test-post-ref', new Decimal(98.36));
+		const expected = {
+			uuid: register.uuid,
+			cashAmount: register.closingCash.toString(),
+			closedAt: timestampPropSchema().serializer(register.closedAt),
+			POSTRef: register.POSTRef,
+			POSTAmount: register.POSTAmount.toString(),
+		};
+		api.query = jest.fn(() => Promise.resolve(null));
+
+		return api.registerClosed(register)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/register/close', expected);
+			});
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.registerClosed(new Register());
+		expect(actual).toBe(promise);
+	});
+});
+
+describe('cashMovementAdded', () => {
+	test('calls query', () => {
+		const cashMovement = new CashMovement('test-cash-movement', new Decimal(12.34), 'test-note');
+		const expected = {
+			uuid: cashMovement.uuid,
+			amount: decimalPropSchema().serializer(cashMovement.amount),
+			note: cashMovement.note,
+			createdAt: timestampPropSchema().serializer(cashMovement.createdAt),
+		};
+		api.query = jest.fn(() => Promise.resolve(null));
+
+		return api.cashMovementAdded(cashMovement)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/cashMovements/add', expected);
+			});
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.cashMovementAdded(new CashMovement());
+		expect(actual).toBe(promise);
+	});
+});
+
+describe('cashMovementRemoved', () => {
+	test('calls query', () => {
+		const cashMovement = new CashMovement('test-cash-movement', new Decimal(12.34), 'test-note');
+		const expected = {
+			uuid: cashMovement.uuid,
+		};
+		api.query = jest.fn(() => Promise.resolve(null));
+
+		return api.cashMovementRemoved(cashMovement)
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/cashMovements/delete', expected);
+			});
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.cashMovementRemoved(new CashMovement());
+		expect(actual).toBe(promise);
+	});
+});
+
+function createOrder() {
+	const transactionMode = new TransactionMode();
+	transactionMode.id = 123;
+	transactionMode.name = 'test tm';
+
+	const room = new Room();
+	room.id = 987;
+	room.name = 'test room';
+
+	const product = new Product();
+	product.id = 456;
+	product.name = 'test product';
+	product.price = new Decimal(1.23);
+
+	const subProduct = new Product();
+	subProduct.id = 4561;
+	subProduct.name = 'sub product';
+	subProduct.price = new Decimal(17.43);
+	subProduct.taxes.push(new AppliedTax(234, 'tax 1', new Decimal(8.11)));
+	subProduct.taxes.push(new AppliedTax(235, 'tax 2', new Decimal(1.88)));
+
+	product.addVariant(subProduct);
+
+	const order = new Order('test-order-uuid');
+	order.note = 'test order note';
+	order.customer.setFieldValue({ id: 6321 }, 'test 1');
+	order.customer.setFieldValue({ id: 6322 }, 'test 2');
+	order.credits.push(new Credit('c1', new Decimal(12.34), 'note c 1'));
+	order.credits.push(new Credit('c2', new Decimal(56.78), 'note c 2'));
+	order.transactions.push(new Transaction('t1', new Decimal(96.32), transactionMode));
+	order.transactions.push(new Transaction('t2', new Decimal(-32.54), transactionMode));
+
+	for (let i = 0; i < 2; i += 1) {
+		const item = new Item(`i${i}`);
+		item.product = i === 0 ? product : subProduct;
+		item.quantity = i === 0 ? 2 : -2;
+		order.items.push(item);
+	}
+
+	for (let i = 0; i < 2; i += 1) {
+		const roomSelection = new RoomSelection('rs1');
+		roomSelection.room = room;
+		roomSelection.startDate = new Date(2017, 2, 4);
+		roomSelection.endDate = new Date(2017, 2, 7);
+		roomSelection.setFieldValue({ id: 6323 }, 'test-2');
+		order.roomSelections.push(roomSelection);
+	}
+
+	return order;
+}
+
+function buildOrderQueryData(order, type) {
+	const data = {
+		uuid: order.uuid,
+	};
+
+	if (order.note !== null) {
+		data.note = order.note;
+	}
+
+	if (order.customer !== null) {
+		data.customer = {
+			fieldValues: fieldValuesPropSchema().serializer(order.customer.fieldValues),
+		};
+	}
+
+	if (order.credits !== null) {
+		data.credits = order.credits.map(credit => ({
+			uuid: credit.uuid,
+			note: credit.note,
+			amount: decimalPropSchema().serializer(credit.amount),
+			createdAt: timestampPropSchema().serializer(credit.createdAt),
+		}));
+	}
+
+	if (order.transactions !== null) {
+		data.transactions = order.transactions.map(transaction => ({
+			uuid: transaction.uuid,
+			amount: decimalPropSchema().serializer(transaction.amount),
+			createdAt: timestampPropSchema().serializer(transaction.createdAt),
+			transactionModeId: transaction.transactionMode ? transaction.transactionMode.id : null,
+		}));
+	}
+
+	if (order.items !== null) {
+		data.items = order.items.map(item => ({
+			uuid: item.uuid,
+			quantity: item.quantity,
+			createdAt: timestampPropSchema().serializer(item.createdAt),
+			product: item.product
+				? {
+					name: item.product.extendedName,
+					price: decimalPropSchema().serializer(item.product.price),
+					productId: item.product.id,
+					taxes: item.product.taxes.map(tax => ({
+						taxId: tax.taxId,
+						amount: decimalPropSchema().serializer(tax.amount),
+					})),
+				}
+				: null,
+		}));
+	}
+
+	if (order.roomSelections !== null) {
+		data.roomSelections = order.roomSelections.map(roomSelection => ({
+			uuid: roomSelection.uuid,
+			startDate: timestampPropSchema().serializer(roomSelection.startDate),
+			endDate: timestampPropSchema().serializer(roomSelection.endDate),
+			room: roomSelection.room ? roomSelection.room.id : null,
+			fieldValues: fieldValuesPropSchema().serializer(roomSelection.fieldValues),
+		}));
+	}
+
+	if (type === 'new') {
+		data.createdAt = timestampPropSchema().serializer(order.createdAt);
+	}
+
+	return data;
+}
+
+describe('orderCreated', () => {
+	test('calls query', () => {
+		const order = createOrder();
+		const expected = buildOrderQueryData(order, 'new');
+		api.query = (path, data) => {
+			expect(path).toBe('/orders/new');
+			expect(data).toEqual(expected);
+			return Promise.resolve(null);
+		};
+		return api.orderCreated(order);
+	});
+
+	test('returns query promise', () => {
+		const promise = Promise.resolve(null);
+		api.query = jest.fn(() => promise);
+		const actual = api.orderCreated(new Order());
+		expect(actual).toBe(promise);
+	});
+});
+
+describe('orderChanged', () => {
+	test('calls query when changes', () => {
+		const order = createOrder();
+		order.recordChanges();
+		order.note = `${order.note}-new`;
+		order.customer.setFieldValue({ id: 88745, value: 'new-value' });
+		order.items.push(new Item('test-item'));
+		order.credits.push(new Credit('test-credit'));
+		order.transactions.push(new Transaction('test-transaction'));
+		order.roomSelections.push(new RoomSelection('test-room-selection'));
+		const diff = order.getChanges();
+		const expected = buildOrderQueryData(diff, 'changes');
+		expected.uuid = order.uuid;
+
+		api.query = (path, data) => {
+			expect(path).toBe('/orders/edit');
+			expect(data).toEqual(expected);
+			return Promise.resolve(null);
+		};
+		return api.orderChanged(order, diff);
+	});
+
+	test('calls query with only modified elements', () => {
+		const order = createOrder();
+		order.recordChanges();
+		order.note = `${order.note}-new`;
+		const diff = order.getChanges();
+		const expected = {
+			uuid: order.uuid,
+			note: order.note,
+		};
+
+		api.query = (path, data) => {
+			expect(path).toBe('/orders/edit');
+			expect(data).toEqual(expected);
+			return Promise.resolve(null);
+		};
+		return api.orderChanged(order, diff);
+	});
+
+	test('does not call query if no changes', () => {
+		const order = createOrder();
+		order.recordChanges();
+		const diff = order.getChanges();
+
+		api.query = jest.fn(() => Promise.resolve('should not be used'));
+		return api.orderChanged(order, diff)
+			.then((data) => {
+				expect(api.query).not.toHaveBeenCalled();
+				expect(data).toBeNull();
+			});
+	});
+});

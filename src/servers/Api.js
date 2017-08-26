@@ -1,7 +1,9 @@
-import { deserialize } from 'serializr';
+import { deserialize, serialize } from 'serializr';
+import pick from 'lodash.pick';
 import Server from './Server';
 import Business from '../business/Business';
 import Register from '../business/Register';
+import Order from '../business/Order';
 
 /**
  * Error codes that can be returned.
@@ -253,6 +255,172 @@ class Api extends Server {
 		} else if (data.token) {
 			this.auth.authenticated = true;
 		}
+	}
+
+	/**
+	 * Calls the /device/link API method with the `passcode` and returns a Promise with the result.
+	 *
+	 * @param {string} passcode
+	 * @return {Promise}
+	 */
+	linkDevice(passcode) {
+		return this.query('/device/link', { passcode }, false);
+	}
+
+	/**
+	 * Calls the /orders API method and returns a Promise with the result (an array of.
+	 *
+	 * @param {string} passcode
+	 * @return {Promise}
+	 */
+
+	/**
+	 * @see Server
+	 * @param {number} quantity
+	 * @param {Order} from
+	 * @return {Promise.<Array<Order>>}
+	 */
+	nextOrders(quantity, from = null) {
+		const data = { quantity };
+
+		if (from) {
+			data.from = from.uuid;
+		}
+
+		return this.query('/orders', data)
+			.then((responseData) => {
+				if (!responseData || !responseData.map) {
+					return [];
+				}
+
+				try {
+					return responseData.map(serializedOrder => deserialize(Order, serializedOrder));
+				} catch (error) {
+					return Promise.reject(createError(
+						ERRORS.INVALID_RESPONSE,
+						`Could not deserialize Order: ${error.message}`
+					));
+				}
+			});
+	}
+
+	/**
+	 * @see Server
+	 * @param {Register} register
+	 * @return {Promise}
+	 */
+	registerOpened(register) {
+		const serialized = serialize(register);
+		const data = pick(serialized, ['uuid', 'employee', 'openedAt']);
+		data.cashAmount = serialized.openingCash;
+		return this.query('/register/open', data);
+	}
+
+	/**
+	 * @see Server
+	 * @param {Register} register
+	 * @return {Promise}
+	 */
+	registerClosed(register) {
+		const serialized = serialize(register);
+		const data = pick(serialized, ['uuid', 'POSTRef', 'POSTAmount', 'closedAt']);
+		data.cashAmount = serialized.closingCash;
+		return this.query('/register/close', data);
+	}
+
+	/**
+	 * @see Server
+	 * @param {cashMovement} cashMovement
+	 * @return {Promise}
+	 */
+	cashMovementAdded(cashMovement) {
+		const serialized = serialize(cashMovement);
+		const data = pick(serialized, ['uuid', 'amount', 'note', 'createdAt']);
+		return this.query('/cashMovements/add', data);
+	}
+
+	/**
+	 * @see Server
+	 * @param {cashMovement} cashMovement
+	 * @return {Promise}
+	 */
+	cashMovementRemoved(cashMovement) {
+		return this.query('/cashMovements/delete', { uuid: cashMovement.uuid });
+	}
+
+	/**
+	 * @see Server
+	 * @param {Order} order
+	 * @return {Promise}
+	 */
+	orderCreated(order) {
+		const data = this.buildOrderApiData(order);
+
+		return this.query('/orders/new', data);
+	}
+
+	/**
+	 * @see Server
+	 * @param {Order} order
+	 * @param {OrderChanges} changes
+	 * @return {Promise}
+	 */
+	orderChanged(order, changes) {
+		// If `changes` has no changes, we resolve immediately
+		if (!changes.hasChanges()) {
+			return Promise.resolve(null);
+		}
+
+		const serializedChanges = this.buildOrderApiData(changes);
+		// we keep only the changed fields
+		const data = pick(serializedChanges, changes.changedFields);
+		data.uuid = order.uuid;
+
+		return this.query('/orders/edit', data);
+	}
+
+	/**
+	 * From the Order or OrderChanges `orderLike` object, returns a serialized object that
+	 * respects the api.
+	 *
+	 * @param {Order|OrderChanges} orderLike
+	 * @return {object}
+	 */
+	buildOrderApiData(orderLike) {
+		const data = serialize(orderLike);
+
+		/**
+		 * Adjust some keys to respect the api
+		 */
+
+		// items.*.product
+		if (orderLike.items) {
+			orderLike.items.forEach((item, index) => {
+				const productData = data.items[index].product;
+
+				data.items[index].product = productData
+					? {
+						...pick(productData, ['price', 'productId', 'taxes']),
+						name: item.product.extendedName,
+						productId: item.product.id,
+						taxes: productData.taxes.map(tax => pick(tax, ['taxId', 'amount'])),
+					}
+					: null;
+			});
+		}
+
+		// transactions
+		if (orderLike.transactions) {
+			orderLike.transactions.forEach((transaction, index) => {
+				const transactionData = data.transactions[index];
+				data.transactions[index] = {
+					...pick(transactionData, ['uuid', 'amount', 'createdAt']),
+					transactionModeId: transaction.transactionMode ? transaction.transactionMode.id : null,
+				};
+			});
+		}
+
+		return data;
 	}
 }
 
