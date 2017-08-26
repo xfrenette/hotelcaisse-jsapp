@@ -6,7 +6,7 @@ import { observable } from 'mobx';
  * @type {Object}
  */
 const ERRORS = {
-	AUTHENTICATION_FAILED: 'auth:failed',
+	AUTHENTICATION_FAILED: 'auth:failed', // same as returned by the API, so do not change !
 };
 
 /**

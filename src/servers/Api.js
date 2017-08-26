@@ -1,5 +1,6 @@
 import { deserialize, serialize } from 'serializr';
 import pick from 'lodash.pick';
+import { ERRORS as AUTH_ERRORS } from '../auth/Auth';
 import Server from './Server';
 import Business from '../business/Business';
 import Register from '../business/Register';
@@ -14,7 +15,7 @@ const ERRORS = {
 	SERVER_ERROR: 'server:error',
 	NETWORK_ERROR: 'network:error',
 	INVALID_RESPONSE: 'response:invalid',
-	AUTH_FAILED: 'auth:failed',
+	AUTH_FAILED: AUTH_ERRORS.AUTHENTICATION_FAILED,
 	NOT_AUTH: 'request:notAuthenticated',
 };
 
@@ -276,7 +277,7 @@ class Api extends Server {
 
 		if (this.auth.authenticated) {
 			if (data.error && data.error.code === ERRORS.AUTH_FAILED) {
-				this.auth.authenticated = false;
+				this.auth.invalidate();
 			}
 		} else if (data.token) {
 			this.auth.authenticated = true;
@@ -292,6 +293,7 @@ class Api extends Server {
 	linkDevice(passcode) {
 		return this.query('/device/link', { passcode }, false);
 	}
+
 	/**
 	 * We query /deviceData. This method is special since it doesn't return the Business in its
 	 * `data` attribute, but `business`. This Business will automatically be deserialized in
