@@ -511,6 +511,7 @@ describe('getChanges()', () => {
 			order.note = `${order.note} (modif)`;
 			const res = order.getChanges();
 			expect(res.note).toBe(order.note);
+			expect(res.fieldChanged('note')).toBeTruthy();
 		});
 
 		test('items', () => {
@@ -520,6 +521,7 @@ describe('getChanges()', () => {
 			order.items.push(newItem2);
 			const res = order.getChanges();
 			expect(res.items).toEqual([newItem1, newItem2]);
+			expect(res.fieldChanged('items')).toBeTruthy();
 		});
 
 		test('transactions', () => {
@@ -529,6 +531,7 @@ describe('getChanges()', () => {
 			order.transactions.push(newTransaction2);
 			const res = order.getChanges();
 			expect(res.transactions).toEqual([newTransaction1, newTransaction2]);
+			expect(res.fieldChanged('transactions')).toBeTruthy();
 		});
 
 		test('customer', () => {
@@ -536,6 +539,7 @@ describe('getChanges()', () => {
 			const res = order.getChanges();
 			expect(res.customer.equals(order.customer)).toBe(true);
 			expect(res.customer).not.toBe(order.customer);
+			expect(res.fieldChanged('customer')).toBeTruthy();
 		});
 
 		describe('roomSelections', () => {
@@ -545,6 +549,7 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.roomSelections).not.toBe(order.roomSelections);
 				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+				expect(res.fieldChanged('roomSelections')).toBeTruthy();
 			});
 
 			test('add one', () => {
@@ -552,6 +557,7 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.roomSelections).not.toBe(order.roomSelections);
 				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+				expect(res.fieldChanged('roomSelections')).toBeTruthy();
 			});
 
 			test('delete one', () => {
@@ -559,6 +565,7 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.roomSelections).not.toBe(order.roomSelections);
 				expect(res.roomSelections).toEqual(order.roomSelections.slice());
+				expect(res.fieldChanged('roomSelections')).toBeTruthy();
 			});
 		});
 
@@ -569,6 +576,7 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.credits).not.toBe(order.credits);
 				expect(res.credits).toEqual(order.credits.slice());
+				expect(res.fieldChanged('credits')).toBeTruthy();
 			});
 
 			test('add one', () => {
@@ -576,6 +584,7 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.credits).not.toBe(order.credits);
 				expect(res.credits).toEqual(order.credits.slice());
+				expect(res.fieldChanged('credits')).toBeTruthy();
 			});
 
 			test('delete one', () => {
@@ -583,12 +592,13 @@ describe('getChanges()', () => {
 				const res = order.getChanges();
 				expect(res.credits).not.toBe(order.credits);
 				expect(res.credits).toEqual(order.credits.slice());
+				expect(res.fieldChanged('credits')).toBeTruthy();
 			});
 		});
 	});
 
 	test('fields not modified', () => {
-		expect(order.getChanges()).toBe(null);
+		expect(order.getChanges().hasChanges()).toBeFalsy();
 	});
 });
 

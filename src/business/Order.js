@@ -438,6 +438,8 @@ class Order extends EventEmitter {
 	 * with the ones that changed or not.
 	 *
 	 * `customer`: if any fieldValue changed, the whole Customer object is in the changes.
+	 *
+	 * @return {OrderChanges}
 	 */
 	getChanges() {
 		if (this.restorationData === null || typeof this.restorationData !== 'object') {
@@ -446,37 +448,34 @@ class Order extends EventEmitter {
 
 		const old = this.restorationData;
 		const changes = new OrderChanges();
-		let foundChanges = false;
 
 		if (this.note !== old.note) {
-			changes.note = this.note;
-			foundChanges = true;
+			changes.setField('note', this.note);
 		}
 
 		['items', 'transactions'].forEach((field) => {
 			const diff = arrayDifference(this[field], old[field]);
 			if (diff.length) {
-				changes[field] = diff;
-				foundChanges = true;
+				changes.setField(field, diff);
 			}
 		});
 
 		if (!this.customer.equals(old.customer)) {
-			changes.customer = this.customer.clone();
-			foundChanges = true;
+			changes.setField('customer', this.customer.clone());
 		}
 
 		if (this.didRoomSelectionsChanged(old)) {
-			changes.roomSelections = this.roomSelections.map(roomSelection => roomSelection.clone());
-			foundChanges = true;
+			changes.setField(
+				'roomSelections',
+				this.roomSelections.map(roomSelection => roomSelection.clone())
+			);
 		}
 
 		if (this.didCreditsChanged(old)) {
-			changes.credits = this.credits.map(credit => credit.clone());
-			foundChanges = true;
+			changes.setField('credits', this.credits.map(credit => credit.clone()));
 		}
 
-		return foundChanges ? changes : null;
+		return changes;
 	}
 
 	/**
