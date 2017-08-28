@@ -16,8 +16,8 @@ import utils from '../utils';
 const channel = postal.channel(CHANNELS.register);
 
 const STATES = {
-	OPENED: 0,
-	CLOSED: 1,
+	CLOSED: 0,
+	OPENED: 1,
 	UNINITIALIZED: 2,
 };
 
