@@ -21,6 +21,7 @@ import AppliedTax from 'business/AppliedTax';
 import Room from 'business/Room';
 import TestAuth from '../mock/TestAuth';
 import TestLogger from '../mock/TestLogger';
+import TestWriter from '../mock/TestWriter';
 
 let api;
 let auth;
@@ -53,6 +54,32 @@ describe('constructor()', () => {
 		const application = {};
 		api = new Api('test', application);
 		expect(api.application).toBe(application);
+	});
+});
+
+describe('save', () => {
+	test('works without writer', () => {
+		// Should not throw or reject
+		return api.save();
+	});
+
+	test('saves all data', () => {
+		const writer = new TestWriter();
+		writer.write = jest.fn(() => Promise.resolve());
+		api.writer = writer;
+
+		api.token = 'test-token';
+		api.lastDataVersion = 'test-version';
+
+		const expected = {
+			token: api.token,
+			lastDataVersion: api.lastDataVersion,
+		};
+
+		return api.save()
+			.then(() => {
+				expect(writer.write).toHaveBeenCalledWith(expected);
+			});
 	});
 });
 

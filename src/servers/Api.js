@@ -75,7 +75,18 @@ class Api extends Server {
 	 * @type {Register}
 	 */
 	lastRegister = null;
+	/**
+	 * Namespaced logger to use.
+	 *
+	 * @type {Logger}
+	 */
 	logger = null;
+	/**
+	 * Writer where this instance can save some data (ex: token, list of waiting queries, ...).
+	 *
+	 * @type {Writer}
+	 */
+	writer = null;
 
 	/**
 	 * @param {string} url API url
@@ -106,6 +117,24 @@ class Api extends Server {
 		if (this.logger) {
 			this.logger.info(message, data);
 		}
+	}
+
+	/**
+	 * Saves in the writer the internal state. Returns the writer's write Promise
+	 * - token
+	 * - lastDataVersion
+	 *
+	 * @return {Promise}
+	 */
+	save() {
+		if (!this.writer) {
+			return Promise.resolve();
+		}
+
+		return this.writer.write({
+			token: this.token,
+			lastDataVersion: this.lastDataVersion,
+		});
 	}
 
 	/**
