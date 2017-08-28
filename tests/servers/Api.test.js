@@ -20,6 +20,7 @@ import RoomSelection from 'business/RoomSelection';
 import AppliedTax from 'business/AppliedTax';
 import Room from 'business/Room';
 import TestAuth from '../mock/TestAuth';
+import TestLogger from '../mock/TestLogger';
 
 let api;
 let auth;
@@ -598,6 +599,28 @@ describe('query', () => {
 		return api.query()
 			.then((data) => {
 				expect(data).toBeNull();
+			});
+	});
+
+	test('logs when successful', () => {
+		const logger = new TestLogger();
+		logger.log = jest.fn();
+		api.setLogger(logger);
+		api.requestApi = () => Promise.resolve(successResponseData);
+		return api.query('/')
+			.then(() => {
+				expect(logger.log).toHaveBeenCalledWith('info', 'servers.api', expect.anything(), expect.anything());
+			});
+	});
+
+	test('logs when in error', () => {
+		const logger = new TestLogger();
+		logger.log = jest.fn();
+		api.setLogger(logger);
+		api.requestApi = () => Promise.resolve(errorResponseData);
+		return api.query('/')
+			.catch(() => {
+				expect(logger.log).toHaveBeenCalledWith('info', 'servers.api', expect.anything(), expect.anything());
 			});
 	});
 });

@@ -75,6 +75,7 @@ class Api extends Server {
 	 * @type {Register}
 	 */
 	lastRegister = null;
+	logger = null;
 
 	/**
 	 * @param {string} url API url
@@ -84,6 +85,27 @@ class Api extends Server {
 		super();
 		this.url = url;
 		this.application = application;
+	}
+
+	/**
+	 * Sets the logger instance
+	 *
+	 * @param {Logger} logger
+	 */
+	setLogger(logger) {
+		this.logger = logger.getNamespace('servers.api');
+	}
+
+	/**
+	 * Logs an 'info' message, only if we have a logger.
+	 *
+	 * @param {string} message
+	 * @param {*} data
+	 */
+	log(message, data) {
+		if (this.logger) {
+			this.logger.info(message, data);
+		}
 	}
 
 	/**
@@ -116,7 +138,7 @@ class Api extends Server {
 
 		const body = this.buildRequestBody(data, authenticated);
 
-		return this.requestApi(path, body)
+		const res = this.requestApi(path, body)
 			.then(Api.validateResponse)
 			.then((responseData) => {
 				this.processResponseMeta(responseData);
@@ -130,6 +152,13 @@ class Api extends Server {
 
 				return responseData.data || null;
 			});
+
+		res.then(
+			(resData) => { this.log(`${path} (success)`, resData); },
+			(resError) => { this.log(`${path} (error)`, resError); }
+		);
+
+		return res;
 	}
 
 	/**
