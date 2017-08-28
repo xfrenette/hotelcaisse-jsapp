@@ -295,4 +295,9 @@ describe('update()', () => {
 			}
 		});
 	});
+
+	test('triggers update event', (done) => {
+		business.on('update', () => { done(); });
+		business.update(new Business());
+	});
 });

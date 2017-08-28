@@ -161,7 +161,8 @@ class Business extends EventEmitter {
 	}
 
 	/**
-	 * Replaces all attributes of this instance with the values in the supplied Business instance.
+	 * Replaces all attributes of this instance with the values in the supplied Business
+	 * instance. Triggers the 'update' event when done.
 	 *
 	 * @param {Business} newBusiness
 	 */
@@ -181,6 +182,8 @@ class Business extends EventEmitter {
 		if (newBusiness.orders) {
 			this.orders.replace(newBusiness.orders);
 		}
+
+		this.emit('update');
 	}
 }
 
