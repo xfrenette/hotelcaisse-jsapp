@@ -196,21 +196,30 @@ class Register extends EventEmiter {
 	}
 
 	/**
-	 * Updates all the attributes of this Register with the values of `newRegister`
+	 * Updates all the attributes of this Register with the values of `newRegister`. Trigger the
+	 * 'update' event when done.
 	 *
 	 * @param newRegister
 	 */
 	update(newRegister) {
-		this.state = newRegister.state;
-		this.uuid = newRegister.uuid;
-		this.employee = newRegister.employee;
-		this.openedAt = newRegister.openedAt;
-		this.openingCash = newRegister.openingCash;
-		this.closedAt = newRegister.closedAt;
-		this.closingCash = newRegister.closingCash;
-		this.POSTRef = newRegister.POSTRef;
-		this.POSTAmount = newRegister.POSTAmount;
-		this.cashMovements = [...newRegister.cashMovements];
+		const attributes = [
+			'state',
+			'uuid',
+			'employee',
+			'openedAt',
+			'openingCash',
+			'closedAt',
+			'closingCash',
+			'POSTRef',
+			'POSTAmount',
+		];
+
+		attributes.forEach((attr) => { this[attr] = newRegister[attr]; });
+
+		// cashMovements is observable
+		this.cashMovements.replace(newRegister.cashMovements.slice());
+
+		this.emit('update');
 	}
 
 	/**

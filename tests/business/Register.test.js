@@ -281,11 +281,18 @@ describe('update', () => {
 
 	test('replaces cashMovements', () => {
 		register.cashMovements.push(new CashMovement('cm-1'));
-		const oldCashMovements = register.cashMovements;
 		register.update(newRegister);
-		expect(register.cashMovements).not.toBe(oldCashMovements);
-		expect(register.cashMovements).not.toBe(newRegister.cashMovements);
-		expect(register.cashMovements).toEqual(newRegister.cashMovements);
+		expect(register.cashMovements.slice()).toEqual(newRegister.cashMovements.slice());
+	});
+
+	test('check cashMovements are updated, but the same array is used', () => {
+		register.update(new Register());
+		expect(isObservable(register.cashMovements)).toBe(true);
+	});
+
+	test('triggers update event', (done) => {
+		register.on('update', () => { done(); });
+		register.update(new Register());
 	});
 });
 
