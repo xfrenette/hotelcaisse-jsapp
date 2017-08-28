@@ -110,12 +110,13 @@ class Api extends Server {
 	/**
 	 * Logs an 'info' message, only if we have a logger.
 	 *
+	 * @param {string} type
 	 * @param {string} message
 	 * @param {*} data
 	 */
-	log(message, data) {
+	log(type, message, data) {
 		if (this.logger) {
-			this.logger.info(message, data);
+			this.logger[type].call(this.logger, message, data);
 		}
 	}
 
@@ -191,6 +192,7 @@ class Api extends Server {
 				this.processResponseBusiness(responseData);
 				this.processResponseRegister(responseData);
 				this.processResponseAuth(responseData);
+				this.save();
 
 				if (responseData.status !== 'ok') {
 					return Promise.reject(Api.buildErrorObjectForResponse(responseData));
@@ -200,8 +202,8 @@ class Api extends Server {
 			});
 
 		res.then(
-			(resData) => { this.log(`${path} (success)`, resData); },
-			(resError) => { this.log(`${path} (error)`, resError); }
+			(resData) => { this.log('info', `${path} (success)`, resData); },
+			(resError) => { this.log('error', `${path} (error)`, resError); }
 		);
 
 		return res;

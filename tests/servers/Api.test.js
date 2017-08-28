@@ -627,6 +627,14 @@ describe('query', () => {
 			});
 	});
 
+	test('calls save', () => {
+		api.save = jest.fn();
+		return api.query()
+			.then(() => {
+				expect(api.save).toHaveBeenCalled();
+			});
+	});
+
 	test('if error response data returned, reject with error', () => {
 		api.requestApi = () => Promise.resolve(errorResponseData);
 		return api.query()
@@ -675,7 +683,7 @@ describe('query', () => {
 		api.requestApi = () => Promise.resolve(errorResponseData);
 		return api.query('/')
 			.catch(() => {
-				expect(logger.log).toHaveBeenCalledWith('info', 'servers.api', expect.anything(), expect.anything());
+				expect(logger.log).toHaveBeenCalledWith('error', 'servers.api', expect.anything(), expect.anything());
 			});
 	});
 });
