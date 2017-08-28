@@ -153,6 +153,11 @@ class Api extends Server {
 				this[attr] = values[attr];
 			}
 		});
+
+		// If we have an auth class, we set its `authenticated` attribute
+		if (this.auth) {
+			this.auth.authenticated = !!values.token;
+		}
 	}
 
 	/**

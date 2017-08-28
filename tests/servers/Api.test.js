@@ -109,6 +109,26 @@ describe('update', () => {
 		expect(api.lastDataVersion).toBe(newValue);
 		expect(api.token).toBe(same);
 	});
+
+	test('if token, sets auth.authenticated to true, else to false', () => {
+		auth = new TestAuth();
+		auth.authenticated = false;
+		api.auth = auth;
+
+		api.update({ token: 'fdfdsfd' });
+		expect(auth.authenticated).toBe(true);
+
+		api.update({ lastDataVersion: 'fdfdsfd' });
+		expect(auth.authenticated).toBe(false);
+
+		api.update({ token: 'fdfdsfd' });
+		api.update({ token: null });
+		expect(auth.authenticated).toBe(false);
+
+		api.auth = null;
+		api.update({ token: 'fdfdsfd' });
+		// Should not throw
+	});
 });
 
 describe('isAuthenticated', () => {
