@@ -138,6 +138,23 @@ class Api extends Server {
 	}
 
 	/**
+	 * Updates the internal state from the object.
+	 * - token
+	 * - lastDataVersion
+	 *
+	 * @param {object} values
+	 */
+	update(values) {
+		const attributes = ['token', 'lastDataVersion'];
+
+		attributes.forEach((attr) => {
+			if (values[attr]) {
+				this[attr] = values[attr];
+			}
+		});
+	}
+
+	/**
 	 * Returns true if an Auth instance is in `auth` and is authenticated.
 	 *
 	 * @returns {boolean}

@@ -83,6 +83,34 @@ describe('save', () => {
 	});
 });
 
+describe('update', () => {
+	test('updates token', () => {
+		const same = 'same-value';
+		const newValue = 'new-value';
+		api.token = 'old-value';
+		api.lastDataVersion = same;
+		api.update({
+			token: newValue,
+			other: 'ignore',
+		});
+		expect(api.token).toBe(newValue);
+		expect(api.lastDataVersion).toBe(same);
+	});
+
+	test('updates lastDataVersion', () => {
+		const same = 'same-value';
+		const newValue = 'new-value';
+		api.lastDataVersion = 'old-value';
+		api.token = same;
+		api.update({
+			lastDataVersion: newValue,
+			other: 'ignore',
+		});
+		expect(api.lastDataVersion).toBe(newValue);
+		expect(api.token).toBe(same);
+	});
+});
+
 describe('isAuthenticated', () => {
 	test('returns false if no auth', () => {
 		api.auth = null;
