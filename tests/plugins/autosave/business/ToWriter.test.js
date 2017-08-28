@@ -7,7 +7,6 @@ let toWriter;
 let writer;
 let application;
 let business;
-let register;
 
 beforeEach(() => {
 	writer = {
@@ -24,6 +23,11 @@ beforeEach(() => {
 test('new Order', () => {
 	const order = new Order();
 	business.addOrder(order);
+	expect(writer.write).toHaveBeenCalledWith(business);
+});
+
+test('order update', () => {
+	business.update(new Business());
 	expect(writer.write).toHaveBeenCalledWith(business);
 });
 

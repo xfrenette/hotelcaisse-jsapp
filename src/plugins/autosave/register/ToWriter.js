@@ -35,6 +35,7 @@ class ToWriter extends Plugin {
 
 		register.on('open', callback);
 		register.on('close', callback);
+		register.on('update', callback);
 		register.on('cashMovementAdd', callback);
 		register.on('cashMovementRemove', callback);
 	}

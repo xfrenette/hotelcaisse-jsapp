@@ -35,6 +35,7 @@ class ToWriter extends Plugin {
 
 		business.on('newOrder', callback);
 		business.on('orderChange', callback);
+		business.on('update', callback);
 	}
 
 	/**

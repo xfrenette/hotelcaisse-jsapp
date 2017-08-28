@@ -26,6 +26,11 @@ test('register opens', () => {
 	expect(writer.write).toHaveBeenCalledWith(register);
 });
 
+test('register updates', () => {
+	register.update(new Register());
+	expect(writer.write).toHaveBeenCalledWith(register);
+});
+
 test('register closes', () => {
 	register.close(new Decimal(1), 'test', new Decimal(1));
 	expect(writer.write).toHaveBeenCalledWith(register);
