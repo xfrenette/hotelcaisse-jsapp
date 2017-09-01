@@ -1,6 +1,20 @@
 import { identifier, object, serializable } from 'serializr';
-import TransactionMode from './TransactionMode';
 import { decimal, timestamp } from '../vendor/serializr/propSchemas';
+import validate from '../Validator';
+import utils from '../utils';
+import TransactionMode from './TransactionMode';
+
+/**
+ * Constraints for validation.
+ *
+ * @type {Object}
+ */
+const constraints = {
+	amount: {
+		presence: true,
+		decimal: { notEqualTo: 0 },
+	},
+};
 
 /**
  * A Transaction is an exchange of money between the business and the customer. The Transaction is
@@ -71,5 +85,18 @@ class Transaction {
 		this.transactionMode = this.transactionMode.clone();
 	}
 }
+
+/**
+ * Validates the values for a new Credit. Will validate only the attributes passed in values. Values
+ * is an object where the key is the attribute and its value is the attribute's value. On success,
+ * returns undefined, else returns an object with the error(s) for each attribute.
+ *
+ * @param {Object} values
+ * @return {Object|undefined}
+ */
+Transaction.validate = (values) => {
+	const appliedConstraints = utils.getConstraintsFor(constraints, values);
+	return validate(values, appliedConstraints);
+};
 
 export default Transaction;
