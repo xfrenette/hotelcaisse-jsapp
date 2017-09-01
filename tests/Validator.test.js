@@ -172,6 +172,23 @@ describe('decimal', () => {
 		expect(validate(values, constraints)).toBeUndefined();
 	});
 
+	test('validates if notEqualTo', () => {
+		const constraints = {
+			test: {
+				decimal: { notEqualTo: -3 },
+			},
+		};
+
+		[-2.9, -3.1, 0].forEach((val) => {
+			const values = {
+				test: new Decimal(val),
+			};
+			expect(validate(values, constraints)).toBeUndefined();
+		});
+
+		expect(validate({ test: new Decimal(-3) }, constraints)).not.toBeUndefined();
+	});
+
 	test('validates if int', () => {
 		const constraints = {
 			test: {

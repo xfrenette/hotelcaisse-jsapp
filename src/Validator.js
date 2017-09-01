@@ -62,6 +62,12 @@ function decimal(value, options) {
 		}
 	}
 
+	if (typeof options.notEqualTo === 'number') {
+		if (value.equals(options.notEqualTo)) {
+			return `is equal to ${options.notEqualTo}`;
+		}
+	}
+
 	if (options.int === true && !value.isInteger()) {
 		return 'is not lower an integer';
 	}
