@@ -107,6 +107,14 @@ class Order extends EventEmitter {
 	 * @type {Object}
 	 */
 	restorationData = null;
+	/**
+	 * Localizer used to round currency. It is not required, but, if set, amounts for taxesTotal and
+	 * all attributes using it (balance, total, ...) will be rounded to the number of decimals of
+	 * the currency.
+	 *
+	 * @type {Localizer}
+	 */
+	localizer = null;
 
 	constructor(uuid = null) {
 		super();
@@ -129,11 +137,31 @@ class Order extends EventEmitter {
 
 	/**
 	 * Returns an array of AppliedTax totals of the items. Taxes with the same taxId are added.
+	 * The amounts are rounded to the number of decimals of the currency, if a currency is set.
 	 *
 	 * @return {Array<AppliedTax>}
 	 */
 	@computed
 	get taxesTotals() {
+		const taxes = this.rawTaxesTotals;
+		if (!this.localizer) {
+			return taxes;
+		}
+
+		taxes.forEach((tax) => {
+			const newAmount = this.localizer.roundForCurrency(tax.amount.toNumber());
+			tax.amount = new Decimal(newAmount);
+		});
+
+		return taxes;
+	}
+
+	/**
+	 * Internal function that returns the taxes without any rounding. Used by taxesTotal
+	 * @return {Array<AppliedTax>}
+	 */
+	@computed
+	get rawTaxesTotals() {
 		// We construct a temporary object that is the sum of each tax. The object will have this
 		// shape:
 		// {
@@ -161,16 +189,23 @@ class Order extends EventEmitter {
 	}
 
 	/**
-	 * Returns sum of the items' total
+	 * Returns sum of the items' total. If a localizer is set, it will be rounded to the
+	 * currency's decimal places
 	 *
 	 * @return {Decimal}
 	 */
 	@computed
 	get itemsTotal() {
-		return this.items.reduce(
+		let total = this.items.reduce(
 			(sum, item) => sum.add(item.total),
 			new Decimal(0)
 		);
+
+		if (this.localizer) {
+			total = new Decimal(this.localizer.roundForCurrency(total.toNumber()));
+		}
+
+		return total;
 	}
 
 	/**

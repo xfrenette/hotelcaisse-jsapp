@@ -14,6 +14,7 @@ import { deserialize, serialize } from 'serializr';
 import { isObservable } from 'mobx';
 import postal from 'postal';
 import AppliedTax from '../../src/business/AppliedTax';
+import Localizer from '../../src/Localizer';
 
 let order;
 let item1;
@@ -29,7 +30,7 @@ let subscription;
 let customerField;
 
 const taxes = {
-	tax1: new AppliedTax(1123, 'tax 1', new Decimal(0.38)),
+	tax1: new AppliedTax(1123, 'tax 1', new Decimal(0.3849)),
 	tax2_1: new AppliedTax(1456, 'tax 2', new Decimal(0.45)),
 	tax2_2: new AppliedTax(1456, 'tax 2', new Decimal(0.12)), // Same taxId as tax2_1
 	tax3: new AppliedTax(1741, 'tax 3', new Decimal(1.78)),
@@ -176,6 +177,12 @@ describe('taxesTotals', () => {
 	test('is observable', () => {
 		expect(isObservable(order, 'taxesTotals')).toBe(true);
 	});
+
+	test('if currency, rounds values', () => {
+		order.localizer = new Localizer('fr-CA', 'CAD');
+		const res = order.taxesTotals;
+		expect(res[0].amount.toNumber()).toBe(0.77);
+	});
 });
 
 describe('itemsTotal', () => {
@@ -193,6 +200,12 @@ describe('itemsTotal', () => {
 
 	test('is observable', () => {
 		expect(isObservable(order, 'itemsTotal')).toBe(true);
+	});
+
+	test('if currency, rounds values', () => {
+		order.localizer = new Localizer('fr-CA', 'CAD');
+		const res = order.itemsTotal;
+		expect(res.toNumber()).toBe(-2.33);
 	});
 });
 
