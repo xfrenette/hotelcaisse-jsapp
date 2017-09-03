@@ -20,13 +20,21 @@ export default {
 	},
 
 	/**
-	 * Returns the minimum Date object between 2 dates.
+	 * Returns the minimum Date object between 2 dates. If one is null, returns the other
 	 *
 	 * @param {Date} date1
 	 * @param {Date} date2
 	 * @return {Date}
 	 */
 	dateMin(date1, date2) {
+		if (date1 === null) {
+			return date2;
+		}
+
+		if (date2 === null) {
+			return date1;
+		}
+
 		if (date1.getTime() <= date2.getTime()) {
 			return date1;
 		}
