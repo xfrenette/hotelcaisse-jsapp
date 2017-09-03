@@ -181,7 +181,9 @@ class Api extends Server {
 	 * @returns {Promise}
 	 */
 	query(path, data = null, authenticated = true) {
+		this.log('info', `Starting query to ${path}...`);
 		if (authenticated && !this.isAuthenticated()) {
+			this.log('warn', 'Not authenticated');
 			return Promise.reject(createError(
 				ERRORS.NOT_AUTH,
 				'This request can be made only if authenticated.'
