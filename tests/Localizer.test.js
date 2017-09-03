@@ -46,6 +46,30 @@ describe('formatNumber()', () => {
 	});
 });
 
+describe('roundForCurrency', () => {
+	test('uses locale', () => {
+		const values = [
+			// input, output
+			[1.234, 1.23],
+			[2, 2],
+			[0.59, 0.59],
+			[0.00, 0],
+			[-2.5, -2.5],
+			[1.2349, 1.23],
+			[-1.2349, -1.23],
+		];
+
+		values.forEach((data) => {
+			expect(localizer.roundForCurrency(data[0])).toBe(data[1]);
+		});
+	});
+
+	test('works with local with no decimals', () => {
+		localizer.setCurrency('ADP');
+		expect(localizer.roundForCurrency(1.2)).toBe(1);
+	});
+});
+
 describe('formatCurrency()', () => {
 	test('uses locale and currency', () => {
 		const expected = '1,25 $';
@@ -71,24 +95,24 @@ describe('formatDate()', () => {
 	});
 });
 
-describe('roundForCurrency()', () => {
+describe('roundForCash()', () => {
 	test('rounds when applicable', () => {
-		let res = localizer.roundForCurrency(3.52);
+		let res = localizer.roundForCash(3.52);
 		expect(res).toBe(3.50);
-		res = localizer.roundForCurrency(-3.52);
+		res = localizer.roundForCash(-3.52);
 		expect(res).toBe(-3.50);
-		res = localizer.roundForCurrency(3.53);
+		res = localizer.roundForCash(3.53);
 		expect(res).toBe(3.55);
-		res = localizer.roundForCurrency(-3.53);
+		res = localizer.roundForCash(-3.53);
 		expect(res).toBe(-3.55);
 	});
 
 	test('does not round if not applicable', () => {
 		localizer.setCurrency('USD');
-		let res = localizer.roundForCurrency(3.52);
+		let res = localizer.roundForCash(3.52);
 		expect(res).toBe(3.52);
 		localizer.setCurrency('BYN');
-		res = localizer.roundForCurrency(3.52);
+		res = localizer.roundForCash(3.52);
 		expect(res).toBe(3.52);
 	});
 });

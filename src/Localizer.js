@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import utils from './utils';
 import Globalize from 'globalize';
+import Decimal from 'decimal.js';
 import get from 'lodash.get';
 import likelySubtags from 'cldr-data/supplemental/likelySubtags.json';
 import metaZones from 'cldr-data/supplemental/metaZones.json';
@@ -183,7 +184,7 @@ class Localizer {
 	 * @param {Number} value
 	 * @return {Number}
 	 */
-	roundForCurrency(value) {
+	roundForCash(value) {
 		const fractionData = this.globalize.cldr.supplemental(['currencyData/fractions', this.currency]);
 
 		if (fractionData && fractionData._cashRounding) {
@@ -196,6 +197,24 @@ class Localizer {
 		}
 
 		return value;
+	}
+
+	/**
+	 * Takes a float number and rounds it to the number of digits of the currency
+	 *
+	 * @param {Number} number
+	 * @return {Number}
+	 */
+	roundForCurrency(number) {
+		const fractionData = this.globalize.cldr.supplemental(['currencyData/fractions', this.currency]);
+
+		if (fractionData && fractionData._digits) {
+			const digits = parseInt(fractionData._digits, 10);
+			// We use Decimal library
+			return (new Decimal(number)).toDecimalPlaces(digits).toNumber();
+		}
+
+		return number;
 	}
 
 	/**
