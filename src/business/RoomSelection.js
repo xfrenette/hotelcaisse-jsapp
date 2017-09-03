@@ -1,4 +1,4 @@
-import { identifier, reference, serializable } from 'serializr';
+import { identifier, object, serializable } from 'serializr';
 import { observable } from 'mobx';
 import isEqual from 'lodash.isequal';
 import { fieldValues, timestamp } from '../vendor/serializr/propSchemas';
@@ -21,7 +21,7 @@ class RoomSelection {
 	 *
 	 * @type {Room}
 	 */
-	@serializable(reference(Room))
+	@serializable(object(Room))
 	@observable
 	room = null;
 	/**
