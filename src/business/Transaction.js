@@ -1,4 +1,5 @@
 import { identifier, object, serializable } from 'serializr';
+import { observable } from 'mobx';
 import { decimal, timestamp } from '../vendor/serializr/propSchemas';
 import validate from '../Validator';
 import utils from '../utils';
@@ -37,6 +38,7 @@ class Transaction {
 	 * @type {Decimal}
 	 */
 	@serializable(decimal())
+	@observable
 	amount = null;
 	/**
 	 * Transaction mode used.
@@ -44,6 +46,7 @@ class Transaction {
 	 * @type {TransactionMode}
 	 */
 	@serializable(object(TransactionMode))
+	@observable
 	transactionMode = null;
 	/**
 	 * Optional note.

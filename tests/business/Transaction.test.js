@@ -1,5 +1,6 @@
 import Transaction from 'business/Transaction';
 import TransactionMode from 'business/TransactionMode';
+import { isObservable } from 'mobx';
 import Decimal from 'decimal.js';
 import { deserialize, serialize } from 'serializr';
 
@@ -34,6 +35,18 @@ describe('constructor()', () => {
 		const transactionMode = new TransactionMode(10);
 		transaction = new Transaction(null, null, transactionMode);
 		expect(transaction.transactionMode).toBe(transactionMode);
+	});
+});
+
+describe('amount', () => {
+	test('is observable', () => {
+		expect(isObservable(transaction, 'amount')).toBe(true);
+	});
+});
+
+describe('transactionMode', () => {
+	test('is observable', () => {
+		expect(isObservable(transaction, 'transactionMode')).toBe(true);
 	});
 });
 
