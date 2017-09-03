@@ -311,6 +311,7 @@ class Api extends Server {
 		}
 
 		try {
+			this.log('info', 'Received new Business', data.business);
 			const business = deserialize(Business, data.business);
 			this.lastBusiness = business;
 
@@ -338,6 +339,7 @@ class Api extends Server {
 		}
 
 		try {
+			this.log('info', 'Received new Register', data.deviceRegister);
 			const register = data.deviceRegister === null
 				? new Register()
 				: deserialize(Register, data.deviceRegister);
@@ -571,6 +573,15 @@ class Api extends Server {
 					...pick(transactionData, ['uuid', 'amount', 'createdAt']),
 					transactionModeId: transaction.transactionMode ? transaction.transactionMode.id : null,
 				};
+			});
+		}
+
+		// roomSelections.*.room -> roomId
+		if (orderLike.roomSelections) {
+			orderLike.roomSelections.forEach((roomSelection, index) => {
+				data.roomSelections[index].roomId = roomSelection.room ? roomSelection.room.id : null;
+				// eslint-disable-next-line
+				delete data.roomSelections[index]['room'];
 			});
 		}
 

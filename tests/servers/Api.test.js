@@ -1011,7 +1011,7 @@ function buildOrderQueryData(order, type) {
 			uuid: roomSelection.uuid,
 			startDate: timestampPropSchema().serializer(roomSelection.startDate),
 			endDate: timestampPropSchema().serializer(roomSelection.endDate),
-			room: roomSelection.room ? roomSelection.room.id : null,
+			roomId: roomSelection.room ? roomSelection.room.id : null,
 			fieldValues: fieldValuesPropSchema().serializer(roomSelection.fieldValues),
 		}));
 	}

@@ -245,7 +245,7 @@ describe('serializing', () => {
 	});
 
 	test('saves room', () => {
-		expect(data.room).toBe(room.id);
+		expect(data.room).toEqual(serialize(room));
 	});
 
 	test('saves fieldValues', () => {
