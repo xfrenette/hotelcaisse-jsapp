@@ -178,10 +178,15 @@ describe('taxesTotals', () => {
 		expect(isObservable(order, 'taxesTotals')).toBe(true);
 	});
 
-	test('if currency, rounds values', () => {
+	test('if currency, rounds values per tax', () => {
+		order.calculateRawTaxesTotals = () => [
+			new AppliedTax(1, 'tax1', new Decimal(1.2351)),
+			new AppliedTax(2, 'tax2', new Decimal(5.2349999)),
+		];
 		order.localizer = new Localizer('fr-CA', 'CAD');
 		const res = order.taxesTotals;
-		expect(res[0].amount.toNumber()).toBe(0.77);
+		expect(res[0].amount.toNumber()).toBe(1.24);
+		expect(res[1].amount.toNumber()).toBe(5.23);
 	});
 });
 
@@ -270,6 +275,26 @@ describe('total', () => {
 
 	test('is observable', () => {
 		expect(isObservable(order, 'total')).toBe(true);
+	});
+
+	test('returns total from items sub total and taxesTotal', () => {
+		const product = new Product();
+		product.price = new Decimal(1);
+		// When rounded individually (expected behavior), the 2 taxes are 0.00 each (and a total
+		// of 0.00). If we round the total (not wanted), the total would be 0.01
+		product.taxes.push(new AppliedTax(1, 'tax1', new Decimal(0.0024))); // For a quantity of 2
+		product.taxes.push(new AppliedTax(2, 'tax2', new Decimal(0.0024)));
+		const item = new Item();
+		item.product = product;
+		item.quantity = 2;
+		order = new Order();
+		order.items.push(item);
+		order.localizer = new Localizer('fr-CA', 'CAD');
+
+		// The total of the taxes is supposed to be 0, so we expect the total to be the total
+		// without taxes
+		const total = order.itemsSubtotal;
+		expect(order.total).toEqual(total);
 	});
 });
 

@@ -143,7 +143,7 @@ class Order extends EventEmitter {
 	 */
 	@computed
 	get taxesTotals() {
-		const taxes = this.rawTaxesTotals;
+		const taxes = this.calculateRawTaxesTotals();
 		if (!this.localizer) {
 			return taxes;
 		}
@@ -160,8 +160,7 @@ class Order extends EventEmitter {
 	 * Internal function that returns the taxes without any rounding. Used by taxesTotal
 	 * @return {Array<AppliedTax>}
 	 */
-	@computed
-	get rawTaxesTotals() {
+	calculateRawTaxesTotals() {
 		// We construct a temporary object that is the sum of each tax. The object will have this
 		// shape:
 		// {
@@ -239,13 +238,19 @@ class Order extends EventEmitter {
 	/**
 	 * Returns total price of the order, a.k.a. amount of the order.
 	 *
-	 * itemsTotal() - creditsTotal()
+	 * itemsSubTotal() + taxesTotal() - creditsTotal()
 	 *
 	 * @return {Decimal}
 	 */
 	@computed
 	get total() {
-		return this.itemsTotal.sub(this.creditsTotal);
+		const taxesTotal = this.taxesTotals.reduce(
+			(prev, tax) => prev.add(tax.amount),
+			new Decimal(0)
+		);
+		return this.itemsSubtotal
+			.add(taxesTotal)
+			.sub(this.creditsTotal);
 	}
 
 	/**
