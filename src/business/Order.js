@@ -1,11 +1,8 @@
 import { identifier, list, object, serializable } from 'serializr';
 import { computed, isObservableArray, observable } from 'mobx';
-import postal from 'postal';
-import EventEmitter from 'events';
 import Decimal from 'decimal.js';
 import arrayDifference from 'lodash.difference';
 import { timestamp } from '../vendor/serializr/propSchemas';
-import { CHANNELS, TOPICS } from '../const/message-bus';
 import OrderChanges from './OrderChanges';
 import Item from './Item';
 import Credit from './Credit';
@@ -14,25 +11,18 @@ import RoomSelection from './RoomSelection';
 import Customer from './Customer';
 
 /**
- * All messages by this class are published on the same channel.
- *
- * @type {ChannelDefinition}
- */
-const channel = postal.channel(CHANNELS.order);
-
-/**
  * An Order, associated with a Customer, contains a list of Items sold (or refunded), a list of
  * Credits, a list of Transactions (payments or refunds) and a list of RoomSelections.
  *
- * We wish the Order to send a message when it is modified. But since the desired new Order may
+ * We wish the app to send a message when the Order is modified. But since the Order may
  * require multiple changes (ex: 2 new items, 1 new payment mode, 1 new credit, all done one at a
  * time), it could clutter the system if a message had to be processed for each modifications. To
  * fix this, the Order comes with a 'modifications transaction' feature: you start recording
  * changes by calling recordChanges(), you modify the Order as you want and then you call commit()
- * when finished. This will publish a 'commit' message containing only the changes that were made.
+ * when finished. This will return an OrderChanges instance containing the modified attributes.
  * This system also allows for a revert() method that can cancel all the modifications.
  */
-class Order extends EventEmitter {
+class Order {
 	/**
 	 * UUID of the register
 	 *
@@ -117,7 +107,6 @@ class Order extends EventEmitter {
 	localizer = null;
 
 	constructor(uuid = null) {
-		super();
 		this.createdAt = new Date();
 		this.uuid = uuid;
 	}
@@ -382,17 +371,8 @@ class Order extends EventEmitter {
 	 * Stops recording changes and publishes a message containing the changes.
 	 */
 	commitChanges() {
-		const changes = this.getChanges();
 		this.stopRecordChanges();
-
-		if (changes !== null) {
-			this.emit('change', changes);
-
-			channel.publish(TOPICS.order.modified, {
-				changes,
-				order: this,
-			});
-		}
+		return this.getChanges();
 	}
 
 	/**
@@ -482,12 +462,13 @@ class Order extends EventEmitter {
 	 * @return {OrderChanges}
 	 */
 	getChanges() {
+		const changes = new OrderChanges();
+
 		if (this.restorationData === null || typeof this.restorationData !== 'object') {
-			return null;
+			return changes;
 		}
 
 		const old = this.restorationData;
-		const changes = new OrderChanges();
 
 		if (this.note !== old.note) {
 			changes.setField('note', this.note);
