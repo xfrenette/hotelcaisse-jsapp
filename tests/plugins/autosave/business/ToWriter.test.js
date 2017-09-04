@@ -22,7 +22,7 @@ beforeEach(() => {
 
 test('new Order', () => {
 	const order = new Order();
-	business.addOrder(order);
+	business.orderCreated(order);
 	expect(writer.write).toHaveBeenCalledWith(business);
 });
 
@@ -34,8 +34,6 @@ test('order update', () => {
 test('order change', () => {
 	const changes = { a: 'b' };
 	const order = new Order();
-	order.getChanges = jest.fn().mockImplementation(() => changes);
-	business.orders.push(order);
-	order.commitChanges();
+	business.orderChanged(order, changes);
 	expect(writer.write).toHaveBeenCalledWith(business);
 });

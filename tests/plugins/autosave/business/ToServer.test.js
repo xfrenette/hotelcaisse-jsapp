@@ -21,7 +21,7 @@ beforeEach(() => {
 test('new Order', () => {
 	testServer.orderCreated = jest.fn();
 	const order = new Order();
-	business.addOrder(order);
+	business.orderCreated(order);
 	expect(testServer.orderCreated).toHaveBeenCalledWith(order);
 });
 
@@ -29,8 +29,6 @@ test('order change', () => {
 	testServer.orderChanged = jest.fn();
 	const changes = { a: 'b' };
 	const order = new Order();
-	order.getChanges = jest.fn().mockImplementation(() => changes);
-	business.orders.push(order);
-	order.commitChanges();
+	business.orderChanged(order, changes);
 	expect(testServer.orderChanged).toHaveBeenCalledWith(order, changes);
 });

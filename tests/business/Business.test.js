@@ -1,6 +1,4 @@
 import { deserialize, serialize } from 'serializr';
-import postal from 'postal';
-import { CHANNELS, TOPICS } from 'const/message-bus';
 import Business from 'business/Business';
 import Product from 'business/Product';
 import ProductCategory from 'business/ProductCategory';
@@ -10,7 +8,6 @@ import Room from 'business/Room';
 import { EmailField, TextField } from 'fields/';
 
 let business;
-const channel = postal.channel(CHANNELS.business);
 let subscription;
 
 beforeEach(() => {
@@ -35,9 +32,6 @@ beforeEach(() => {
 	business.transactionModes.push(new TransactionMode('tm-1'));
 	business.transactionModes.push(new TransactionMode('tm-2'));
 
-	business.orders.push(new Order());
-	business.orders.push(new Order());
-
 	const room1 = new Room();
 	room1.id = 8123;
 	const room2 = new Room();
@@ -52,81 +46,6 @@ afterEach(() => {
 		subscription.unsubscribe();
 		subscription = null;
 	}
-});
-
-describe('emits orderChange', () => {
-	const changes = { a: 'b' };
-	let order;
-
-	beforeEach(() => {
-		order = new Order();
-		order.getChanges = jest.fn().mockImplementation(() => changes);
-	});
-
-	test('with order added by addOrder', (done) => {
-		business.on('orderChange', (o, c) => {
-			expect(o).toBe(order);
-			expect(c).toEqual(changes);
-			done();
-		});
-		business.addOrder(order);
-		order.commitChanges();
-	});
-
-	test('with order added directly on orders', (done) => {
-		business.on('orderChange', (o, c) => {
-			expect(o).toBe(order);
-			expect(c).toEqual(changes);
-			done();
-		});
-		business.orders.push(order);
-		order.commitChanges();
-	});
-
-	test('does not trigger event when order is removed', () => {
-		business.on('orderChange', () => {
-			expect(false).toBe(true);
-		});
-
-		business.orders.push(order);
-		business.orders.clear();
-		order.commitChanges();
-
-		business.orders.push(order);
-		business.orders.replace([]);
-		order.commitChanges();
-	});
-});
-
-describe('addOrder()', () => {
-	test('adds to orders array', () => {
-		business = new Business();
-		const order = new Order();
-		business.addOrder(order);
-		expect(business.orders.slice()).toEqual([order]);
-	});
-
-	test('emits newOrder', (done) => {
-		const order = new Order();
-		business.on('newOrder', (o) => {
-			expect(o).toBe(order);
-			done();
-		});
-		business.addOrder(order);
-	});
-
-	test('publishes message', (done) => {
-		const order = new Order();
-		subscription = channel.subscribe(
-			TOPICS.business.order.added,
-			(data) => {
-				expect(data.business).toBe(business);
-				expect(data.order).toBe(order);
-				done();
-			}
-		);
-		business.addOrder(order);
-	});
 });
 
 describe('serializing', () => {
@@ -156,11 +75,6 @@ describe('serializing', () => {
 		expect(data.transactionModes[1].name).toBe(business.transactionModes[1].name);
 	});
 
-	test('serializes orders', () => {
-		expect(data.orders.length).toBe(business.orders.length);
-		expect(data.orders[1].createdAt).toEqual(expect.any(Number));
-	});
-
 	test('serializes customerFields', () => {
 		expect(data.customerFields.length).toBe(business.customerFields.length);
 		expect(data.customerFields[1].id).toBe(business.customerFields[1].id);
@@ -174,6 +88,30 @@ describe('serializing', () => {
 	test('serializes rooms', () => {
 		expect(data.rooms.length).toBe(business.rooms.length);
 		expect(data.rooms[1].id).toBe(business.rooms[1].id);
+	});
+});
+
+describe('orderCreated', () => {
+	test('emits event', (done) => {
+		const order = new Order();
+		business.on('newOrder', (data) => {
+			expect(data).toBe(order);
+			done();
+		});
+		business.orderCreated(order);
+	});
+});
+
+describe('orderChanged', () => {
+	test('emits event', (done) => {
+		const order = new Order();
+		const changes = {};
+		business.on('orderChange', (dataOrder, dataChanges) => {
+			expect(dataOrder).toBe(order);
+			expect(dataChanges).toBe(changes);
+			done();
+		});
+		business.orderChanged(order, changes);
 	});
 });
 
@@ -192,10 +130,6 @@ describe('deserializing', () => {
 		transactionModes: [
 			{ name: 'tm1' },
 			{ name: 'tm2' },
-		],
-		orders: [
-			{ createdAt: (new Date()).getTime() },
-			{ createdAt: (new Date()).getTime() },
 		],
 		customerFields: [
 			{ id: 369, type: 'TextField' },
@@ -240,12 +174,6 @@ describe('deserializing', () => {
 		expect(newBusiness.transactionModes[1].name).toBe(data.transactionModes[1].name);
 	});
 
-	test('restores orders', () => {
-		expect(newBusiness.orders.length).toBe(data.orders.length);
-		expect(newBusiness.orders[1]).toBeInstanceOf(Order);
-		expect(newBusiness.orders[1].createdAt).toBeInstanceOf(Date);
-	});
-
 	test('restores customerFields', () => {
 		expect(newBusiness.customerFields.length).toBe(data.customerFields.length);
 		expect(newBusiness.customerFields[1]).toBeInstanceOf(EmailField);
@@ -271,28 +199,19 @@ describe('update()', () => {
 			products: [],
 			rootProductCategory: new ProductCategory(),
 			transactionModes: [],
-			orders: [],
 			customerFields: {},
 			roomSelectionFields: {},
 			rooms: [],
 		};
 		const newBusiness = new Business();
 		Object.keys(attributes).forEach((attribute) => {
-			if (attribute === 'orders') {
-				newBusiness.orders.replace(attributes.orders);
-			} else {
-				newBusiness[attribute] = attributes[attribute];
-			}
+			newBusiness[attribute] = attributes[attribute];
 		});
 
 		business.update(newBusiness);
 
 		Object.keys(attributes).forEach((attribute) => {
-			if (attribute === 'orders') {
-				expect(business.orders.slice()).toEqual(attributes.orders);
-			} else {
-				expect(business[attribute]).toBe(attributes[attribute]);
-			}
+			expect(business[attribute]).toBe(attributes[attribute]);
 		});
 	});
 
