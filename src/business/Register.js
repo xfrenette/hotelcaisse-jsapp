@@ -217,7 +217,7 @@ class Register extends EventEmiter {
 		attributes.forEach((attr) => { this[attr] = newRegister[attr]; });
 
 		// cashMovements is observable
-		this.cashMovements.replace(newRegister.cashMovements.slice());
+		this.cashMovements.replace(newRegister.cashMovements);
 
 		this.emit('update');
 	}
