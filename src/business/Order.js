@@ -371,8 +371,9 @@ class Order {
 	 * Stops recording changes and publishes a message containing the changes.
 	 */
 	commitChanges() {
+		const changes = this.getChanges();
 		this.stopRecordChanges();
-		return this.getChanges();
+		return changes;
 	}
 
 	/**
