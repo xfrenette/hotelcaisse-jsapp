@@ -1,7 +1,8 @@
 import { deserialize, serialize } from 'serializr';
+import EventEmitter from 'events';
 import pick from 'lodash.pick';
 import { ERRORS as AUTH_ERRORS } from '../auth/Auth';
-import Server from './Server';
+import { mixin as serverMixin } from './Server';
 import Business from '../business/Business';
 import Register from '../business/Register';
 import Order from '../business/Order';
@@ -26,7 +27,7 @@ function createError(code, message) {
 	};
 }
 
-class Api extends Server {
+class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	/**
 	 * Authentication class that wants to be controlled by the responses from the api. If set,
 	 * its `authenticated` attribute will be set based on responses from the API.
@@ -52,13 +53,6 @@ class Api extends Server {
 	 * @type {string|null}
 	 */
 	token = null;
-	/**
-	 * Application instance. If set, its business and register will be updated when api response
-	 * contain new data.
-	 *
-	 * @type {Application|null}
-	 */
-	application = null;
 	/**
 	 * Last Business instance that was in a response's `business` attribute. If a response
 	 * contains an invalid Business instance (present, but invalid), this property will be set
@@ -92,10 +86,9 @@ class Api extends Server {
 	 * @param {string} url API url
 	 * @param {Application} application Application instance
 	 */
-	constructor(url, application = null) {
+	constructor(url) {
 		super();
 		this.url = url;
-		this.application = application;
 	}
 
 	/**
@@ -298,8 +291,8 @@ class Api extends Server {
 	}
 
 	/**
-	 * If the data has a `business` attribute, tries to deserialize it. If successful, updates the
-	 * application's business instance and saves it in the `lastBusiness` attribute. Note that if
+	 * If the data has a `business` attribute, tries to deserialize it. If successful, triggers
+	 * a 'businessUpdate' event and saves the Business in the `lastBusiness` attribute. Note that if
 	 * the deserialization fails, this method fails silently since it is not as important as the
 	 * data of the response.  The `lastBusiness` attribute will be set to null.
 	 *
@@ -314,10 +307,7 @@ class Api extends Server {
 			this.log('info', 'Received new Business', data.business);
 			const business = deserialize(Business, data.business);
 			this.lastBusiness = business;
-
-			if (this.application) {
-				this.application.business.update(business);
-			}
+			this.emit('businessUpdate', business);
 		} catch (e) {
 			this.lastBusiness = null;
 		}
@@ -326,7 +316,7 @@ class Api extends Server {
 	/**
 	 * If the data has a `deviceRegister` attribute, tries to deserialize it. (Note that if `null`,
 	 * it means the device doesn't have a current register, so we will use a new, uninitialized
-	 * Register.) If successful, updates the application's register instance and saves the Register
+	 * Register.) If successful, triggers the 'registerUpdate' event and saves the Register
 	 * in `lastRegister`. Note that if the deserialization fails, this method fails silently since
 	 * it is not as important as the data of the response. The `lastRegister` attribute will be set
 	 * to null (which means an error).
@@ -344,10 +334,7 @@ class Api extends Server {
 				? new Register()
 				: deserialize(Register, data.deviceRegister);
 			this.lastRegister = register;
-
-			if (this.application) {
-				this.application.register.update(register);
-			}
+			this.emit('registerUpdate', register);
 		} catch (e) {
 			this.lastRegister = null;
 		}

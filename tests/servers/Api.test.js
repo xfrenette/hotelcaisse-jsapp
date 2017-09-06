@@ -49,12 +49,6 @@ describe('constructor()', () => {
 		api = new Api(url);
 		expect(api.url).toBe(url);
 	});
-
-	test('sets application', () => {
-		const application = {};
-		api = new Api('test', application);
-		expect(api.application).toBe(application);
-	});
 });
 
 describe('save', () => {
@@ -351,19 +345,10 @@ describe('processResponseMeta', () => {
 });
 
 describe('processResponseBusiness', () => {
-	let business;
-
-	beforeEach(() => {
-		business = {
-			update: jest.fn(),
-		};
-
-		api.application = { business };
-	});
-
 	test('does nothing if not present', () => {
+		api.on = jest.fn();
 		api.processResponseBusiness({});
-		expect(business.update).not.toHaveBeenCalled();
+		expect(api.on).not.toHaveBeenCalled();
 	});
 
 	test('does nothing if invalid', () => {
@@ -371,87 +356,71 @@ describe('processResponseBusiness', () => {
 			business: { rooms: 'invalid' },
 		};
 		api.lastBusiness = new Business();
+		api.on = jest.fn();
 		api.processResponseBusiness(data);
-		expect(business.update).not.toHaveBeenCalled();
+		expect(api.on).not.toHaveBeenCalled();
 		expect(api.lastBusiness).toBeNull();
 	});
 
-	test('calls update if valid', () => {
+	test('triggers businessUpdate if valid', (done) => {
 		const data = {
 			business: { rooms: [] },
 		};
 		api.lastBusiness = null;
-		api.processResponseBusiness(data);
-		expect(business.update).toHaveBeenCalledWith(expect.any(Business));
-		expect(api.lastBusiness).toBeInstanceOf(Business);
-	});
-
-	test('works if no application', () => {
-		const data = {
-			business: { rooms: [] },
-		};
-		api.application = null;
-		api.lastBusiness = null;
+		api.on('businessUpdate', (updateData) => {
+			expect(updateData).toBeInstanceOf(Business);
+			done();
+		});
 		api.processResponseBusiness(data);
 		expect(api.lastBusiness).toBeInstanceOf(Business);
 	});
 });
 
 describe('processResponseRegister', () => {
-	let register;
-
-	beforeEach(() => {
-		register = {
-			update: jest.fn(),
-		};
-
-		api.application = { register };
-	});
-
 	test('does nothing if not present', () => {
+		api.on = jest.fn();
 		api.processResponseRegister({});
-		expect(register.update).not.toHaveBeenCalled();
+		expect(api.on).not.toHaveBeenCalled();
 	});
 
 	test('does nothing if invalid', () => {
 		const data = {
 			deviceRegister: { cashMovements: 'invalid' },
 		};
+		api.on = jest.fn();
 		api.lastRegister = new Register();
 		api.processResponseRegister(data);
-		expect(register.update).not.toHaveBeenCalled();
+		expect(api.on).not.toHaveBeenCalled();
 		expect(api.lastRegister).toBeNull();
 	});
 
-	test('calls update if valid', () => {
+	test('triggers registerUpdate if valid', (done) => {
 		const data = {
-			deviceRegister: { cashMovements: [], uuid: 'test' },
+			deviceRegister: { state: STATES.OPENED, cashMovements: [], uuid: 'test' },
 		};
+		api.on('registerUpdate', (updateData) => {
+			expect(updateData).toBeInstanceOf(Register);
+			expect(updateData.state).toBe(STATES.OPENED);
+			done();
+		});
 		api.lastRegister = null;
 		api.processResponseRegister(data);
-		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
 		expect(api.lastRegister).toBeInstanceOf(Register);
 	});
 
-	test('calls update if null', () => {
+	test('triggers registerUpdate if null', (done) => {
 		const data = {
 			deviceRegister: null,
 		};
+		api.on('registerUpdate', (updateData) => {
+			expect(updateData).toBeInstanceOf(Register);
+			expect(updateData.state).toBe(STATES.UNINITIALIZED);
+		});
+		done();
 		api.lastRegister = null;
 		api.processResponseRegister(data);
-		expect(register.update).toHaveBeenCalledWith(expect.any(Register));
 		expect(api.lastRegister).toBeInstanceOf(Register);
 		expect(api.lastRegister.state).toBe(STATES.UNINITIALIZED);
-	});
-
-	test('works if no application', () => {
-		const data = {
-			deviceRegister: { cashMovements: [], uuid: 'test' },
-		};
-		api.application = null;
-		api.lastRegister = null;
-		api.processResponseRegister(data);
-		expect(api.lastRegister).toBeInstanceOf(Register);
 	});
 });
 
