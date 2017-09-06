@@ -259,10 +259,7 @@ class Register extends EventEmiter {
 	 * @param {CashMovement} cashMovement
 	 */
 	removeCashMovement(cashMovement) {
-		this.cashMovements = this.cashMovements.filter(
-			element => element !== cashMovement
-		);
-
+		this.cashMovements.remove(cashMovement);
 		cashMovement.register = null;
 
 		this.emit('cashMovementRemove', cashMovement);
