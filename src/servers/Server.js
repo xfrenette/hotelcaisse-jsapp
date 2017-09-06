@@ -4,7 +4,7 @@
  * save data or that can execute actions the Application itself cannot do (ex: send emails). This
  * instance does nothing and should be implemented.
  */
-class Server {
+const serverMixin = superClass => class extends superClass {
 	/**
 	 * Returns a Promise that resolves with the Business instance that is currently on the server.
 	 *
@@ -96,6 +96,13 @@ class Server {
 	orderChanged(order, changes) {
 		return Promise.resolve();
 	}
-}
+};
 
-export default Server;
+// We extend a no-op class here so it still extends Object (for an unknown reason, we cannot extend
+// Object directly, maybe because of Babel ?)
+export default serverMixin(class {});
+
+/**
+ * A "mixin" class that can be used when a class wants to extend the Server and AnotherClass.
+ */
+export const mixin = serverMixin;
