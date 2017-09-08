@@ -10,13 +10,13 @@ class NumberField extends Field {
 	@serializable
 	type = 'NumberField';
 
-	@serializable(rawObject())
 	/**
 	 * Additional numericality constraints (see the "numericality" constraint). By default, set to
 	 * true (meaning no other constraints beside being a numeric).
 	 *
 	 * @type {Boolean|Object}
 	 */
+	@serializable(rawObject())
 	constraints = true;
 
 	/**
