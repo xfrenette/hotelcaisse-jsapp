@@ -5,6 +5,7 @@ import NumberField from './NumberField';
 import SelectField from './SelectField';
 import PhoneField from './PhoneField';
 import NameField from './NameField';
+import YesNoField from './YesNoField';
 
 export {
 	Field,
@@ -14,4 +15,5 @@ export {
 	SelectField,
 	PhoneField,
 	NameField,
+	YesNoField,
 };
