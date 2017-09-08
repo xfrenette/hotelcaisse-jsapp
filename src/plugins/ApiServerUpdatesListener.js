@@ -6,6 +6,12 @@ import Plugin from './Plugin';
  */
 class ApiServerUpdatesListener extends Plugin {
 	/**
+	 * Unique id of this plugin
+	 *
+	 * @type {String}
+	 */
+	id = 'apiServerUpdatesListener';
+	/**
 	 * Api server instance
 	 * @type {Api}
 	 */
