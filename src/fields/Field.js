@@ -52,9 +52,10 @@ class Field {
 	@serializable
 	required = false;
 	/**
-	 * Value by default when the field is shown. Set to null for no default value.
+	 * Value by default when the field is shown. Set to null for no default value. The
+	 * defaultValue must be a string, even if the field represent a numeric value.
 	 *
-	 * @type {mixed}
+	 * @type {string}
 	 */
 	@serializable
 	defaultValue = null;

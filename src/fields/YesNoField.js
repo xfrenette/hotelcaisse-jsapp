@@ -15,7 +15,8 @@ class YesNoField extends Field {
 	 * @return {Array}
 	 */
 	validate(value) {
-		if (value === 1 || value === 0) {
+		const numberValue = parseFloat(value);
+		if (numberValue === 1 || value === 0) {
 			return undefined;
 		}
 
