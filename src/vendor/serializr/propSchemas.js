@@ -164,7 +164,7 @@ const fieldValuesPropSchema = {
 
 const timestampPropSchema = {
 	/**
-	 * Serializer function that returns the literal object as is.
+	 * Serializer function that returns the timestamp of the Date (in seconds).
 	 *
 	 * @param {Date} value
 	 * @return {Integer|null|undefined}
@@ -178,7 +178,7 @@ const timestampPropSchema = {
 	},
 
 	/**
-	 * Deserializer function that calls callback with the jsonValue object as is.
+	 * Deserializer function that takes a timestamp (in seconds) and returns a Date.
 	 *
 	 * @param {Number|null|undefined} jsonValue
 	 * @param {Function} callback
@@ -193,8 +193,43 @@ const timestampPropSchema = {
 	},
 };
 
+const numberPropSchema = {
+	/**
+	 * Serializer function that returns value as a number. If NaN, returns null.
+	 *
+	 * @param {*} value
+	 * @return {Integer|null|undefined}
+	 */
+	serializer(value) {
+		if (value === null || value === undefined) {
+			return value;
+		}
+
+		const res = parseFloat(value);
+
+		return Number.isNaN(res) ? null : res;
+	},
+
+	/**
+	 * Deserializer function that takes a value and tries to convert it to a number. If NaN,
+	 * leave it as NaN.
+	 *
+	 * @param {*} jsonValue
+	 * @param {Function} callback
+	 */
+	deserializer(jsonValue, callback) {
+		if (jsonValue === null || jsonValue === undefined) {
+			callback(null, jsonValue);
+			return;
+		}
+
+		callback(null, parseFloat(jsonValue));
+	},
+};
+
 export const decimal = () => decimalPropSchema;
 export const rawObject = () => rawObjectPropSchema;
 export const field = () => fieldPropSchema;
 export const fieldValues = () => fieldValuesPropSchema;
 export const timestamp = () => timestampPropSchema;
+export const number = () => numberPropSchema;
