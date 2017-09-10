@@ -14,6 +14,7 @@ import Order from '../business/Order';
  */
 const ERRORS = {
 	SERVER_ERROR: 'server:error',
+	REQUEST_ERROR: 'request:error',
 	NETWORK_ERROR: 'network:error',
 	INVALID_RESPONSE: 'response:invalid',
 	AUTH_FAILED: AUTH_ERRORS.AUTHENTICATION_FAILED,
@@ -27,7 +28,20 @@ function createError(code, message) {
 	};
 }
 
-class Api extends serverMixin(EventEmitter) { // Normally also extends Server
+/**
+ * Takes the error object returned by `query()` and returns a boolean indicating if the request
+ * should be tried again (because we expect it might work eventually). Errors generated because
+ * of the client will not be retried (ex: authentication error, invalid request, ...)
+ *
+ * @param {object} err
+ * @return {boolean}
+ */
+function shouldQueryBeRetried(err) {
+	const doNotRetryFor = [ERRORS.REQUEST_ERROR, ERRORS.AUTH_FAILED];
+	return doNotRetryFor.indexOf(err.code) === -1;
+}
+
+class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	/**
 	 * Authentication class that wants to be controlled by the responses from the api. If set,
 	 * its `authenticated` attribute will be set based on responses from the API.
@@ -81,10 +95,23 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	 * @type {Writer}
 	 */
 	writer = null;
+	/**
+	 * Internal list of queries to execute. Each item is an object with the following entries:
+	 * `params` {array} List of parameters to pass to `query()`
+	 * `resolve` {function} Optional. Callback to call when `query()` resolves
+	 * `reject` {function} Optional. Callback to call when `query()` rejects
+	 *
+	 * @type {array}
+	 */
+	queriesQueue = [];
+	/**
+	 * True when the queue is running, false when it ends
+	 * @type {boolean}
+	 */
+	queueRunning = false;
 
 	/**
 	 * @param {string} url API url
-	 * @param {Application} application Application instance
 	 */
 	constructor(url) {
 		super();
@@ -160,6 +187,60 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	 */
 	isAuthenticated() {
 		return this.auth && this.auth.authenticated;
+	}
+
+	/**
+	 * Adds to the queue a new call to query with the same attributes. The queue is a FIFO
+	 * queue. When a query ends the following one is executed. If a query rejects and it should
+	 * be retried (see shouldRetryQuery), it is added again to the end of the queue. Returns a
+	 * promise that resolves with the promise returned by query. If the query fails and it
+	 * should not be retried, rejects with the error object.
+	 *
+	 * A method that calls `queueQuery()` instead of `query()` should not see any difference.
+	 *
+	 * @return {Promise}
+	 */
+	queueQuery(...params) {
+		return new Promise((resolve, reject) => {
+			this.queriesQueue.push({ params, resolve, reject });
+			this.runQueue();
+		});
+	}
+
+	/**
+	 * Executes the next query in the `queriesQueue` array. (Note that if it is already runnind, or
+	 * if there is no other query, stops there.) Will run a `query()` call with the `params`. If it
+	 * resolves and the next query has a `resolve` callback, will execute it. If it fails, checks if
+	 * the query should be retried (see `shouldQueryBeRetried()`). If so, puts the query back to the
+	 * beginning of the `queriesQueue` (so it will be the next one tried). Else, if the query has a
+	 * `reject` callback, it is called with the error object. In all cases, re-runs this function
+	 * after
+	 */
+	runQueue() {
+		if (this.queueRunning || !this.queriesQueue.length) {
+			return;
+		}
+
+		const nextQuery = this.queriesQueue.shift();
+		this.queueRunning = true;
+		this.query(...nextQuery.params).then(
+			(data) => {
+				if (nextQuery.resolve) {
+					nextQuery.resolve(data);
+				}
+			},
+			(err) => {
+				if (shouldQueryBeRetried(err)) {
+					this.queriesQueue.unshift(nextQuery);
+				} else if (nextQuery.reject) {
+					nextQuery.reject(err);
+				}
+			}
+		).then(() => {
+			// Will always execute
+			this.queueRunning = false;
+			this.runQueue();
+		});
 	}
 
 	/**
@@ -448,6 +529,7 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	}
 
 	/**
+	 * This query is queued
 	 * @see Server
 	 * @param {Register} register
 	 * @return {Promise}
@@ -456,10 +538,11 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 		const serialized = serialize(register);
 		const data = pick(serialized, ['uuid', 'employee', 'openedAt']);
 		data.cashAmount = serialized.openingCash;
-		return this.query('/register/open', data);
+		return this.queueQuery('/register/open', data);
 	}
 
 	/**
+	 * This query is queued
 	 * @see Server
 	 * @param {Register} register
 	 * @return {Promise}
@@ -468,10 +551,11 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 		const serialized = serialize(register);
 		const data = pick(serialized, ['uuid', 'POSTRef', 'POSTAmount', 'closedAt']);
 		data.cashAmount = serialized.closingCash;
-		return this.query('/register/close', data);
+		return this.queueQuery('/register/close', data);
 	}
 
 	/**
+	 * Queued query
 	 * @see Server
 	 * @param {cashMovement} cashMovement
 	 * @return {Promise}
@@ -479,19 +563,21 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	cashMovementAdded(cashMovement) {
 		const serialized = serialize(cashMovement);
 		const data = pick(serialized, ['uuid', 'amount', 'note', 'createdAt']);
-		return this.query('/cashMovements/add', data);
+		return this.queueQuery('/cashMovements/add', data);
 	}
 
 	/**
+	 * Queued query
 	 * @see Server
 	 * @param {cashMovement} cashMovement
 	 * @return {Promise}
 	 */
 	cashMovementRemoved(cashMovement) {
-		return this.query('/cashMovements/delete', { uuid: cashMovement.uuid });
+		return this.queueQuery('/cashMovements/delete', { uuid: cashMovement.uuid });
 	}
 
 	/**
+	 * Queued query
 	 * @see Server
 	 * @param {Order} order
 	 * @return {Promise}
@@ -499,10 +585,11 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 	orderCreated(order) {
 		const data = this.buildOrderApiData(order);
 
-		return this.query('/orders/new', data);
+		return this.queueQuery('/orders/new', data);
 	}
 
 	/**
+	 * Queued query
 	 * @see Server
 	 * @param {Order} order
 	 * @param {OrderChanges} changes
@@ -519,7 +606,7 @@ class Api extends serverMixin(EventEmitter) { // Normally also extends Server
 		const data = pick(serializedChanges, changes.changedFields);
 		data.uuid = order.uuid;
 
-		return this.query('/orders/edit', data);
+		return this.queueQuery('/orders/edit', data);
 	}
 
 	/**

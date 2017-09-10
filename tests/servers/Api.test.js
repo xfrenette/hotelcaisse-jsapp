@@ -19,6 +19,7 @@ import Item from 'business/Item';
 import RoomSelection from 'business/RoomSelection';
 import AppliedTax from 'business/AppliedTax';
 import Room from 'business/Room';
+import OrderChanges from 'business/OrderChanges';
 import TestAuth from '../mock/TestAuth';
 import TestLogger from '../mock/TestLogger';
 import TestWriter from '../mock/TestWriter';
@@ -788,11 +789,13 @@ describe('registerOpened', () => {
 			});
 	});
 
-	test('returns query promise', () => {
-		const promise = Promise.resolve(null);
-		api.query = jest.fn(() => promise);
-		const actual = api.registerOpened(new Register());
-		expect(actual).toBe(promise);
+	test('resolves with query data', () => {
+		const data = { test: true };
+		api.query = jest.fn(() => Promise.resolve(data));
+		return api.registerOpened(new Register())
+			.then((res) => {
+				expect(res).toBe(data);
+			});
 	});
 });
 
@@ -817,11 +820,13 @@ describe('registerClosed', () => {
 			});
 	});
 
-	test('returns query promise', () => {
-		const promise = Promise.resolve(null);
-		api.query = jest.fn(() => promise);
-		const actual = api.registerClosed(new Register());
-		expect(actual).toBe(promise);
+	test('resolves with query data', () => {
+		const data = { test: true };
+		api.query = jest.fn(() => Promise.resolve(data));
+		return api.registerClosed(new Register())
+			.then((res) => {
+				expect(res).toBe(data);
+			});
 	});
 });
 
@@ -842,11 +847,13 @@ describe('cashMovementAdded', () => {
 			});
 	});
 
-	test('returns query promise', () => {
-		const promise = Promise.resolve(null);
-		api.query = jest.fn(() => promise);
-		const actual = api.cashMovementAdded(new CashMovement());
-		expect(actual).toBe(promise);
+	test('resolves with query data', () => {
+		const data = { test: true };
+		api.query = jest.fn(() => Promise.resolve(data));
+		return api.cashMovementAdded(new CashMovement())
+			.then((res) => {
+				expect(res).toBe(data);
+			});
 	});
 });
 
@@ -864,11 +871,13 @@ describe('cashMovementRemoved', () => {
 			});
 	});
 
-	test('returns query promise', () => {
-		const promise = Promise.resolve(null);
-		api.query = jest.fn(() => promise);
-		const actual = api.cashMovementRemoved(new CashMovement());
-		expect(actual).toBe(promise);
+	test('resolves with query data', () => {
+		const data = { test: true };
+		api.query = jest.fn(() => Promise.resolve(data));
+		return api.cashMovementRemoved(new CashMovement())
+			.then((res) => {
+				expect(res).toBe(data);
+			});
 	});
 });
 
@@ -1004,11 +1013,13 @@ describe('orderCreated', () => {
 		return api.orderCreated(order);
 	});
 
-	test('returns query promise', () => {
-		const promise = Promise.resolve(null);
-		api.query = jest.fn(() => promise);
-		const actual = api.orderCreated(new Order());
-		expect(actual).toBe(promise);
+	test('resolves with query promise data', () => {
+		const data = { test: true };
+		api.query = jest.fn(() => Promise.resolve(data));
+		return api.orderCreated(new Order())
+			.then((res) => {
+				expect(res).toBe(data);
+			});
 	});
 });
 
@@ -1187,5 +1198,53 @@ describe('getRegister', () => {
 					expect(error.code).toBe(ERRORS.INVALID_RESPONSE);
 				}
 			);
+	});
+});
+
+describe('queueQuery', () => {
+	test('resolves and rejects', (done) => {
+		const editOrderResponse = { test: true };
+		const serverError = { code: ERRORS.SERVER_ERROR };
+		const clientError = { code: ERRORS.REQUEST_ERROR };
+		let newOrderAlreadyCall = false;
+		/*
+		 * `query()` will resolve correctly for /orders/edit, but will fail for /orders/new, the
+		 * first time with a server error (so should retry), the second time with a request
+		 * error, so should not retry and will reject with the error.
+		 */
+		api.query = (path) => {
+			if (path === '/orders/new') {
+				if (!newOrderAlreadyCall) {
+					newOrderAlreadyCall = true;
+					return Promise.reject(serverError);
+				}
+
+				return Promise.reject(clientError);
+			}
+
+			return Promise.resolve(editOrderResponse);
+		};
+
+		const changes = new OrderChanges();
+		changes.setField('note', 'new notes');
+
+		// First query newOrder (will fail, but should retry without rejecting). The newOrder
+		// will be retried, but will fail, the editOrder should resolve.
+		const newOrderPromise = api.orderCreated(new Order());
+		const editOrderPromise = api.orderChanged(new Order(), changes);
+
+		let newPromiseExecuted = false;
+
+		newOrderPromise.catch((error) => {
+			newPromiseExecuted = true;
+			expect(error).toBe(clientError);
+		});
+
+		editOrderPromise.then((data) => {
+			expect(newPromiseExecuted).toBe(true);
+			expect(data).toBe(editOrderResponse);
+			expect(api.queriesQueue.length).toBe(0);
+			done();
+		});
 	});
 });
