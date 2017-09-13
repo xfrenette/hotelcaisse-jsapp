@@ -6,7 +6,7 @@ import {
 	fieldValues as fieldValuesPropSchema,
 	timestamp as timestampPropSchema,
 } from 'vendor/serializr/propSchemas';
-import Api, { ERRORS } from 'servers/Api';
+import Api, { ERRORS, RETRY_DELAY_MAX, RETRY_DELAY_MIN } from 'servers/Api';
 import Business from 'business/Business';
 import Register, { STATES } from 'business/Register';
 import Order from 'business/Order';
@@ -1207,6 +1207,10 @@ describe('queueQuery', () => {
 		const serverError = { code: ERRORS.SERVER_ERROR };
 		const clientError = { code: ERRORS.REQUEST_ERROR };
 		let newOrderAlreadyCall = false;
+
+		api.getNextRetryDelay = jest.fn(() => 100);
+		api.resetRetryDelay = jest.fn();
+
 		/*
 		 * `query()` will resolve correctly for /orders/edit, but will fail for /orders/new, the
 		 * first time with a server error (so should retry), the second time with a request
@@ -1244,7 +1248,34 @@ describe('queueQuery', () => {
 			expect(newPromiseExecuted).toBe(true);
 			expect(data).toBe(editOrderResponse);
 			expect(api.queriesQueue.length).toBe(0);
+
+			expect(api.getNextRetryDelay).toHaveBeenCalledTimes(1);
+			expect(api.resetRetryDelay).toHaveBeenCalledTimes(2);
 			done();
 		});
+	});
+});
+
+describe('getNextRetryDelay', () => {
+	test('does not exceed max', () => {
+		let delay;
+		// After 8 calls, it should have exceeded the max
+		for (let i = 0; i < 8; i += 1) {
+			delay = api.getNextRetryDelay();
+		}
+		expect(delay).toBe(RETRY_DELAY_MAX);
+	});
+
+	test('returns longer at each request', () => {
+		let delay = api.getNextRetryDelay();
+		let oldDelay = delay;
+		expect(delay).toBe(RETRY_DELAY_MIN);
+
+		delay = api.getNextRetryDelay();
+		expect(delay).toBeGreaterThan(oldDelay);
+		oldDelay = delay;
+
+		delay = api.getNextRetryDelay();
+		expect(delay).toBeGreaterThan(oldDelay);
 	});
 });

@@ -1,4 +1,5 @@
 import { deserialize, serialize } from 'serializr';
+import delay from 'delay';
 import EventEmitter from 'events';
 import pick from 'lodash.pick';
 import { ERRORS as AUTH_ERRORS } from '../auth/Auth';
@@ -20,6 +21,20 @@ const ERRORS = {
 	AUTH_FAILED: AUTH_ERRORS.AUTHENTICATION_FAILED,
 	NOT_AUTH: 'request:notAuthenticated',
 };
+
+/**
+ * When a queued query fails, it will be tried again after a delay. At each fail, it will be
+ * tried again after a longer delay. This is the maximum delay that can be waited.
+ *
+ * @type {number}
+ */
+const RETRY_DELAY_MAX = 15 * 60 * 1000; // 15 minutes
+/**
+ * The first (minimum) delay
+ *
+ * @type {number}
+ */
+const RETRY_DELAY_MIN = 15 * 1000; // 15 seconds
 
 function createError(code, message) {
 	return {
@@ -109,6 +124,13 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 * @type {boolean}
 	 */
 	queueRunning = false;
+	/**
+	 * Last delay returned by getNextRetryDelay(). If null, the next call will return
+	 * RETRY_DELAY_MIN.
+	 *
+	 * @type {number}
+	 */
+	lastRetryDelay = null;
 
 	/**
 	 * @param {string} url API url
@@ -228,13 +250,17 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 				if (nextQuery.resolve) {
 					nextQuery.resolve(data);
 				}
+				this.resetRetryDelay();
 			},
 			(err) => {
 				if (shouldQueryBeRetried(err)) {
 					this.queriesQueue.unshift(nextQuery);
+					return delay(this.getNextRetryDelay());
 				} else if (nextQuery.reject) {
 					nextQuery.reject(err);
 				}
+				this.resetRetryDelay();
+				return null;
 			}
 		).then(() => {
 			// Will always execute
@@ -661,6 +687,33 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 		return data;
 	}
+
+	/**
+	 * Returns the next delay before trying again a failed queued query. The result will be between
+	 * RETRY_DELAY_MIN and RETRY_DELAY_MAX. It is doubled at each call. Call `resetRetryDelay()`
+	 * to reset to RETRY_DELAY_MIN.
+	 *
+	 * @return {number}
+	 */
+	getNextRetryDelay() {
+		let nextDelay;
+
+		if (this.lastRetryDelay === null) {
+			nextDelay = RETRY_DELAY_MIN;
+		} else {
+			nextDelay = Math.min(this.lastRetryDelay * 2, RETRY_DELAY_MAX);
+		}
+
+		this.lastRetryDelay = nextDelay;
+		return nextDelay;
+	}
+
+	/**
+	 * Resets the next retry delay.
+	 */
+	resetRetryDelay() {
+		this.lastRetryDelay = null;
+	}
 }
 
 /**
@@ -697,4 +750,4 @@ Api.buildErrorObjectForResponse = (data) => {
 };
 
 export default Api;
-export { ERRORS };
+export { ERRORS, RETRY_DELAY_MAX, RETRY_DELAY_MIN };
