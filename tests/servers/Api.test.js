@@ -1233,6 +1233,44 @@ describe('getRegister', () => {
 	});
 });
 
+describe('ping', () => {
+	beforeEach(() => {
+		api.auth = null;
+		api.query = jest.fn(() => Promise.resolve({}));
+	});
+
+	test('does nothing if queries are queued', () => {
+		api.queriesQueue.push({ params: ['/'] });
+		api.ping();
+		expect(api.query).not.toHaveBeenCalled();
+	});
+
+	test('does nothing if queue running', () => {
+		api.queueRunning = true;
+		api.ping();
+		expect(api.query).not.toHaveBeenCalled();
+	});
+
+	test('does nothing if has auth but not authenticated', () => {
+		api.auth = { authenticated: false };
+		api.ping();
+		expect(api.query).not.toHaveBeenCalled();
+	});
+
+	test('does nothing if a query is running', () => {
+		api.requestRunning = true;
+		api.ping();
+		expect(api.query).not.toHaveBeenCalled();
+	});
+
+	test('calls query with expected parameters', () => {
+		return api.ping()
+			.then(() => {
+				expect(api.query).toHaveBeenCalledWith('/ping');
+			});
+	});
+});
+
 describe('queueQuery', () => {
 	test('resolves and rejects', (done) => {
 		const editOrderResponse = { test: true };

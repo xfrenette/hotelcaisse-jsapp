@@ -125,6 +125,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 */
 	queueRunning = false;
 	/**
+	 * True when a request is running, false when it ends.
+	 * @type {boolean}
+	 */
+	requestRunning = false;
+	/**
 	 * Last delay returned by getNextRetryDelay(). If null, the next call will return
 	 * RETRY_DELAY_MIN.
 	 *
@@ -339,6 +344,8 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 * @returns {Promise}
 	 */
 	requestApi(path = '/', body = null) {
+		this.requestRunning = true;
+
 		const init = {
 			method: 'POST',
 			headers: {
@@ -361,8 +368,14 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 		const rejected = error => Promise.reject(createError(ERRORS.NETWORK_ERROR, error.message));
 
-		return fetch(url, init)
-			.then(resolved, rejected);
+		const requestResult = fetch(url, init);
+
+		requestResult.then(
+			() => { this.requestRunning = false; },
+			() => { this.requestRunning = false; }
+		);
+
+		return requestResult.then(resolved, rejected);
 	}
 
 	/**
@@ -645,6 +658,22 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 		data.uuid = order.uuid;
 
 		return this.queueQuery('/orders/edit', data);
+	}
+
+	/**
+	 * Sends a simple 'ping' request to the server. Because it is used to only make a request to
+	 * the server, it is useless if a query is already running or if the queue is not empty.
+	 */
+	ping() {
+		if (this.queueRunning || this.requestRunning || this.queriesQueue.length) {
+			return Promise.resolve();
+		}
+
+		if (this.auth && !this.auth.authenticated) {
+			return Promise.resolve();
+		}
+
+		return this.query('/ping');
 	}
 
 	/**
