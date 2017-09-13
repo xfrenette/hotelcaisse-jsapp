@@ -174,9 +174,12 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 			return Promise.resolve();
 		}
 
+		const savedQueries = this.queriesQueue.map(({ params }) => ({ params }));
+
 		return this.writer.write({
 			token: this.token,
 			lastDataVersion: this.lastDataVersion,
+			queriesQueue: savedQueries,
 		});
 	}
 
@@ -184,11 +187,12 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 * Updates the internal state from the object.
 	 * - token
 	 * - lastDataVersion
+	 * - queriesQueue
 	 *
 	 * @param {object} values
 	 */
 	update(values) {
-		const attributes = ['token', 'lastDataVersion'];
+		const attributes = ['token', 'lastDataVersion', 'queriesQueue'];
 
 		attributes.forEach((attr) => {
 			if (values[attr]) {
@@ -200,6 +204,9 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 		if (this.auth) {
 			this.auth.authenticated = !!values.token;
 		}
+
+		// We run the queue
+		this.runQueue();
 	}
 
 	/**
@@ -225,6 +232,7 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	queueQuery(...params) {
 		return new Promise((resolve, reject) => {
 			this.queriesQueue.push({ params, resolve, reject });
+			this.save();
 			this.runQueue();
 		});
 	}

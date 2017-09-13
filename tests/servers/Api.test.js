@@ -63,12 +63,23 @@ describe('save', () => {
 		writer.write = jest.fn(() => Promise.resolve());
 		api.writer = writer;
 
+		const queriesQueue = [
+			{ params: ['/', { a: 'b' }], resolve: () => null, reject: () => null },
+			{ params: ['/test', { b: 2 }] },
+		];
+
+		const expectedQueriesQueue = queriesQueue.map(
+			({ params }) => ({ params })
+		);
+
 		api.token = 'test-token';
 		api.lastDataVersion = 'test-version';
+		api.queriesQueue = queriesQueue;
 
 		const expected = {
 			token: api.token,
 			lastDataVersion: api.lastDataVersion,
+			queriesQueue: expectedQueriesQueue,
 		};
 
 		return api.save()
@@ -103,6 +114,27 @@ describe('update', () => {
 		});
 		expect(api.lastDataVersion).toBe(newValue);
 		expect(api.token).toBe(same);
+	});
+
+	test('updates queriesQueue', () => {
+		const same = 'same-value';
+		const newValue = [{ params: ['/new'] }];
+		api.queriesQueue = [{ params: ['/old'] }];
+		api.token = same;
+		api.update({
+			queriesQueue: newValue,
+			other: 'ignore',
+		});
+		expect(api.queriesQueue).toEqual(newValue);
+		expect(api.token).toBe(same);
+	});
+
+	test('calls runQueue', () => {
+		api.runQueue = jest.fn();
+		api.update({
+			queriesQueue: [],
+		});
+		expect(api.runQueue).toHaveBeenCalled();
 	});
 
 	test('if token, sets auth.authenticated to true, else to false', () => {
@@ -1253,6 +1285,13 @@ describe('queueQuery', () => {
 			expect(api.resetRetryDelay).toHaveBeenCalledTimes(2);
 			done();
 		});
+	});
+
+	test('calls save()', () => {
+		api.query = jest.fn(() => Promise.resolve());
+		api.save = jest.fn();
+		api.queueQuery('/');
+		expect(api.save).toHaveBeenCalled();
 	});
 });
 
