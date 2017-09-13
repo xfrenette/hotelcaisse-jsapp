@@ -1,16 +1,16 @@
-import Plugin from './Plugin';
+import Plugin from '../Plugin';
 
 /**
  * Plugin that listens to business and register update events from the Api server and updates
  * the data on the application instance.
  */
-class ApiServerUpdatesListener extends Plugin {
+class UpdatesListener extends Plugin {
 	/**
 	 * Unique id of this plugin
 	 *
 	 * @type {String}
 	 */
-	id = 'apiServerUpdatesListener';
+	id = 'apiServer.updatesListener';
 	/**
 	 * Api server instance
 	 * @type {Api}
@@ -54,4 +54,4 @@ class ApiServerUpdatesListener extends Plugin {
 	}
 }
 
-export default ApiServerUpdatesListener;
+export default UpdatesListener;

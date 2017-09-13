@@ -1,5 +1,5 @@
 import { serialize } from 'serializr';
-import Listener from 'plugins/ApiServerUpdatesListener';
+import Listener from 'plugins/apiServer/UpdatesListener';
 import Application from 'Application';
 import Business from 'business/Business';
 import Register from 'business/Register';
