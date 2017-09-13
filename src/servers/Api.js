@@ -243,6 +243,8 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 			return;
 		}
 
+		this.log('info', 'Running queries queue');
+
 		const nextQuery = this.queriesQueue.shift();
 		this.queueRunning = true;
 		this.query(...nextQuery.params).then(
@@ -254,8 +256,10 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 			},
 			(err) => {
 				if (shouldQueryBeRetried(err)) {
+					const retryDelay = this.getNextRetryDelay();
 					this.queriesQueue.unshift(nextQuery);
-					return delay(this.getNextRetryDelay());
+					this.log('info', `Will retry query in ${retryDelay} seconds`);
+					return delay(retryDelay);
 				} else if (nextQuery.reject) {
 					nextQuery.reject(err);
 				}
