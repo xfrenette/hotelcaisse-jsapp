@@ -3,6 +3,7 @@ import Listener from 'plugins/apiServer/UpdatesListener';
 import Application from 'Application';
 import Business from 'business/Business';
 import Register from 'business/Register';
+import Device from 'business/Device';
 import Room from 'business/Room';
 import Server from 'servers/Api';
 
@@ -15,7 +16,7 @@ beforeEach(() => {
 
 	application = new Application();
 	application.business = new Business();
-	application.register = new Register();
+	application.device = new Device();
 
 	listener = new Listener(server);
 	listener.bootstrap(application);

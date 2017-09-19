@@ -1,6 +1,6 @@
 import Application from 'Application';
 import Business from 'business/Business';
-import Register from 'business/Register';
+import Device from 'business/Device';
 
 let application;
 
@@ -22,10 +22,10 @@ describe('constructor()', () => {
 });
 
 describe('bootstrap()', () => {
-	test('creates Business and Register', () => {
+	test('creates Business and Device', () => {
 		application.bootstrap();
 		expect(application.business).toBeInstanceOf(Business);
-		expect(application.register).toBeInstanceOf(Register);
+		expect(application.device).toBeInstanceOf(Device);
 	});
 
 	test('does not create error if no plugins', () => {
@@ -51,6 +51,14 @@ describe('bootstrap()', () => {
 			plugins: falsePlugins,
 		});
 		application.bootstrap();
+	});
+});
+
+describe('register', () => {
+	test('references device.currentRegister', () => {
+		expect(application.register).toBeNull();
+		application.bootstrap();
+		expect(application.register).toBe(application.device.currentRegister);
 	});
 });
 

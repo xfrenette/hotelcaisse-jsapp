@@ -1,5 +1,6 @@
 import RegisterAutoLoad from 'plugins/loadOnInit/Register';
 import Register from 'business/Register';
+import Device from 'business/Device';
 import Application from 'Application';
 import TestReader from '../../mock/TestReader';
 
@@ -14,7 +15,9 @@ register2.uuid = 'register-2';
 beforeEach(() => {
 	testReader = new TestReader();
 	application = new Application();
-	application.register = register1;
+	const device = new Device();
+	device.currentRegister = register1;
+	application.device = device;
 	registerAutoLoad = new RegisterAutoLoad(testReader);
 	registerAutoLoad.bootstrap(application);
 });

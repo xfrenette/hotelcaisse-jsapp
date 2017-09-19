@@ -3,6 +3,7 @@ import ToWriter from 'plugins/autosave/register/ToWriter';
 import Application from 'Application';
 import CashMovement from 'business/CashMovement';
 import Register from 'business/Register';
+import Device from 'business/Device';
 
 let toWriter;
 let writer;
@@ -16,7 +17,9 @@ beforeEach(() => {
 	toWriter = new ToWriter(writer);
 	application = new Application();
 	register = new Register();
-	application.register = register;
+	const device = new Device();
+	device.currentRegister = register;
+	application.device = device;
 	toWriter.bootstrap(application);
 	toWriter.start();
 });

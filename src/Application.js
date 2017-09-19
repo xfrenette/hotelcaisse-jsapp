@@ -1,6 +1,6 @@
 import Config from './Config';
 import Business from './business/Business';
-import Register from './business/Register';
+import Device from './business/Device';
 import Logger from './loggers/Logger';
 
 /**
@@ -23,12 +23,12 @@ class Application {
 	 */
 	business = null;
 	/**
-	 * Register instance of this device. Once created in `bootstrap()`, the same instance will
-	 * always be used, even when new Register data is loaded, so you can add event listeners on it.
+	 * Device instance. Once created in `bootstrap()`, the same instance will always be used,
+	 * even when new device data is loaded, so you can add event listeners on it.
 	 *
-	 * @type {Register}
+	 * @type {Device}
 	 */
-	register = null;
+	device = null;
 	/**
 	 * Logger instance of the application. The default one does nothing.
 	 *
@@ -42,6 +42,16 @@ class Application {
 	 * @type {Logger}
 	 */
 	log = null;
+
+	/**
+	 * Simple alias to `this.device.currentRegister`. If `this.device` is not yet created,
+	 * returns null.
+	 *
+	 * @return {Register|null}
+	 */
+	get register() {
+		return this.device ? this.device.currentRegister : null;
+	}
 
 	/**
 	 * If a config object is supplied, sets the config.
@@ -60,7 +70,7 @@ class Application {
 	bootstrap() {
 		this.log.info('bootstrapping start');
 		this.business = new Business();
-		this.register = new Register();
+		this.device = new Device();
 		this.config.get('plugins', []).forEach((plugin) => {
 			plugin.bootstrap(this);
 		});
