@@ -256,8 +256,14 @@ describe('close()', () => {
 
 describe('update', () => {
 	let newRegister;
+	let newRegisterData;
 
 	beforeEach(() => {
+		const cm1 = new CashMovement('cm-new-1');
+		cm1.createdAt = new Date(123456 * 1000);
+		const cm2 = new CashMovement('cm-new-2');
+		cm2.createdAt = new Date(823456 * 1000);
+
 		newRegister = new Register();
 		newRegister.state = STATES.OPENED;
 		newRegister.uuid = `${register.uuid}-new`;
@@ -268,26 +274,49 @@ describe('update', () => {
 		newRegister.closingCash = register.closingCash.add(1);
 		newRegister.POSTRef = `${newRegister.POSTRef}-new`;
 		newRegister.POSTAmount = register.POSTAmount.add(1);
-		newRegister.cashMovements.push(new CashMovement('cm-new-1'));
-		newRegister.cashMovements.push(new CashMovement('cm-new-2'));
+		newRegister.cashMovements.push(cm1);
+		newRegister.cashMovements.push(cm2);
+		newRegisterData = serialize(newRegister);
 	});
 
-	test('replaces attributes', () => {
-		register.update(newRegister);
-		const newSerialized = serialize(newRegister);
+	test('replaces all attributes', () => {
+		register.update(newRegisterData);
+		expect(register.cashMovements[0]).toBeInstanceOf(CashMovement);
 		const currentSerialized = serialize(register);
-		expect(currentSerialized).toEqual(newSerialized);
+		expect(currentSerialized).toEqual(newRegisterData);
 	});
 
 	test('replaces cashMovements', () => {
 		register.cashMovements.push(new CashMovement('cm-1'));
-		register.update(newRegister);
+		register.update(newRegisterData);
 		expect(register.cashMovements.slice()).toEqual(newRegister.cashMovements.slice());
 	});
 
 	test('check cashMovements are updated, but the same array is used', () => {
 		register.update(new Register());
 		expect(isObservable(register.cashMovements)).toBe(true);
+	});
+
+	test('updates only defined attributes', () => {
+		const oldUUID = register.uuid;
+		const oldCashMovements = register.cashMovements.slice();
+		register.update({});
+		expect(register.uuid).toBe(oldUUID);
+		expect(register.cashMovements.slice()).toEqual(oldCashMovements);
+	});
+
+	test('throws if invalid data', () => {
+		const data = {
+			cashMovements: 'invalid',
+		};
+		expect(() => { register.update(data); }).toThrow();
+	});
+
+	test('if passed a Register, updates all attributes', () => {
+		register.state = STATES.OPENED;
+		register.update(new Register());
+		expect(register.uuid).toBeNull();
+		expect(register.state).toBe(STATES.UNINITIALIZED);
 	});
 });
 

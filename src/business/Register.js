@@ -1,7 +1,7 @@
-import { identifier, list, object, serializable } from 'serializr';
+import { identifier, list, object, serializable, deserialize } from 'serializr';
 import EventEmiter from 'events';
 import postal from 'postal';
-import { observable } from 'mobx';
+import { observable, isObservableArray } from 'mobx';
 import { CHANNELS, TOPICS } from '../const/message-bus';
 import CashMovement from './CashMovement';
 import { decimal, timestamp } from '../vendor/serializr/propSchemas';
@@ -196,12 +196,21 @@ class Register extends EventEmiter {
 	}
 
 	/**
-	 * Updates all the attributes of this Register with the values of `newRegister`. Trigger the
-	 * 'update' event when done.
+	 * Updates all the attributes of this Register with `registerData`. If `registerData` is an
+	 * object, only the attributes defined will be updated (after being deserialized). If it is a
+	 * Register instance, all attributes will be updated. Throws an error if an object that
+	 * cannot be properly deserialized is passed.
 	 *
-	 * @param newRegister
+	 * @param {object|Register} registerData
+	 * @throws {Error}
 	 */
-	update(newRegister) {
+	update(registerData) {
+		let newRegister = registerData;
+
+		if (!(registerData instanceof Register)) {
+			newRegister = deserialize(Register, registerData);
+		}
+
 		const attributes = [
 			'state',
 			'uuid',
@@ -212,12 +221,20 @@ class Register extends EventEmiter {
 			'closingCash',
 			'POSTRef',
 			'POSTAmount',
+			'cashMovements',
 		];
 
-		attributes.forEach((attr) => { this[attr] = newRegister[attr]; });
+		attributes.forEach((attr) => {
+			if (registerData[attr] === undefined) {
+				return;
+			}
 
-		// cashMovements is observable
-		this.cashMovements.replace(newRegister.cashMovements);
+			if (isObservableArray(this[attr])) {
+				this[attr].replace(newRegister[attr]);
+			} else {
+				this[attr] = newRegister[attr];
+			}
+		});
 	}
 
 	/**
