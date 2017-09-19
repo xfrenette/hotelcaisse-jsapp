@@ -28,12 +28,13 @@ test('business update', (done) => {
 	const room = new Room();
 	room.name = 'test room';
 	newBusiness.rooms.push(room);
+	const serializedBusiness = serialize(newBusiness);
 
 	application.business.update = (updateData) => {
-		expect(updateData).toEqual(newBusiness);
+		expect(updateData).toEqual(serializedBusiness);
 		done();
 	};
-	server.processResponseBusiness({ business: serialize(newBusiness) });
+	server.processResponseBusiness({ business: serializedBusiness });
 });
 
 test('device update', (done) => {
@@ -41,10 +42,11 @@ test('device update', (done) => {
 	const newRegister = new Register();
 	newRegister.uuid = 'test-register-uuid';
 	newDevice.currentRegister = newRegister;
+	const serializedDevice = serialize(newDevice);
 
 	application.device.update = (updateData) => {
-		expect(updateData).toEqual(newDevice);
+		expect(updateData).toEqual(serializedDevice);
 		done();
 	};
-	server.processResponseDevice({ device: serialize(newDevice) });
+	server.processResponseDevice({ device: serializedDevice });
 });

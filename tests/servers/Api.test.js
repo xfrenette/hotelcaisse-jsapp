@@ -422,7 +422,7 @@ describe('processResponseDevice', () => {
 			device: { currentRegister: 'invalid' },
 		};
 		api.on = jest.fn();
-		api.lastDevice = new Device();
+		api.lastDevice = {};
 		api.processResponseDevice(data);
 		expect(api.on).not.toHaveBeenCalled();
 		expect(api.lastDevice).toBeNull();
@@ -433,13 +433,12 @@ describe('processResponseDevice', () => {
 			device: { currentRegister: { state: STATES.OPENED, cashMovements: [], uuid: 'test' } },
 		};
 		api.on('deviceUpdate', (updateData) => {
-			expect(updateData).toBeInstanceOf(Device);
-			expect(updateData.currentRegister.state).toBe(STATES.OPENED);
+			expect(updateData).toEqual(data.device);
 			done();
 		});
 		api.lastDevice = null;
 		api.processResponseDevice(data);
-		expect(api.lastDevice).toBeInstanceOf(Device);
+		expect(api.lastDevice).toEqual(data.device);
 	});
 });
 
@@ -1171,7 +1170,7 @@ describe('getDevice', () => {
 	});
 
 	test('calls query with expected parameters', () => {
-		api.lastDevice = new Device();
+		api.lastDevice = {};
 		api.query = jest.fn(() => Promise.resolve({}));
 		return api.getDevice()
 			.then(() => {
@@ -1179,19 +1178,19 @@ describe('getDevice', () => {
 			});
 	});
 
-	test('resolves with Device', () => {
+	test('resolves with device data', () => {
 		const device = new Device();
 		const register = new Register();
 		register.uuid = 'test-register';
 		device.currentRegister = register;
+		const deviceData = serialize(device);
 
 		api.requestApi = jest.fn(
-			() => Promise.resolve({ status: 'ok', device: serialize(device) })
+			() => Promise.resolve({ status: 'ok', device: deviceData })
 		);
 		return api.getDevice()
 			.then((data) => {
-				expect(data).toBeInstanceOf(Device);
-				expect(data.currentRegister).toBeInstanceOf(Register);
+				expect(data).toEqual(deviceData);
 				expect(data.currentRegister.uuid).toBe(register.uuid);
 			});
 	});

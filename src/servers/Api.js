@@ -449,9 +449,10 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 	/**
 	 * If the data has a `device` attribute, tries to deserialize it. If successful, triggers the
-	 * 'deviceUpdate' event and saves the Device in `lastDevice`. Note that if the
-	 * deserialization fails, this method fails silently since it is not as important as the data of
-	 * the response. The `lastDevice` attribute will be set to null (which means an error).
+	 * 'deviceUpdate' event (with the data, not the deserialized Device) and saves the data in
+	 * `lastDevice`. Note that if the deserialization fails, this method fails silently since it is
+	 * not as important as the data of the response. The `lastDevice` attribute will be set to null
+	 * (which means an error).
 	 *
 	 * @param {object} data
 	 */
@@ -461,10 +462,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 		}
 
 		try {
-			this.log('info', 'Received new Device', data.deviceDevice);
-			const device = deserialize(Device, data.device);
-			this.lastDevice = device;
-			this.emit('deviceUpdate', device);
+			this.log('info', 'Received new Device', data.device);
+			// Try to deserialize
+			deserialize(Device, data.device);
+			this.lastDevice = data.device;
+			this.emit('deviceUpdate', data.device);
 		} catch (e) {
 			this.lastDevice = null;
 		}

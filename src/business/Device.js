@@ -21,14 +21,25 @@ class Device extends EventEmiter {
 	}
 
 	/**
-	 * Updates the data of this instance. Also updates the currentRegister, if present. Emits an
-	 * 'update' event.
+	 * Updates the data of this instance. If `deviceData` is an object, only updates the defined
+	 * attributes. If it is a Device instance, updates all attributes. Emits an 'update' event.
+	 * Throws an error if the `deviceData` is an object that cannot be deserialized.
 	 *
-	 * @param newDevice
+	 * @param {object|Device} deviceData
 	 */
-	update(newDevice) {
-		const newRegister = newDevice.currentRegister || new Register();
-		this.currentRegister.update(newRegister);
+	update(deviceData) {
+		// For now, this Device class only has a reference to a Register, so everything here
+		// concerns only the register.
+		let newRegister = deviceData.currentRegister;
+
+		if (newRegister === null) {
+			newRegister = new Register();
+		}
+
+		if (newRegister !== undefined) {
+			this.currentRegister.update(newRegister);
+		}
+
 		this.emit('update');
 	}
 }
