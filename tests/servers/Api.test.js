@@ -9,6 +9,7 @@ import {
 import Api, { ERRORS, RETRY_DELAY_MAX, RETRY_DELAY_MIN } from 'servers/Api';
 import Business from 'business/Business';
 import Register, { STATES } from 'business/Register';
+import Device from 'business/Device';
 import Order from 'business/Order';
 import CashMovement from 'business/CashMovement';
 import Credit from 'business/Credit';
@@ -409,51 +410,36 @@ describe('processResponseBusiness', () => {
 	});
 });
 
-describe('processResponseRegister', () => {
+describe('processResponseDevice', () => {
 	test('does nothing if not present', () => {
 		api.on = jest.fn();
-		api.processResponseRegister({});
+		api.processResponseDevice({});
 		expect(api.on).not.toHaveBeenCalled();
 	});
 
 	test('does nothing if invalid', () => {
 		const data = {
-			deviceRegister: { cashMovements: 'invalid' },
+			device: { currentRegister: 'invalid' },
 		};
 		api.on = jest.fn();
-		api.lastRegister = new Register();
-		api.processResponseRegister(data);
+		api.lastDevice = new Device();
+		api.processResponseDevice(data);
 		expect(api.on).not.toHaveBeenCalled();
-		expect(api.lastRegister).toBeNull();
+		expect(api.lastDevice).toBeNull();
 	});
 
-	test('triggers registerUpdate if valid', (done) => {
+	test('triggers deviceUpdate if valid', (done) => {
 		const data = {
-			deviceRegister: { state: STATES.OPENED, cashMovements: [], uuid: 'test' },
+			device: { currentRegister: { state: STATES.OPENED, cashMovements: [], uuid: 'test' } },
 		};
-		api.on('registerUpdate', (updateData) => {
-			expect(updateData).toBeInstanceOf(Register);
-			expect(updateData.state).toBe(STATES.OPENED);
+		api.on('deviceUpdate', (updateData) => {
+			expect(updateData).toBeInstanceOf(Device);
+			expect(updateData.currentRegister.state).toBe(STATES.OPENED);
 			done();
 		});
-		api.lastRegister = null;
-		api.processResponseRegister(data);
-		expect(api.lastRegister).toBeInstanceOf(Register);
-	});
-
-	test('triggers registerUpdate if null', (done) => {
-		const data = {
-			deviceRegister: null,
-		};
-		api.on('registerUpdate', (updateData) => {
-			expect(updateData).toBeInstanceOf(Register);
-			expect(updateData.state).toBe(STATES.UNINITIALIZED);
-		});
-		done();
-		api.lastRegister = null;
-		api.processResponseRegister(data);
-		expect(api.lastRegister).toBeInstanceOf(Register);
-		expect(api.lastRegister.state).toBe(STATES.UNINITIALIZED);
+		api.lastDevice = null;
+		api.processResponseDevice(data);
+		expect(api.lastDevice).toBeInstanceOf(Device);
 	});
 });
 
@@ -633,11 +619,11 @@ describe('query', () => {
 			});
 	});
 
-	test('calls processResponseRegister', () => {
-		api.processResponseRegister = jest.fn();
+	test('calls processResponseDevice', () => {
+		api.processResponseDevice = jest.fn();
 		return api.query()
 			.then(() => {
-				expect(api.processResponseRegister).toHaveBeenCalledWith(successResponseData);
+				expect(api.processResponseDevice).toHaveBeenCalledWith(successResponseData);
 			});
 	});
 
@@ -1171,14 +1157,14 @@ describe('getBusiness', () => {
 	});
 });
 
-describe('getRegister', () => {
+describe('getDevice', () => {
 	beforeEach(() => {
 		api.isAuthenticated = () => true;
 	});
 
 	test('rejects if query rejects', () => {
 		api.query = () => Promise.reject();
-		return api.getRegister()
+		return api.getDevice()
 			.then(
 				() => { throw new Error('Should have rejected'); },
 				() => true
@@ -1186,31 +1172,34 @@ describe('getRegister', () => {
 	});
 
 	test('calls query with expected parameters', () => {
-		api.lastRegister = new Register();
+		api.lastDevice = new Device();
 		api.query = jest.fn(() => Promise.resolve({}));
-		return api.getRegister()
+		return api.getDevice()
 			.then(() => {
 				expect(api.query).toHaveBeenCalledWith('/deviceData');
 			});
 	});
 
-	test('resolves with Register', () => {
+	test('resolves with Device', () => {
+		const device = new Device();
 		const register = new Register();
 		register.uuid = 'test-register';
+		device.currentRegister = register;
 
 		api.requestApi = jest.fn(
-			() => Promise.resolve({ status: 'ok', deviceRegister: serialize(register) })
+			() => Promise.resolve({ status: 'ok', device: serialize(device) })
 		);
-		return api.getRegister()
+		return api.getDevice()
 			.then((data) => {
-				expect(data).toBeInstanceOf(Register);
-				expect(data.uuid).toBe(register.uuid);
+				expect(data).toBeInstanceOf(Device);
+				expect(data.currentRegister).toBeInstanceOf(Register);
+				expect(data.currentRegister.uuid).toBe(register.uuid);
 			});
 	});
 
-	test('rejects if response doesn\'t have register', () => {
+	test('rejects if response doesn\'t have device', () => {
 		api.requestApi = jest.fn(() => Promise.resolve({ status: 'ok', data: {} }));
-		return api.getRegister()
+		return api.getDevice()
 			.then(
 				() => { throw new Error('Should have rejected'); },
 				(error) => {
@@ -1221,9 +1210,9 @@ describe('getRegister', () => {
 
 	test('rejects if cannot deserialize', () => {
 		api.requestApi = jest.fn(
-			() => Promise.resolve({ status: 'ok', deviceRegister: 'invalid register' })
+			() => Promise.resolve({ status: 'ok', device: 'invalid device' })
 		);
-		return api.getRegister()
+		return api.getDevice()
 			.then(
 				() => { throw new Error('Should have rejected'); },
 				(error) => {

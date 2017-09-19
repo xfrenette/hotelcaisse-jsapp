@@ -15,12 +15,12 @@ const serverMixin = superClass => class extends superClass {
 	}
 
 	/**
-	 * Returns a Promise that resolves with the device's Register instance that is currently on the
+	 * Returns a Promise that resolves with the Device instance that is currently on the
 	 * server.
 	 *
-	 * @return {Promise.<Register>}
+	 * @return {Promise.<Device>}
 	 */
-	getRegister() {
+	getDevice() {
 		return Promise.resolve(null);
 	}
 

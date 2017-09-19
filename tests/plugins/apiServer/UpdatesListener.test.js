@@ -36,13 +36,15 @@ test('business update', (done) => {
 	server.processResponseBusiness({ business: serialize(newBusiness) });
 });
 
-test('register update', (done) => {
+test('device update', (done) => {
+	const newDevice = new Device();
 	const newRegister = new Register();
 	newRegister.uuid = 'test-register-uuid';
+	newDevice.currentRegister = newRegister;
 
-	application.register.update = (updateData) => {
-		expect(updateData).toEqual(newRegister);
+	application.device.update = (updateData) => {
+		expect(updateData).toEqual(newDevice);
 		done();
 	};
-	server.processResponseRegister({ deviceRegister: serialize(newRegister) });
+	server.processResponseDevice({ device: serialize(newDevice) });
 });

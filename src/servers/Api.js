@@ -5,7 +5,7 @@ import pick from 'lodash.pick';
 import { ERRORS as AUTH_ERRORS } from '../auth/Auth';
 import { mixin as serverMixin } from './Server';
 import Business from '../business/Business';
-import Register from '../business/Register';
+import Device from '../business/Device';
 import Order from '../business/Order';
 
 /**
@@ -91,13 +91,13 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 */
 	lastBusiness = null;
 	/**
-	 * Last Register instance that was in a response's `deviceRegister` attribute. If a response
-	 * contains an invalid Register instance (present, but invalid), this property will be set to
+	 * Last Device instance that was in a response's `device` attribute. If a response
+	 * contains an invalid Device instance (present, but invalid), this property will be set to
 	 * null.
 	 *
-	 * @type {Register}
+	 * @type {Device}
 	 */
-	lastRegister = null;
+	lastDevice = null;
 	/**
 	 * Namespaced logger to use.
 	 *
@@ -314,7 +314,7 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 			.then((responseData) => {
 				this.processResponseMeta(responseData);
 				this.processResponseBusiness(responseData);
-				this.processResponseRegister(responseData);
+				this.processResponseDevice(responseData);
 				this.processResponseAuth(responseData);
 				this.save();
 
@@ -446,29 +446,25 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	}
 
 	/**
-	 * If the data has a `deviceRegister` attribute, tries to deserialize it. (Note that if `null`,
-	 * it means the device doesn't have a current register, so we will use a new, uninitialized
-	 * Register.) If successful, triggers the 'registerUpdate' event and saves the Register
-	 * in `lastRegister`. Note that if the deserialization fails, this method fails silently since
-	 * it is not as important as the data of the response. The `lastRegister` attribute will be set
-	 * to null (which means an error).
+	 * If the data has a `device` attribute, tries to deserialize it. If successful, triggers the
+	 * 'deviceUpdate' event and saves the Device in `lastDevice`. Note that if the
+	 * deserialization fails, this method fails silently since it is not as important as the data of
+	 * the response. The `lastDevice` attribute will be set to null (which means an error).
 	 *
 	 * @param {object} data
 	 */
-	processResponseRegister(data) {
-		if (!data.deviceRegister && data.deviceRegister !== null) {
+	processResponseDevice(data) {
+		if (!data.device) {
 			return;
 		}
 
 		try {
-			this.log('info', 'Received new Register', data.deviceRegister);
-			const register = data.deviceRegister === null
-				? new Register()
-				: deserialize(Register, data.deviceRegister);
-			this.lastRegister = register;
-			this.emit('registerUpdate', register);
+			this.log('info', 'Received new Device', data.deviceDevice);
+			const device = deserialize(Device, data.device);
+			this.lastDevice = device;
+			this.emit('deviceUpdate', device);
 		} catch (e) {
-			this.lastRegister = null;
+			this.lastDevice = null;
 		}
 	}
 
@@ -527,25 +523,25 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	}
 
 	/**
-	 * We query /deviceData. This method is special since it doesn't return the Register in its
-	 * `data` attribute, but `register`. This Register will automatically be deserialized in
-	 * `lastRegister`. So we do the request, and once finished, return the value in `lastRegister`.
+	 * We query /deviceData. This method is special since it doesn't return the Device in its
+	 * `data` attribute, but `device`. This Device will automatically be deserialized in
+	 * `lastDevice`. So we do the request, and once finished, return the value in `lastDevice`.
 	 * Note that if it is null, it means it could not be deserialized (so we return an error).
 	 *
 	 * @see Server
-	 * @return {Promise.<Register>}
+	 * @return {Promise.<Device>}
 	 */
-	getRegister() {
+	getDevice() {
 		return this.query('/deviceData')
 			.then(() => {
-				if (this.lastRegister === null) {
+				if (this.lastDevice === null) {
 					return Promise.reject(createError(
 						ERRORS.INVALID_RESPONSE,
-						'Could not deserialize Register'
+						'Could not deserialize Device'
 					));
 				}
 
-				return this.lastRegister;
+				return this.lastDevice;
 			});
 	}
 

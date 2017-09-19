@@ -1,7 +1,7 @@
 import Plugin from '../Plugin';
 
 /**
- * Plugin that listens to business and register update events from the Api server and updates
+ * Plugin that listens to business and device update events from the Api server and updates
  * the data on the application instance.
  */
 class UpdatesListener extends Plugin {
@@ -30,11 +30,11 @@ class UpdatesListener extends Plugin {
 	}
 
 	/**
-	 * Listen to `businessUpdate` and `registerUpdate` events
+	 * Listen to `businessUpdate` and `deviceUpdate` events
 	 */
 	setupListeners() {
 		this.server.on('businessUpdate', this.updateBusiness.bind(this));
-		this.server.on('registerUpdate', this.updateRegister.bind(this));
+		this.server.on('deviceUpdate', this.updateDevice.bind(this));
 	}
 
 	/**
@@ -46,11 +46,11 @@ class UpdatesListener extends Plugin {
 	}
 
 	/**
-	 * Updates the register instance of the application with the received register.
-	 * @param {Register} register
+	 * Updates the device instance of the application with the received device.
+	 * @param {Device} device
 	 */
-	updateRegister(register) {
-		this.application.register.update(register);
+	updateDevice(device) {
+		this.application.device.update(device);
 	}
 }
 
