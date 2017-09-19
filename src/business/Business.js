@@ -1,4 +1,4 @@
-import { list, object, serializable } from 'serializr';
+import { list, object, serializable, deserialize } from 'serializr';
 import EventEmitter from 'events';
 import Product from './Product';
 import ProductCategory from './ProductCategory';
@@ -80,12 +80,25 @@ class Business extends EventEmitter {
 	}
 
 	/**
-	 * Replaces all attributes of this instance with the values in the supplied Business
-	 * instance. Triggers the 'update' event when done.
+	 * Replaces attributes of this instance with the values of `businessData`. If it is an object,
+	 * only the attributes in this object will be updated (after being deserialized). If it is a
+	 * Business instance, all its attribute will be replaced by the ones of the instance. Triggers
+	 * the 'update' event when done. If `businessData` is an object and its attributes cannot be
+	 * deserialized, throws an error.
 	 *
-	 * @param {Business} newBusiness
+	 * @param {object|Business} businessData
+	 * @throws {Error} When `businessData` attributes cannot be deserialized
 	 */
-	update(newBusiness) {
+	update(businessData) {
+		let newBusiness = businessData;
+
+		if (!(businessData instanceof Business)) {
+			// The `businessData` object contains serialized objects (ex: rooms). We deserialize
+			// everything first. Will throw an error if cannot deserialize
+			newBusiness = deserialize(Business, businessData);
+		}
+
+		// We use only attributes in `newBusiness` that are in `businessData`
 		[
 			'products',
 			'rootProductCategory',
@@ -94,7 +107,9 @@ class Business extends EventEmitter {
 			'roomSelectionFields',
 			'rooms',
 		].forEach((attribute) => {
-			this[attribute] = newBusiness[attribute];
+			if (businessData[attribute] !== undefined) {
+				this[attribute] = newBusiness[attribute];
+			}
 		});
 
 		this.emit('update');

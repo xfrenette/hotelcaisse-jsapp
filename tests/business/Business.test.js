@@ -194,29 +194,77 @@ describe('deserializing', () => {
 });
 
 describe('update()', () => {
-	test('replaces all attributes', () => {
+	const attrs = [
+		'products',
+		'rootProductCategory',
+		'transactionModes',
+		'customerFields',
+		'roomSelectionFields',
+		'rooms',
+	];
+
+	test('replaces all attributes with deserialized data', () => {
 		const attributes = {
-			products: [],
-			rootProductCategory: new ProductCategory(),
-			transactionModes: [],
-			customerFields: {},
-			roomSelectionFields: {},
-			rooms: [],
+			products: [{ name: 'update-test-p' }],
+			rootProductCategory: { name: 'update-test-cat', products: [], categories: [] },
+			transactionModes: [{ name: 'update-test-tm' }],
+			customerFields: [{ type: 'TextField', id: 555 }],
+			roomSelectionFields: [{ type: 'TextField', id: 666 }],
+			rooms: [{ name: 'update-room-1' }],
 		};
-		const newBusiness = new Business();
-		Object.keys(attributes).forEach((attribute) => {
-			newBusiness[attribute] = attributes[attribute];
-		});
 
-		business.update(newBusiness);
+		business.update(attributes);
 
 		Object.keys(attributes).forEach((attribute) => {
-			expect(business[attribute]).toBe(attributes[attribute]);
+			let firstExpected = attributes[attribute];
+			let firstActual = business[attribute];
+
+			if (Array.isArray(firstExpected)) {
+				firstExpected = firstExpected[0];
+				firstActual = firstActual[0];
+			}
+
+			const propName = firstExpected.name ? 'name' : 'id';
+			expect(firstActual[propName]).toBe(firstExpected[propName]);
 		});
+
+		// Test for deserialization
+		expect(business.products[0]).toBeInstanceOf(Product);
+		expect(business.transactionModes[0]).toBeInstanceOf(TransactionMode);
+		expect(business.rooms[0]).toBeInstanceOf(Room);
+	});
+
+	test('updates only defined attributes', () => {
+		const originals = {};
+		attrs.forEach((attr) => {
+			originals[attr] = business[attr];
+		});
+		business.update({});
+		attrs.forEach((attr) => {
+			expect(business[attr]).toBe(originals[attr]);
+		});
+	});
+
+	test('throws error if non-deserializable attribute', () => {
+		const attributes = {
+			products: 'invalid',
+		};
+
+		expect(() => {
+			business.update(attributes);
+		}).toThrow();
 	});
 
 	test('triggers update event', (done) => {
 		business.on('update', () => { done(); });
-		business.update(new Business());
+		business.update({});
+	});
+
+	test('if passed a Business instance, updates all attributes', () => {
+		const newBusiness = new Business();
+		business.update(newBusiness);
+		attrs.forEach((attr) => {
+			expect(business[attr]).toBe(newBusiness[attr]);
+		});
 	});
 });

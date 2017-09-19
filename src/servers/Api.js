@@ -83,11 +83,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 */
 	token = null;
 	/**
-	 * Last Business instance that was in a response's `business` attribute. If a response
+	 * Last business data that was in a response's `business` attribute. If a response
 	 * contains an invalid Business instance (present, but invalid), this property will be set
 	 * to null.
 	 *
-	 * @type {Business}
+	 * @type {object}
 	 */
 	lastBusiness = null;
 	/**
@@ -424,7 +424,7 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 	/**
 	 * If the data has a `business` attribute, tries to deserialize it. If successful, triggers
-	 * a 'businessUpdate' event and saves the Business in the `lastBusiness` attribute. Note that if
+	 * a 'businessUpdate' event and saves the data in the `lastBusiness` attribute. Note that if
 	 * the deserialization fails, this method fails silently since it is not as important as the
 	 * data of the response.  The `lastBusiness` attribute will be set to null.
 	 *
@@ -437,10 +437,12 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 		try {
 			this.log('info', 'Received new Business', data.business);
-			const business = deserialize(Business, data.business);
-			this.lastBusiness = business;
-			this.emit('businessUpdate', business);
+			// We try to deserialize, even if it is the serialized data that is sent in the event
+			deserialize(Business, data.business);
+			this.lastBusiness = data.business;
+			this.emit('businessUpdate', data.business);
 		} catch (e) {
+			// Deserialization failed
 			this.lastBusiness = null;
 		}
 	}

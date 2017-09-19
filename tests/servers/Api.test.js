@@ -402,11 +402,11 @@ describe('processResponseBusiness', () => {
 		};
 		api.lastBusiness = null;
 		api.on('businessUpdate', (updateData) => {
-			expect(updateData).toBeInstanceOf(Business);
+			expect(updateData).toBe(data.business);
 			done();
 		});
 		api.processResponseBusiness(data);
-		expect(api.lastBusiness).toBeInstanceOf(Business);
+		expect(api.lastBusiness).toBe(data.business);
 	});
 });
 
@@ -1127,7 +1127,6 @@ describe('getBusiness', () => {
 		);
 		return api.getBusiness()
 			.then((data) => {
-				expect(data).toBeInstanceOf(Business);
 				expect(data.transactionModes[0].id).toBe(business.transactionModes[0].id);
 			});
 	});
