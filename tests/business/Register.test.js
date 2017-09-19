@@ -289,11 +289,6 @@ describe('update', () => {
 		register.update(new Register());
 		expect(isObservable(register.cashMovements)).toBe(true);
 	});
-
-	test('triggers update event', (done) => {
-		register.on('update', () => { done(); });
-		register.update(new Register());
-	});
 });
 
 describe('serializing', () => {

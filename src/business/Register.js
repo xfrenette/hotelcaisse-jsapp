@@ -218,8 +218,6 @@ class Register extends EventEmiter {
 
 		// cashMovements is observable
 		this.cashMovements.replace(newRegister.cashMovements);
-
-		this.emit('update');
 	}
 
 	/**
