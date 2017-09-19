@@ -1,11 +1,11 @@
 import Plugin from '../../Plugin';
 
 /**
- * Plugin that listens to modifications to the application's Register and calls methods on its
+ * Plugin that listens to modifications to the application's Device and calls methods on its
  * Server instance to save the modifications.
  */
 class ToServer extends Plugin {
-	id = 'autosave.register.toServer';
+	id = 'autosave.device.toServer';
 	/**
 	 * Server instance
 	 *
@@ -26,11 +26,11 @@ class ToServer extends Plugin {
 	}
 
 	/**
-	 * Registers all the listeners
+	 * Registers all the listeners on the Device's
 	 */
 	registerListeners() {
-		this.listenOnOpen();
-		this.listenOnClose();
+		this.listenOnRegisterOpen();
+		this.listenOnRegisterClose();
 		this.listenOnCashMovementAdd();
 		this.listenOnCashMovementRemove();
 	}
@@ -38,7 +38,7 @@ class ToServer extends Plugin {
 	/**
 	 * When the register is opened, call server.registerOpened
 	 */
-	listenOnOpen() {
+	listenOnRegisterOpen() {
 		this.application.register.on('open', () => {
 			this.server.registerOpened(this.application.register);
 		});
@@ -47,7 +47,7 @@ class ToServer extends Plugin {
 	/**
 	 * When the register is closed, call server.registerClosed
 	 */
-	listenOnClose() {
+	listenOnRegisterClose() {
 		this.application.register.on('close', () => {
 			this.server.registerClosed(this.application.register);
 		});

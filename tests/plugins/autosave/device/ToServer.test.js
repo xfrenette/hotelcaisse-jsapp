@@ -1,12 +1,12 @@
 import Decimal from 'decimal.js';
-import ToServer from 'plugins/autosave/register/ToServer';
+import ToServer from 'plugins/autosave/device/ToServer';
 import Application from 'Application';
-import Register from 'business/Register';
 import Device from 'business/Device';
 import CashMovement from 'business/CashMovement';
 
 let toServer;
 let application;
+let device;
 let register;
 let testServer;
 
@@ -14,9 +14,8 @@ beforeEach(() => {
 	testServer = {};
 	toServer = new ToServer(testServer);
 	application = new Application();
-	register = new Register();
-	const device = new Device();
-	device.currentRegister = register;
+	device = new Device();
+	register = device.currentRegister;
 	application.device = device;
 	toServer.bootstrap(application);
 	toServer.start();
