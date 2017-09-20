@@ -83,11 +83,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 */
 	token = null;
 	/**
-	 * Last business data that was in a response's `business` attribute. If a response
+	 * Last Business instance that was in a response's `business` attribute. If a response
 	 * contains an invalid Business instance (present, but invalid), this property will be set
 	 * to null.
 	 *
-	 * @type {object}
+	 * @type {Business}
 	 */
 	lastBusiness = null;
 	/**
@@ -423,10 +423,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	}
 
 	/**
-	 * If the data has a `business` attribute, tries to deserialize it. If successful, triggers
-	 * a 'businessUpdate' event and saves the data in the `lastBusiness` attribute. Note that if
-	 * the deserialization fails, this method fails silently since it is not as important as the
-	 * data of the response.  The `lastBusiness` attribute will be set to null.
+	 * If the data has a `business` attribute, tries to deserialize it. If successful, triggers a
+	 * 'businessUpdate' event with the raw data and saves the Business instance in the
+	 * `lastBusiness` attribute. Note that if the deserialization fails, this method fails silently
+	 * since it is not as important as the data of the response.  The `lastBusiness` attribute will
+	 * be set to null.
 	 *
 	 * @param {object} data
 	 */
@@ -438,8 +439,8 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 		try {
 			this.log('info', 'Received new Business', data.business);
 			// We try to deserialize, even if it is the serialized data that is sent in the event
-			deserialize(Business, data.business);
-			this.lastBusiness = data.business;
+			const business = deserialize(Business, data.business);
+			this.lastBusiness = business;
 			this.emit('businessUpdate', data.business);
 		} catch (e) {
 			// Deserialization failed
@@ -449,10 +450,10 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 
 	/**
 	 * If the data has a `device` attribute, tries to deserialize it. If successful, triggers the
-	 * 'deviceUpdate' event (with the data, not the deserialized Device) and saves the data in
-	 * `lastDevice`. Note that if the deserialization fails, this method fails silently since it is
-	 * not as important as the data of the response. The `lastDevice` attribute will be set to null
-	 * (which means an error).
+	 * 'deviceUpdate' event (with the data, not the deserialized Device) and saves the Device
+	 * instance in `lastDevice`. Note that if the deserialization fails, this method fails silently
+	 * since it is not as important as the data of the response. The `lastDevice` attribute will be
+	 * set to null (which means an error).
 	 *
 	 * @param {object} data
 	 */
@@ -464,8 +465,8 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 		try {
 			this.log('info', 'Received new Device', data.device);
 			// Try to deserialize
-			deserialize(Device, data.device);
-			this.lastDevice = data.device;
+			const device = deserialize(Device, data.device);
+			this.lastDevice = device;
 			this.emit('deviceUpdate', data.device);
 		} catch (e) {
 			this.lastDevice = null;

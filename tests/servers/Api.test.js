@@ -406,7 +406,7 @@ describe('processResponseBusiness', () => {
 			done();
 		});
 		api.processResponseBusiness(data);
-		expect(api.lastBusiness).toBe(data.business);
+		expect(api.lastBusiness).toBeInstanceOf(Business);
 	});
 });
 
@@ -422,7 +422,7 @@ describe('processResponseDevice', () => {
 			device: { currentRegister: 'invalid' },
 		};
 		api.on = jest.fn();
-		api.lastDevice = {};
+		api.lastDevice = new Device();
 		api.processResponseDevice(data);
 		expect(api.on).not.toHaveBeenCalled();
 		expect(api.lastDevice).toBeNull();
@@ -438,7 +438,8 @@ describe('processResponseDevice', () => {
 		});
 		api.lastDevice = null;
 		api.processResponseDevice(data);
-		expect(api.lastDevice).toEqual(data.device);
+		expect(api.lastDevice).toBeInstanceOf(Device);
+		expect(api.lastDevice.currentRegister.state).toBe(data.device.currentRegister.state);
 	});
 });
 
@@ -1120,13 +1121,15 @@ describe('getBusiness', () => {
 	test('resolves with Business', () => {
 		const business = new Business();
 		business.transactionModes.push(new TransactionMode(123, 'test'));
+		const serializedBusiness = serialize(business);
 
 		api.requestApi = jest.fn(
-			() => Promise.resolve({ status: 'ok', business: serialize(business) })
+			() => Promise.resolve({ status: 'ok', business: serializedBusiness })
 		);
 		return api.getBusiness()
 			.then((data) => {
-				expect(data.transactionModes[0].id).toBe(business.transactionModes[0].id);
+				expect(data).toBeInstanceOf(Business);
+				expect(serialize(data)).toEqual(serializedBusiness);
 			});
 	});
 
@@ -1170,7 +1173,7 @@ describe('getDevice', () => {
 	});
 
 	test('calls query with expected parameters', () => {
-		api.lastDevice = {};
+		api.lastDevice = new Device();
 		api.query = jest.fn(() => Promise.resolve({}));
 		return api.getDevice()
 			.then(() => {
@@ -1190,8 +1193,8 @@ describe('getDevice', () => {
 		);
 		return api.getDevice()
 			.then((data) => {
-				expect(data).toEqual(deviceData);
-				expect(data.currentRegister.uuid).toBe(register.uuid);
+				expect(data).toBeInstanceOf(Device);
+				expect(serialize(data)).toEqual(deviceData);
 			});
 	});
 
