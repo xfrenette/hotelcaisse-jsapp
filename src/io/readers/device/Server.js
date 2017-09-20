@@ -17,13 +17,13 @@ class Server extends Reader {
 	}
 
 	/**
-	 * Calls its Server instance's getRegister() and resolves with its value. If the
-	 * server.getRegister() fails, resolves with null.
+	 * Calls its Server instance's getDevice() and resolves with its value. If the
+	 * server.getDevice() fails, resolves with null.
 	 *
 	 * @return {Promise}
 	 */
 	read() {
-		return this.server.getRegister()
+		return this.server.getDevice()
 			.catch(() => null);
 	}
 }

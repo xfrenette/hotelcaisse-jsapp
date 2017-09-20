@@ -1,14 +1,14 @@
-import Register from 'business/Register';
-import ServerReader from 'io/readers/register/Server';
+import Device from 'business/Device';
+import ServerReader from 'io/readers/device/Server';
 
-let register;
+let device;
 let server;
 let reader;
 
 beforeEach(() => {
-	register = new Register();
+	device = new Device();
 	server = {
-		getRegister: () => Promise.resolve(register),
+		getDevice: () => Promise.resolve(device),
 	};
 	reader = new ServerReader(server);
 });
@@ -19,7 +19,7 @@ describe('read()', () => {
 	});
 
 	test('resolves with null if reader fails', (done) => {
-		server.getRegister = () => Promise.reject();
+		server.getDevice = () => Promise.reject();
 		reader.read()
 			.then((data) => {
 				expect(data).toBeNull();
@@ -30,7 +30,7 @@ describe('read()', () => {
 	test('resolves with server data', (done) => {
 		reader.read()
 			.then((data) => {
-				expect(data).toBe(register);
+				expect(data).toBe(device);
 				done();
 			});
 	});
