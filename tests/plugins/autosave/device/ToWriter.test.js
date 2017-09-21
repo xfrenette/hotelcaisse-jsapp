@@ -28,6 +28,11 @@ test('device updates', () => {
 	expect(writer.write).toHaveBeenCalledWith(device);
 });
 
+test('device bumpRegisterNumber', () => {
+	device.bumpRegisterNumber();
+	expect(writer.write).toHaveBeenCalledWith(device);
+});
+
 test('register opens', () => {
 	register.open('test', new Decimal(1));
 	expect(writer.write).toHaveBeenCalledWith(device);

@@ -34,12 +34,13 @@ class ToWriter extends Plugin {
 		const device = this.application.device;
 		const callback = () => { this.writeDevice(); };
 
+		device.on('update', callback);
+		device.on('registerNumberBump', callback);
+
 		register.on('open', callback);
 		register.on('close', callback);
 		register.on('cashMovementAdd', callback);
 		register.on('cashMovementRemove', callback);
-
-		device.on('update', callback);
 	}
 
 	/**
