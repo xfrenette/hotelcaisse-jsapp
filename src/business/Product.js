@@ -18,7 +18,7 @@ const constraints = {
 	},
 	price: {
 		presence: true,
-		decimal: { gt: 0 },
+		decimal: { gte: 0 },
 	},
 };
 

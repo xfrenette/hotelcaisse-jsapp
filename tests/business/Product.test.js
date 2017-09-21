@@ -190,7 +190,7 @@ describe('deserializing', () => {
 describe('validate()', () => {
 	test('validates name and price', () => {
 		product.name = ' ';
-		product.price = new Decimal(0);
+		product.price = new Decimal(-1);
 		const res = product.validate();
 		expect(res).toEqual(expect.objectContaining({
 			name: expect.any(Array),
@@ -208,7 +208,7 @@ describe('static validate()', () => {
 	});
 
 	test('rejects invalid price', () => {
-		const invalidValues = [undefined, null, 12, '12', new Decimal(-1), new Decimal(0)];
+		const invalidValues = [undefined, null, 12, '12', new Decimal(-1)];
 		invalidValues.forEach((value) => {
 			expect(Product.validate({ price: value })).not.toBeUndefined();
 		});
