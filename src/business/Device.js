@@ -28,6 +28,19 @@ class Device extends EventEmiter {
 	}
 
 	/**
+	 * Returns the current `nextRegisterNumber` and bumps it by 1. Emits
+	 * 'registerNumberBump' event.
+	 *
+	 * @return {Number}
+	 */
+	bumpRegisterNumber() {
+		const current = this.nextRegisterNumber;
+		this.nextRegisterNumber += 1;
+		this.emit('registerNumberBump');
+		return current;
+	}
+
+	/**
 	 * Updates the data of this instance. If `deviceData` is an object, only updates the defined
 	 * attributes. If it is a Device instance, updates all attributes. Emits an 'update' event.
 	 * Throws an error if the `deviceData` is an object that cannot be deserialized.

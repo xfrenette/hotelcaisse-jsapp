@@ -55,6 +55,26 @@ describe('deserializing', () => {
 	});
 });
 
+describe('bumpRegisterNumber', () => {
+	test('returns current nextRegisterNumber', () => {
+		const number = 123;
+		device.nextRegisterNumber = number;
+		expect(device.bumpRegisterNumber()).toBe(number);
+	});
+
+	test('increments nextRegisterNumber', () => {
+		const number = 123;
+		device.nextRegisterNumber = number;
+		device.bumpRegisterNumber();
+		expect(device.nextRegisterNumber).toBe(number + 1);
+	});
+
+	test('emits registerNumberBump', (done) => {
+		device.on('registerNumberBump', done);
+		device.bumpRegisterNumber();
+	});
+});
+
 describe('update', () => {
 	test('updates all attributes', () => {
 		const data = {
