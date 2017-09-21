@@ -73,6 +73,12 @@ class Register extends EventEmiter {
 	@serializable(identifier())
 	uuid = null;
 	/**
+	 * Generated number for this register
+	 * @type {Number}
+	 */
+	@serializable
+	number = null;
+	/**
 	 * The Register can be OPENED or CLOSED. It is UNINITIALIZED when created, before being opened
 	 * or closed.
 	 *
@@ -214,6 +220,7 @@ class Register extends EventEmiter {
 		const attributes = [
 			'state',
 			'uuid',
+			'number',
 			'employee',
 			'openedAt',
 			'openingCash',

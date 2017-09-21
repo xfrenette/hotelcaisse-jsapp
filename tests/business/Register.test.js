@@ -14,6 +14,7 @@ let subscription;
 beforeEach(() => {
 	register = new Register();
 	register.uuid = 'test-uuid';
+	register.number = 2020;
 	register.employee = 'test employee';
 	register.openedAt = new Date(123);
 	register.openingCash = new Decimal(12.32);
@@ -267,6 +268,7 @@ describe('update', () => {
 		newRegister = new Register();
 		newRegister.state = STATES.OPENED;
 		newRegister.uuid = `${register.uuid}-new`;
+		newRegister.number = register.number + 1;
 		newRegister.employee = `${register.employee} new`;
 		newRegister.openedAt = new Date(register.openedAt.getTime() + 10000);
 		newRegister.openingCash = register.openingCash.add(1);
@@ -334,7 +336,6 @@ describe('serializing', () => {
 		cm2 = new CashMovement();
 		cm2.note = 'test-note2';
 
-		register.uuid = 'test-uuid';
 		register.open('employee-name', openingCash);
 
 		register.cashMovements.push(cm1);
@@ -347,6 +348,7 @@ describe('serializing', () => {
 
 	test('serializes primitives', () => {
 		expect(data.uuid).toBe(register.uuid);
+		expect(data.number).toBe(register.number);
 		expect(data.employee).toBe(register.employee);
 		expect(data.state).toBe(register.state);
 		expect(data.POSTRef).toBe(register.POSTRef);
@@ -385,6 +387,7 @@ describe('deserializing', () => {
 
 	const data = {
 		uuid: 'test-uuid1',
+		number: 7878,
 		state: STATES.CLOSED,
 		employee: 'test-employee',
 		openedAt: date.getTime() / 1000,
@@ -405,6 +408,7 @@ describe('deserializing', () => {
 
 	test('restores primitives', () => {
 		expect(newRegister.uuid).toBe(data.uuid);
+		expect(newRegister.number).toBe(data.number);
 		expect(newRegister.state).toBe(data.state);
 		expect(newRegister.employee).toBe(data.employee);
 		expect(newRegister.POSTRef).toBe(data.POSTRef);
