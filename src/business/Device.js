@@ -7,6 +7,13 @@ import Register from './Register';
  */
 class Device extends EventEmiter {
 	/**
+	 * Number to use for the next Register we open
+	 *
+	 * @type {Number}
+	 */
+	@serializable
+	nextRegisterNumber = null;
+	/**
 	 * Register currently used by the device. Note that once the instance is created in the
 	 * constructor, the same instance will always be used, but it can be updated with new data.
 	 *
@@ -28,8 +35,15 @@ class Device extends EventEmiter {
 	 * @param {object|Device} deviceData
 	 */
 	update(deviceData) {
-		// For now, this Device class only has a reference to a Register, so everything here
-		// concerns only the register.
+		const attrs = ['nextRegisterNumber'];
+
+		attrs.forEach((attr) => {
+			if (deviceData[attr] !== undefined) {
+				this[attr] = deviceData[attr];
+			}
+		});
+
+		// Following is Register related
 		let newRegister = deviceData.currentRegister;
 
 		if (newRegister === null) {

@@ -7,6 +7,7 @@ let device;
 
 beforeEach(() => {
 	device = new Device();
+	device.nextRegisterNumber = 23;
 });
 
 describe('constructor', () => {
@@ -24,6 +25,10 @@ describe('serializing', () => {
 		data = serialize(device);
 	});
 
+	test('serializes primitives', () => {
+		expect(data.nextRegisterNumber).toBe(device.nextRegisterNumber);
+	});
+
 	test('serializes currentRegister', () => {
 		const serializedRegister = serialize(device.currentRegister);
 		expect(data.currentRegister).toEqual(serializedRegister);
@@ -32,11 +37,16 @@ describe('serializing', () => {
 
 describe('deserializing', () => {
 	const data = {
+		nextRegisterNumber: 98,
 		currentRegister: { state: STATES.OPENED },
 	};
 
 	beforeEach(() => {
 		device = deserialize(Device, data);
+	});
+
+	test('restores primitives', () => {
+		expect(device.nextRegisterNumber).toBe(data.nextRegisterNumber);
 	});
 
 	test('restores currentRegister', () => {
@@ -48,12 +58,14 @@ describe('deserializing', () => {
 describe('update', () => {
 	test('updates all attributes', () => {
 		const data = {
+			nextRegisterNumber: device.nextRegisterNumber + 1,
 			currentRegister: {
 				uuid: 'test-uuid-register',
 				cashMovements: [{ uuid: 'test-cash-movement' }],
 			},
 		};
 		device.update(data);
+		expect(device.nextRegisterNumber).toBe(data.nextRegisterNumber);
 		expect(device.currentRegister.uuid).toBe(data.currentRegister.uuid);
 		expect(device.currentRegister.cashMovements[0]).toBeInstanceOf(CashMovement);
 		expect(device.currentRegister.cashMovements[0].uuid)
@@ -61,8 +73,10 @@ describe('update', () => {
 	});
 
 	test('updates only defined attributes', () => {
+		const oldNextRegisterNumber = device.nextRegisterNumber;
 		device.currentRegister.state = STATES.OPENED;
 		device.update({});
+		expect(device.nextRegisterNumber).toBe(oldNextRegisterNumber);
 		expect(device.currentRegister.state).toBe(STATES.OPENED);
 	});
 
@@ -90,6 +104,7 @@ describe('update', () => {
 		newDevice.currentRegister.uuid = 'test-new-register';
 		device.update(newDevice);
 		expect(device.currentRegister.uuid).toBe(newDevice.currentRegister.uuid);
+		expect(device.nextRegisterNumber).toBe(newDevice.nextRegisterNumber);
 	});
 
 	test('throws when invalid data', () => {
