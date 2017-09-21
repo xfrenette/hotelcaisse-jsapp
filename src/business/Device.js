@@ -12,7 +12,7 @@ class Device extends EventEmiter {
 	 * @type {Number}
 	 */
 	@serializable
-	nextRegisterNumber = null;
+	nextRegisterNumber = 1;
 	/**
 	 * Register currently used by the device. Note that once the instance is created in the
 	 * constructor, the same instance will always be used, but it can be updated with new data.
