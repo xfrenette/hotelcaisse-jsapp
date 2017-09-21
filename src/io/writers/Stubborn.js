@@ -25,6 +25,11 @@ class Stubborn extends Writer {
 	 * @type {Promise|null}
 	 */
 	currentTry = null;
+	/**
+	 * setTimeout function to use (a special one is used in the react native app)
+	 * @type {function}
+	 */
+	setTimeout = setTimeout;
 
 	/**
 	 * @param {Writer} writer
@@ -130,7 +135,7 @@ class Stubborn extends Writer {
 	 */
 	retryLater(delay) {
 		return new Promise((resolve) => {
-			setTimeout(() => {
+			this.setTimeout(() => {
 				resolve(this.tryWrite());
 			}, delay);
 		});

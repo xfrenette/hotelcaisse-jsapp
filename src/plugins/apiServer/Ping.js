@@ -27,6 +27,11 @@ class Ping extends Plugin {
 	 * @type {number}
 	 */
 	ref = null;
+	/**
+	 * setInterval method to use (a special one is used in the react native app).
+	 * @type {function}
+	 */
+	setInterval = setInterval;
 
 	constructor(server, interval = PING_INTERVAL) {
 		super();
@@ -47,7 +52,7 @@ class Ping extends Plugin {
 	startPings() {
 		this.server.ping();
 
-		this.ref = setInterval(() => {
+		this.ref = this.setInterval(() => {
 			this.server.ping();
 		}, this.interval);
 	}
