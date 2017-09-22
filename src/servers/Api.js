@@ -1,5 +1,4 @@
 import { deserialize, serialize } from 'serializr';
-import delay from 'delay';
 import EventEmitter from 'events';
 import pick from 'lodash.pick';
 import { ERRORS as AUTH_ERRORS } from '../auth/Auth';
@@ -41,6 +40,20 @@ function createError(code, message) {
 		code,
 		message,
 	};
+}
+
+/**
+ * Returns a Promise that resolves after `time` (milliseconds). Uses `setTimeoutFn` as the
+ * timeout function.
+ *
+ * @param {number} time
+ * @param {function} setTimeoutFn
+ * @return {Promise}
+ */
+function delay(time, setTimeoutFn) {
+	return new Promise((resolve) => {
+		setTimeoutFn(resolve, time);
+	});
 }
 
 /**
@@ -136,6 +149,11 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 * @type {number}
 	 */
 	lastRetryDelay = null;
+	/**
+	 * setTimeout method to use (a special one is used in the react native app).
+	 * @type {function}
+	 */
+	setTimeout = setTimeout;
 
 	/**
 	 * @param {string} url API url
@@ -271,8 +289,8 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 				if (shouldQueryBeRetried(err)) {
 					const retryDelay = this.getNextRetryDelay();
 					this.queriesQueue.unshift(nextQuery);
-					this.log('info', `Will retry query in ${retryDelay} seconds`);
-					return delay(retryDelay);
+					this.log('info', `Will retry query in ${retryDelay / 1000} seconds`);
+					return delay(retryDelay, this.setTimeout);
 				} else if (nextQuery.reject) {
 					nextQuery.reject(err);
 				}
