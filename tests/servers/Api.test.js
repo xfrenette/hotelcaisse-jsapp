@@ -792,9 +792,11 @@ describe('registerOpened', () => {
 	test('calls query', () => {
 		const register = new Register();
 		register.uuid = 'test-uuid';
+		register.number = 987;
 		register.open('test-employee', new Decimal(12.34));
 		const expected = {
 			uuid: register.uuid,
+			number: register.number,
 			employee: register.employee,
 			cashAmount: register.openingCash.toString(),
 			openedAt: timestampPropSchema().serializer(register.openedAt),

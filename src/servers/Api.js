@@ -606,7 +606,7 @@ class Api extends serverMixin(EventEmitter) { // Extends Server and EventEmitter
 	 */
 	registerOpened(register) {
 		const serialized = serialize(register);
-		const data = pick(serialized, ['uuid', 'employee', 'openedAt']);
+		const data = pick(serialized, ['uuid', 'number', 'employee', 'openedAt']);
 		data.cashAmount = serialized.openingCash;
 		return this.queueQuery('/register/open', data);
 	}
