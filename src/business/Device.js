@@ -21,6 +21,15 @@ class Device extends EventEmiter {
 	 */
 	@serializable(object(Register))
 	currentRegister = null;
+	/**
+	 * Settings for the device (hardcoded for now)
+	 * @type {object}
+	 */
+	settings = {
+		registers: {
+			cashFloat: 100,
+		},
+	};
 
 	constructor() {
 		super();
