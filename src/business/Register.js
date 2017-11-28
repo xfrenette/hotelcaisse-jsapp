@@ -44,7 +44,7 @@ const openConstraints = {
 const closeConstraints = {
 	cashAmount: {
 		presence: true,
-		decimal: { gte: 0 },
+		decimal: true,
 	},
 	POSTRef: {
 		presence: true,
@@ -52,7 +52,7 @@ const closeConstraints = {
 	},
 	POSTAmount: {
 		presence: true,
-		decimal: { gte: 0 },
+		decimal: true,
 	},
 };
 

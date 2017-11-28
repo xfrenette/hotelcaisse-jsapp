@@ -250,7 +250,7 @@ describe('close()', () => {
 	});
 
 	test('does nothing if invalid data', () => {
-		register.close(new Decimal(-1), 'test', new Decimal(1));
+		register.close(null, false, null);
 		expect(register.state).not.toBe(STATES.CLOSED);
 	});
 });
@@ -467,7 +467,7 @@ describe('Register.validateOpen', () => {
 
 describe('Register.validateClose', () => {
 	test('invalid cashAmount', () => {
-		const invalidValues = [undefined, 12, new Decimal(-2)];
+		const invalidValues = [undefined, 12, 'test'];
 		invalidValues.forEach((value) => {
 			const res = Register.validateClose({ cashAmount: value });
 			expect(res).not.toBeUndefined();
@@ -483,7 +483,7 @@ describe('Register.validateClose', () => {
 	});
 
 	test('invalid POSTAmount', () => {
-		const invalidValues = [undefined, 12, new Decimal(-2)];
+		const invalidValues = [undefined, 12, 'test'];
 		invalidValues.forEach((value) => {
 			const res = Register.validateClose({ POSTAmount: value });
 			expect(res).not.toBeUndefined();
